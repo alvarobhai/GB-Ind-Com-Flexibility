@@ -68,8 +68,8 @@ The dashboard uses a WGS84 GeoJSON snapshot of GB DNO licence-area boundaries. T
 - Sector selection does not change the Segment or End-use lists; it only filters the results.
 
 
-## V8 update
-- Removed the duplicate visual selection indicator; each Sector, Segment, End-use and Potential option now uses a single square selection box.
-- DNO map now supports multi-select: one or more DNOs can be selected while all 14 DNO regions remain visible, with unselected regions faded.
-- DNO map uses the NESO 2024 DNO licence-area GeoJSON and robustly maps the published DNO naming conventions to the dashboard's analytical DNO names.
-- No FES/scenario comparison functionality is included in this version.
+## V9 update
+- DNO map reprojects NESO EPSG:27700 geometry to WGS84 before rendering, avoiding distorted/slanted geometry.
+- All DNO regions remain visible; selected regions are highlighted and unselected regions fade rather than disappearing.
+- Multiple DNO regions can be selected simultaneously.
+- Sector/Segment/End-use selection controls now use a single square indicator; visual state updates immediately on deselection.
