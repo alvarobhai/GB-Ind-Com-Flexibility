@@ -49,3 +49,6 @@ For the next visual iteration, replace the schematic with the official NESO DNO 
 
 ### Map note
 The dashboard uses simplified geographic DNO area shapes for the static client-side map. The authoritative NESO DNO licence-area dataset is the source reference for geography; NESO notes that licence boundaries are approximate and can change over time.
+
+## DNO geography
+The dashboard uses a WGS84 GeoJSON snapshot of GB DNO licence-area boundaries. The geometry was taken from Jacob Varley's February 2026 public GeoJSON gist, which notes that it was taken directly from the City Observatory Birmingham source with minor naming amendments. NESO is the authoritative source for the GB DNO licence-area dataset and describes its boundaries as approximate; see the NESO GIS dataset page for the official source.
