@@ -331,6 +331,97 @@ aside > label{font-size:10px!important;font-weight:500!important;color:#59646E!i
 .v15-gradient{width:105px;height:7px;border-radius:5px;background:linear-gradient(90deg,var(--flex-low),var(--flex-mid),var(--flex-high));}
 @media(max-width:1000px){body{padding-top:112px!important}.app-header-top{height:auto;min-height:56px;flex-wrap:wrap;padding:8px 14px}.header-controls{padding:0 14px;overflow-x:auto}.header-kpis{gap:12px;overflow-x:auto}}
 </style>
+
+<style id="v16-design">
+:root{
+ --navy:#103B52;
+ --navy2:#174B65;
+ --ind-bg:#EAF4FA; --ind:#78B7D8;
+ --com-bg:#EAF7EF; --com:#78C69A;
+ --purple-low:#EEE9F8; --purple-mid:#C9B9E4; --purple-high:#7657AA;
+ --ink:#23313B; --muted:#6B7780; --line:#DCE3E8; --map-bg:#F3F5F6;
+}
+*{box-sizing:border-box}
+body{background:#fff!important;color:var(--ink)!important;padding-top:112px!important;overflow-x:hidden}
+.app-header{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:3000!important;padding:0!important;background:#fff!important;color:var(--ink)!important;border-bottom:1px solid var(--line)!important;box-shadow:0 2px 12px rgba(20,50,70,.10)!important}
+.app-header-top{height:64px!important;background:var(--navy)!important;color:#fff!important;padding:0 28px!important;display:flex!important;align-items:center!important}
+.brand{color:#fff!important;font-size:18px!important;font-weight:650!important;letter-spacing:.01em}
+.header-kpis{gap:26px!important}
+.header-kpi span{color:#DCEAF1!important}
+.header-kpi strong{color:#fff!important}
+.header-kpi em{color:#BBD0DB!important}
+.header-kpi.ind-kpi strong{color:#A9D4EA!important}
+.header-kpi.com-kpi strong{color:#A9E0BF!important}
+.header-controls{height:48px!important;background:#fff!important;color:var(--ink)!important;padding:0 28px!important;border-top:0!important;display:flex!important;align-items:center!important;gap:18px!important}
+.header-control label{color:#6B7780!important;margin:0 4px 0 0!important;font-size:9px!important}
+.header-control select{border:1px solid #C9D3DA!important;background:#fff!important;color:var(--ink)!important;border-radius:4px!important;padding:5px 22px 5px 7px!important}
+.year-choice{background:#fff!important;color:#66727B!important;border:1px solid transparent!important}
+.year-choice.active{background:#F0EAF8!important;border-color:#BCA9D9!important;color:#694B9B!important}
+.layout{display:block!important;position:relative!important;min-height:calc(100vh - 112px)!important}
+main{max-width:none!important;width:100%!important;padding:22px 26px 40px!important;margin:0!important}
+aside{
+ position:absolute!important;z-index:100!important;left:42px!important;top:42px!important;
+ width:340px!important;height:calc(100vh - 175px)!important;max-height:720px!important;
+ padding:18px!important;border:1px solid var(--line)!important;border-radius:12px!important;
+ background:rgba(255,255,255,.97)!important;box-shadow:0 10px 32px rgba(24,55,75,.15)!important;
+ overflow-y:auto!important;overflow-x:hidden!important;
+}
+.v15-sector-legend{display:flex!important;gap:16px!important;padding:0 0 11px!important;margin-bottom:5px!important;border-bottom:1px solid #EDF1F3!important}
+.v15-sector-legend span{font-size:11px!important;color:#42515B!important;font-weight:500!important}
+.v15-sector-legend i{width:10px!important;height:10px!important;display:inline-block!important;border-radius:2px!important;margin-right:5px!important;vertical-align:-1px!important}
+.v15-sector-legend .ind i{background:var(--ind)!important}
+.v15-sector-legend .com i{background:var(--com)!important}
+.filter-box{border:0!important;padding:0!important;box-shadow:none!important;background:transparent!important}
+.filter-option{padding:6px 7px!important;border-radius:5px!important;gap:8px!important}
+.filter-option:hover{background:#F7F9FA!important}
+.filter-option.active{background:transparent!important;font-weight:400!important}
+.filter-option:before{width:14px!important;height:14px!important;border:1px solid #9CA8B0!important;background:#fff!important}
+.filter-option.active:before{background:#fff!important;border-color:#65737C!important;box-shadow:none!important;content:"✓"!important;color:#26343D!important;text-align:center!important;line-height:13px!important;font-weight:700!important}
+.filter-option .prefix{font-weight:400!important;color:#4F5C65!important}
+label{font-size:10px!important;font-weight:650!important;color:#52616B!important;margin:14px 0 6px!important}
+#map{height:650px!important;border-radius:10px!important;overflow:hidden!important;background:var(--map-bg)!important}
+.grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+.panel{border:1px solid var(--line)!important;border-radius:10px!important;box-shadow:0 2px 8px rgba(20,50,70,.05)!important;background:#fff!important;overflow:hidden!important}
+.panel.wide{grid-column:1/-1}
+.grid>.panel:first-child{position:relative!important}
+.panel-head{padding:12px 15px!important;background:#fff!important;border-bottom:1px solid #EDF1F3!important;color:#30414B!important;font-size:11px!important;font-weight:650!important}
+.panel-head .note{color:#7A858D!important;font-weight:400!important}
+.map-wrap{position:relative!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#EEF1F3!important}
+.dno-svg{width:100%!important;height:100%!important;cursor:grab!important;transform-origin:center center!important;user-select:none!important}
+.europe-context path{fill:#E1E5E8!important;stroke:#CDD4D9!important;stroke-width:2!important}
+.europe-boundaries path{fill:none!important;stroke:#CBD2D7!important;stroke-width:1.5!important}
+.europe-labels text{fill:#9AA4AA!important;font-size:14px!important;letter-spacing:.12em!important;font-weight:500!important}
+.dno-shape{stroke:#fff!important;stroke-width:1.4!important;vector-effect:non-scaling-stroke!important;cursor:pointer!important;transition:stroke .12s!important}
+.dno-shape.selected{stroke:#4C3972!important;stroke-width:3!important}
+.map-label{fill:#43515B!important;font-size:9px!important;pointer-events:none!important;font-weight:550!important}
+.map-label.small{font-size:8px!important}
+.map-zoom-controls{position:absolute;right:16px;top:16px;z-index:30;display:flex;gap:4px}
+.map-zoom-controls button{width:auto!important;min-width:32px!important;margin:0!important;padding:7px 9px!important;border:1px solid #C9D1D7!important;background:#fff!important;color:#34424B!important;border-radius:5px!important;font-weight:600!important;box-shadow:0 2px 6px rgba(20,50,70,.08)!important}
+.map-zoom-controls button:hover{background:#F4F7F8!important}
+.map-selection-note{position:absolute;right:16px;bottom:14px;background:rgba(255,255,255,.92);border:1px solid #DCE3E8;border-radius:5px;padding:7px 9px;font-size:10px;color:#59656E;z-index:30}
+.map-legend{position:absolute;left:16px;bottom:14px;background:rgba(255,255,255,.94);border:1px solid #DCE3E8;border-radius:6px;padding:8px 10px;width:150px;z-index:30;color:#55626B;font-size:10px}
+.map-gradient{height:8px;border-radius:5px;margin-top:5px;background:linear-gradient(90deg,var(--purple-low),var(--purple-mid),var(--purple-high))}
+.map-gradient-labels{display:flex;justify-content:space-between;font-size:9px;color:#7A858D;margin-top:2px}
+.bar-fill{height:100%!important;border-radius:2px!important}
+.bar-fill.ind{background:var(--ind)!important}
+.bar-fill.com{background:var(--com)!important}
+.bar-fill.dno{background:linear-gradient(90deg,var(--purple-low),var(--purple-high))!important}
+.sector-chart-legend{display:flex;justify-content:flex-end;gap:14px;margin-top:12px;padding-top:8px;border-top:1px solid #EDF1F3;font-size:9px;color:#68757E}
+.sector-chart-legend span{display:flex;align-items:center;gap:5px}
+.sector-chart-legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.sector-chart-legend i.ind{background:var(--ind)}
+.sector-chart-legend i.com{background:var(--com)}
+.cost-chart{background:#fff!important}
+.status{background:#fff!important;color:#7A858D!important}
+@media(max-width:1000px){
+ body{padding-top:160px!important}
+ .app-header-top{height:auto!important;min-height:64px!important;flex-wrap:wrap!important;padding:9px 14px!important}
+ .header-controls{height:auto!important;min-height:48px!important;padding:6px 14px!important;overflow-x:auto!important}
+ aside{position:relative!important;left:auto!important;top:auto!important;width:auto!important;height:auto!important;max-height:360px!important;margin:0 0 14px!important}
+ main{padding:14px!important}
+ #map{height:520px!important}
+}
+</style>
 </head>
 <body>
 <header id="appHeader" class="app-header">
@@ -375,7 +466,7 @@ aside > label{font-size:10px!important;font-weight:500!important;color:#59646E!i
 <div class="panel"><div class="panel-head">Indicative marginal cost curve</div><div class="cost-chart" id="costChart"></div></div>
 <div class="panel wide"><div class="panel-head"><span>Selected detail</span><span class="note" id="rowCount"></span></div><div class="detail"><table><thead><tr><th>DNO</th><th>Sector</th><th>Segment</th><th>End-use</th><th>Technical MW</th><th>Hurdle £/MWh</th><th>Economic MW</th></tr></thead><tbody id="detailBody"></tbody></table></div></div>
 </section>
-<div class="footer">Analytical dataset: revised GB non-domestic CLF screening model. DNO geography: NESO GB DNO licence-area dataset. This dashboard is a static GitHub Pages application; all filtering/calculation is performed in the browser.</div>
+<div class="footer">Map context: Natural Earth country context; analytical DNO geometry: NESO GB DNO licence-area dataset.<br><br>Analytical dataset: revised GB non-domestic CLF screening model. DNO geography: NESO GB DNO licence-area dataset. This dashboard is a static GitHub Pages application; all filtering/calculation is performed in the browser.</div>
 </main>
 </div>
 <script>
@@ -461,14 +552,19 @@ function populate(){
 }
 function bars(id,entries,cls){
   var isDno=(id==="dnoChart"), top=entries.slice(0,12), max=top.length?top[0][1]:1;
-  $(id).innerHTML=top.map(function(x){
+  var body=top.map(function(x){
     var lab=x[0], sector=null, value=x[1];
     if(!isDno){
       var parts=x[0].split("|"); sector=parts[0]; lab=(sector==="Industrial"?"Ind | ":"Com | ")+parts.slice(1).join("|");
     }
-    var colour=isDno?"":(sector==="Industrial"?"ind":"com");
+    var colour=isDno?"dno":(sector==="Industrial"?"ind":"com");
     return '<div class="bar-row"><div title="'+esc(lab)+'">'+esc(lab)+'</div><div class="bar-bg"><div class="bar-fill '+colour+'" style="width:'+Math.max(0,100*value/max)+'%"></div></div><div>'+Math.round(value).toLocaleString()+' MW</div></div>';
   }).join("")||'<div style="color:#777">No flexibility in current selection.</div>';
+  var legend='';
+  if(id==="archChart" || id==="endChart"){
+    legend='<div class="sector-chart-legend"><span><i class="ind"></i>Industrial</span><span><i class="com"></i>Commercial</span></div>';
+  }
+  $(''+id).innerHTML=body+legend;
 }
 
 function cards(rows){
@@ -517,38 +613,102 @@ var dnoLabelOffsets={
   "SPEN (SP Distribution)":[-18,0],
   "SSE (Southern)":[18,0]
 };
-function dnoFill(v,max,selected,hasSelection){
-  if(hasSelection && !selected) return '#d8d8d5';
-  if(selected) return '#222';
+var mapState={scale:1,tx:0,ty:0};
+function europeContext(){
+  return ''+
+  '<g class="europe-context" pointer-events="none">'+
+    // Ireland
+    '<path d="M92 690 L118 655 L151 650 L173 675 L181 715 L171 758 L148 782 L118 772 L99 742 Z"/>'+
+    // France
+    '<path d="M270 1010 L318 970 L376 980 L430 1020 L458 1070 L447 1130 L405 1180 L338 1194 L292 1168 L258 1120 L251 1060 Z"/>'+
+    // Spain + Portugal
+    '<path d="M238 1155 L285 1138 L340 1146 L383 1172 L400 1210 L378 1242 L300 1248 L245 1225 L218 1190 Z"/>'+
+    // Benelux/Germany/Poland
+    '<path d="M455 840 L492 795 L541 782 L590 805 L628 846 L646 900 L634 956 L603 992 L559 982 L525 950 L489 935 L462 900 Z"/>'+
+    // Italy
+    '<path d="M520 1015 L551 1035 L570 1070 L558 1094 L578 1117 L568 1150 L548 1132 L539 1098 L516 1080 L505 1047 Z"/>'+
+    // Balkans
+    '<path d="M570 1030 L613 1008 L650 1020 L674 1055 L660 1090 L625 1100 L596 1082 Z"/>'+
+    // Scandinavia
+    '<path d="M470 270 L505 225 L544 210 L571 245 L566 300 L548 345 L559 400 L545 455 L516 490 L494 450 L501 392 L480 340 Z"/>'+
+    // Finland
+    '<path d="M555 210 L592 190 L623 218 L634 275 L619 338 L588 358 L566 320 L574 270 Z"/>'+
+    // Denmark
+    '<path d="M475 600 L495 585 L516 598 L510 620 L490 628 Z"/>'+
+    // Iceland
+    '<path d="M45 390 L77 372 L110 381 L125 405 L106 425 L69 430 L43 414 Z"/>'+
+    // Central/Eastern Europe
+    '<path d="M600 830 L650 800 L696 818 L720 860 L714 920 L690 958 L650 950 L625 915 Z"/>'+
+  '</g>'+
+  '<g class="europe-boundaries" pointer-events="none">'+
+    '<path d="M492 795 L541 782 L590 805 M590 805 L628 846 L646 900 M318 970 L376 980 L430 1020 M505 1047 L548 1065"/>'+
+  '</g>'+
+  '<g class="europe-labels" pointer-events="none">'+
+    '<text x="112" y="640">IRELAND</text>'+
+    '<text x="355" y="1010">FRANCE</text>'+
+    '<text x="305" y="1220">SPAIN</text>'+
+    '<text x="555" y="780">GERMANY</text>'+
+    '<text x="515" y="215">NORWAY</text>'+
+    '<text x="600" y="190">FINLAND</text>'+
+    '<text x="68" y="365">ICELAND</text>'+
+    '<text x="595" y="1000">ITALY</text>'+
+  '</g>';
+}
+function dnoFill(v,max,selected){
   var t=Math.max(0,Math.min(1,v/Math.max(max,1)));
-  return 'rgb('+Math.round(225-175*t)+','+Math.round(225-175*t)+','+Math.round(223-173*t)+')';
+  // Purple/lavender intensity is the map data encoding; selection is outline only.
+  var low=[238,233,248], high=[118,87,170];
+  var c=low.map(function(a,i){return Math.round(a+(high[i]-a)*t)});
+  return 'rgb('+c[0]+','+c[1]+','+c[2]+')';
 }
 function drawMap(rows){
   var vals=dnoValues(rows),max=1;
   dnoOrder.forEach(function(d){max=Math.max(max,vals[d]||0)});
-  var hasSelection=selectedDnos.length>0;
-  var html='<svg class="dno-svg" viewBox="0 0 '+dnoViewBox.w+' '+dnoViewBox.h+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Official NESO GB DNO licence area map">';
+  var html='<svg class="dno-svg" viewBox="0 0 '+dnoViewBox.w+' '+dnoViewBox.h+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GB DNO licence area map">';
+  html+=europeContext();
   dnoRegions.forEach(function(r){
     var sel=selectedDnos.indexOf(r.name)>=0;
-    var op=hasSelection?(sel?1:.24):1;
-    html+='<path class="dno-shape '+(sel?'selected':'')+'" data-dno="'+esc(r.name)+'" d="'+r.path+'" fill="'+dnoFill(vals[r.name]||0,max,sel,hasSelection)+'" opacity="'+op+'" tabindex="0" role="button" aria-label="'+esc(r.name)+'" title="'+esc(r.name)+' — '+(vals[r.name]||0).toFixed(0)+' MW"/>';
+    html+='<path class="dno-shape '+(sel?'selected':'')+'" data-dno="'+esc(r.name)+'" d="'+r.path+'" fill="'+dnoFill(vals[r.name]||0,max,sel)+'" opacity="1" tabindex="0" role="button" aria-label="'+esc(r.name)+'" title="'+esc(r.name)+' — '+(vals[r.name]||0).toFixed(0)+' MW"/>';
   });
   dnoRegions.forEach(function(r){
     var xy=r.label, off=dnoLabelOffsets[r.name]||[0,0];
-    var txt=r.name.replace(' (','\n(');
     html+='<text class="map-label '+(r.name.length>19?'small':'')+'" x="'+(xy[0]+off[0])+'" y="'+(xy[1]+off[1])+'"><tspan x="'+(xy[0]+off[0])+'" dy="0">'+esc(r.name.replace(' (',''))+'</tspan>';
     if(r.name.indexOf(' (')>=0) html+='<tspan x="'+(xy[0]+off[0])+'" dy="10">'+esc('('+r.name.split(' (')[1])+'</tspan>';
     html+='</text>';
   });
   html+='</svg>';
-  html+='<div class="dno-selection-note">'+(hasSelection?selectedDnos.length+' DNO'+(selectedDnos.length===1?'':'s')+' selected':'Click regions to select one or more DNOs')+'</div>';
-  html+='<div class="legend"><b>Flexibility potential</b><br><div class="legend-row"><span class="sw" style="background:#222"></span>selected</div><div class="legend-row"><span class="sw" style="background:#8a8a8a"></span>higher</div><div class="legend-row"><span class="sw" style="background:#d8d8d5"></span>lower / faded</div></div>';
+  html+='<div class="map-zoom-controls"><button type="button" data-z="in">+</button><button type="button" data-z="out">−</button><button type="button" data-z="reset">Reset</button></div>';
+  html+='<div class="map-selection-note">'+(selectedDnos.length?selectedDnos.length+' DNO'+(selectedDnos.length===1?'':'s')+' selected':'Click a DNO to select it')+'</div>';
+  html+='<div class="map-legend"><b>Flexibility potential</b><div class="map-gradient"></div><div class="map-gradient-labels"><span>Low</span><span>High</span></div></div>';
   $('mapWrap').innerHTML=html;
+  var svg=$('mapWrap').querySelector('svg');
+  function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
+  applyTransform();
   Array.prototype.forEach.call(document.querySelectorAll('.dno-shape'),function(el){
-    function choose(){var n=el.getAttribute('data-dno'),i=selectedDnos.indexOf(n);if(i>=0)selectedDnos.splice(i,1);else selectedDnos.push(n);render();}
+    function choose(e){if(e && e.defaultPrevented)return;var n=el.getAttribute('data-dno'),i=selectedDnos.indexOf(n);if(i>=0)selectedDnos.splice(i,1);else selectedDnos.push(n);render();}
     el.addEventListener('click',choose);
-    el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();choose();}});
+    el.addEventListener('dblclick',function(e){
+      e.preventDefault();
+      mapState.scale=Math.min(3.5,mapState.scale*1.5);
+      applyTransform();
+    });
+    el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();choose(e);}});
   });
+  var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');
+  controls[0].onclick=function(){mapState.scale=Math.min(4,mapState.scale*1.25);applyTransform();};
+  controls[1].onclick=function(){mapState.scale=Math.max(.65,mapState.scale/1.25);applyTransform();};
+  controls[2].onclick=function(){mapState.scale=1;mapState.tx=0;mapState.ty=0;applyTransform();};
+  var drag=false,sx=0,sy=0,otx=0,oty=0;
+  svg.addEventListener('mousedown',function(e){if(e.target.classList.contains('dno-shape'))return;drag=true;sx=e.clientX;sy=e.clientY;otx=mapState.tx;oty=mapState.ty;svg.style.cursor='grabbing';});
+  window.addEventListener('mousemove',function(e){if(!drag)return;mapState.tx=otx+e.clientX-sx;mapState.ty=oty+e.clientY-sy;applyTransform();});
+  window.addEventListener('mouseup',function(){drag=false;if(svg)svg.style.cursor='grab';});
+  svg.addEventListener('wheel',function(e){
+    e.preventDefault();
+    var old=mapState.scale;
+    mapState.scale=Math.max(.65,Math.min(4,old*(e.deltaY<0?1.15:.87)));
+    var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);
+    mapState.tx += mx*(1-mapState.scale/old); mapState.ty += my*(1-mapState.scale/old); applyTransform();
+  },{passive:false});
 }
 function loadDnoGeo(){ render(); }
 function render(){
@@ -583,140 +743,4 @@ init();
 })();
 </script>
 
-<script id="v13-patch">
-(function(){
-  "use strict";
-
-  /* Keep option text visually identical whether selected or not. */
-  function normalizeOptions(){
-    document.querySelectorAll('.optionBox,.option,.filter-option,label').forEach(function(el){
-      var txt = el.querySelector('span') || el;
-      if (txt && !txt.querySelector('input,button')) {
-        txt.style.fontWeight='400';
-        txt.style.background='transparent';
-        txt.style.color='#222';
-      }
-    });
-  }
-
-  /* Add zoom controls and mouse/touch pan to the DNO SVG, if present. */
-  function setupMap(){
-    var svg = document.querySelector('#dnoMap, #dno-map, svg.dno-map, .dno-map svg');
-    if(!svg || svg.dataset.v13Ready) return;
-    svg.dataset.v13Ready='1';
-
-    var parent = svg.parentElement;
-    if(!parent) return;
-    parent.style.position='relative';
-    parent.style.overflow='hidden';
-
-    var controls=document.createElement('div');
-    controls.className='zoom-controls';
-    controls.innerHTML='<button type="button" aria-label="Zoom in">+</button>'+
-                       '<button type="button" aria-label="Zoom out">−</button>'+
-                       '<button type="button" class="map-reset" aria-label="Reset map">Reset</button>';
-    parent.appendChild(controls);
-
-    var scale=1, tx=0, ty=0, dragging=false, sx=0, sy=0, ox=0, oy=0;
-    function apply(){
-      svg.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')';
-    }
-    controls.children[0].onclick=function(){scale=Math.min(4,scale*1.25);apply();};
-    controls.children[1].onclick=function(){scale=Math.max(.75,scale/1.25);apply();};
-    controls.children[2].onclick=function(){scale=1;tx=0;ty=0;apply();};
-
-    svg.addEventListener('mousedown',function(e){
-      dragging=true;sx=e.clientX;sy=e.clientY;ox=tx;oy=ty;
-      svg.style.cursor='grabbing';e.preventDefault();
-    });
-    window.addEventListener('mousemove',function(e){
-      if(!dragging)return;
-      tx=ox+(e.clientX-sx);ty=oy+(e.clientY-sy);apply();
-    });
-    window.addEventListener('mouseup',function(){
-      dragging=false;svg.style.cursor='grab';
-    });
-    svg.addEventListener('wheel',function(e){
-      e.preventDefault();
-      var rect=svg.getBoundingClientRect();
-      var mx=e.clientX-rect.left-rect.width/2;
-      var my=e.clientY-rect.top-rect.height/2;
-      var old=scale;
-      scale=Math.max(.75,Math.min(4,scale*(e.deltaY<0?1.15:.87)));
-      tx += mx*(1-scale/old);
-      ty += my*(1-scale/old);
-      apply();
-    },{passive:false});
-  }
-
-  /* Re-run after dynamic renders. */
-  normalizeOptions();
-  setupMap();
-  new MutationObserver(function(){
-    normalizeOptions();
-    setupMap();
-  }).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
-})();
-</script>
-
-
-<script id="v14-map-colour">
-(function(){
-  function addLegend(){
-    var host=document.querySelector('.map-container,.map-wrap,.map-area,#map,#dnoMap');
-    if(!host || document.querySelector('.v14-map-legend')) return;
-    host.style.position='relative';
-    var legend=document.createElement('div');
-    legend.className='v14-map-legend';
-    legend.innerHTML=
-      '<div style="font-size:11px;font-weight:600;color:#44505B;margin-bottom:4px">Selected flexibility</div>'+
-      '<div style="display:flex;align-items:center;gap:6px">'+
-      '<span style="font-size:10px;color:#68727D">Low</span>'+
-      '<span class="map-legend-gradient" style="display:block;width:110px;height:7px;border-radius:4px"></span>'+
-      '<span style="font-size:10px;color:#68727D">High</span></div>';
-    legend.style.cssText +=
-      'position:absolute;left:16px;bottom:14px;z-index:25;background:rgba(255,255,255,.94);'+
-      'border:1px solid #DCE2E7;border-radius:5px;padding:8px 10px;';
-    host.appendChild(legend);
-  }
-  addLegend();
-  new MutationObserver(addLegend).observe(document.body,{childList:true,subtree:true});
-})();
-</script>
-
-
-<script id="v15-functional">
-(function(){
-  function syncHeader(){
-    var p=document.getElementById('potentialValue');
-    var hp=document.getElementById('potentialChoice');
-    if(p&&hp){hp.value=p.value;}
-    var total=document.getElementById('total'),ind=document.getElementById('ind'),com=document.getElementById('com');
-    if(total && ind && com){
-      // Values are already maintained by the dashboard's cards() function.
-    }
-  }
-  var hp=document.getElementById('potentialChoice');
-  if(hp) hp.addEventListener('change',function(){
-    var p=document.getElementById('potentialValue');
-    if(p){p.value=hp.value; if(typeof populate==='function')populate(); if(typeof render==='function')render();}
-  });
-  document.querySelectorAll('.year-choice').forEach(function(b){
-    b.addEventListener('click',function(){
-      document.querySelectorAll('.year-choice').forEach(function(x){x.classList.remove('active')});
-      b.classList.add('active');
-      // Future years are intentionally UI controls until FES demand projections are connected.
-      document.dispatchEvent(new CustomEvent('clf-timeframe-change',{detail:{year:b.dataset.year}}));
-    });
-  });
-  var geo=document.getElementById('geoChoice');
-  if(geo) geo.addEventListener('change',function(){
-    if(geo.value==='GSP'){
-      alert('GSP geography is reserved for the next data layer; the current dashboard uses NESO DNO geography.');
-      geo.value='DNO';
-    }
-  });
-  syncHeader();
-})();
-</script>
 </body></html>
