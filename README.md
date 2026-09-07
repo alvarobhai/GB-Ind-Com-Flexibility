@@ -52,3 +52,10 @@ The dashboard uses simplified geographic DNO area shapes for the static client-s
 
 ## DNO geography
 The dashboard uses a WGS84 GeoJSON snapshot of GB DNO licence-area boundaries. The geometry was taken from Jacob Varley's February 2026 public GeoJSON gist, which notes that it was taken directly from the City Observatory Birmingham source with minor naming amendments. NESO is the authoritative source for the GB DNO licence-area dataset and describes its boundaries as approximate; see the NESO GIS dataset page for the official source.
+
+
+## V6 update
+- Compact selection boxes: smaller text and tighter vertical spacing.
+- Filter behaviour and independent Sector/Segment/End-use dimensions are preserved.
+- FES scenario/year functionality remains the basis for projected demand; FES does not determine flexibility capacity.
+- Intended geography architecture: GB → DNO → GSP.
