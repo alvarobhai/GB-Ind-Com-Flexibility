@@ -1,88 +1,22 @@
-# GB CLF GitHub Pages Dashboard v2
+# GB Non-Domestic Flexibility Explorer — V12
 
-This is a static, client-side dashboard. It requires only `index.html` and the `data/` folder.
+A static GitHub Pages dashboard for exploring GB non-domestic consumer-led flexibility potential by DNO, sector, segment and end-use.
 
-## Publish / replace the existing version
+## V12 changes
+- Removed all GHD branding/references from the page header.
+- Replaced the previous image/hotspot workaround with the **official NESO GB DNO licence-area geometry** supplied in the NESO 2024 GeoJSON dataset.
+- Converted the supplied EPSG:27700 geometry into a lightweight embedded SVG representation for reliable GitHub Pages rendering.
+- DNO regions remain visible when one or more are selected; unselected regions fade rather than disappear.
+- Multiple DNO regions can be selected by clicking them.
+- DNO shading reflects the selected flexibility potential; selected regions are highlighted.
+- Technical/Economic selection remains a single-select control.
 
-Replace the files in the GitHub repository with:
-- `index.html`
-- `data/data.json`
-- `data/CLF_Dashboard_Data.csv`
+## Data
+The analytical dataset is in `data/data.json`.
 
-Do not put them inside an additional subfolder.
+The DNO map geometry is embedded directly in `index.html` so the dashboard has no runtime dependency on an external map server or GeoJSON endpoint.
 
-## Why v2
+Source geometry: NESO, GB DNO licence areas 20240503, supplied as `gb-dno-license-areas-20240503-as-geojson.geojson`.
 
-The first prototype depended on external mapping/chart JavaScript at initialisation. This version has **no external JavaScript dependency for core functionality**:
-- local JSON data
-- native HTML/CSS
-- inline SVG map
-- inline SVG marginal cost curve
-
-This should eliminate the blank-page problem on GitHub Pages.
-
-## Scope
-
-DNO → Sector → Archetype → End-use → Technical Flex MW → Hurdle Cost → Economic Flex MW.
-
-No achievable potential.
-
-## Dashboard
-
-- Sector filter
-- Archetype filter
-- End-use filter
-- Technical / Economic
-- £150–£1,000/MWh hurdle-cost slider
-- Clickable DNO map
-- DNO/archetype/end-use charts
-- Indicative marginal cost curve
-- Detail table
-- URL state preservation
-
-## DNO map note
-
-The current map is a **schematic interactive DNO-area representation** designed to make the dashboard robust on GitHub Pages. The analytical DNO values are the model's DNO allocations.
-
-For the next visual iteration, replace the schematic with the official NESO DNO polygon GeoJSON after confirming the field-name and projection handling.
-
-
-### Map note
-The dashboard uses simplified geographic DNO area shapes for the static client-side map. The authoritative NESO DNO licence-area dataset is the source reference for geography; NESO notes that licence boundaries are approximate and can change over time.
-
-## DNO geography
-The dashboard uses a WGS84 GeoJSON snapshot of GB DNO licence-area boundaries. The geometry was taken from Jacob Varley's February 2026 public GeoJSON gist, which notes that it was taken directly from the City Observatory Birmingham source with minor naming amendments. NESO is the authoritative source for the GB DNO licence-area dataset and describes its boundaries as approximate; see the NESO GIS dataset page for the official source.
-
-
-## V6 update
-- Compact selection boxes: smaller text and tighter vertical spacing.
-- Filter behaviour and independent Sector/Segment/End-use dimensions are preserved.
-- FES scenario/year functionality remains the basis for projected demand; FES does not determine flexibility capacity.
-- Intended geography architecture: GB → DNO → GSP.
-
-
-## V7 update
-- Removed all explicit “All” options from Sector, Segment and End-use menus.
-- Sector, Segment and End-use are independent multi-select dimensions; all items are selected by default.
-- Replaced the schematic DNO polygons with the authoritative NESO 2024 DNO licence-area GeoJSON loaded from the NESO data portal.
-- Sector selection does not change the Segment or End-use lists; it only filters the results.
-
-
-## V9 update
-- DNO map reprojects NESO EPSG:27700 geometry to WGS84 before rendering, avoiding distorted/slanted geometry.
-- All DNO regions remain visible; selected regions are highlighted and unselected regions fade rather than disappearing.
-- Multiple DNO regions can be selected simultaneously.
-- Sector/Segment/End-use selection controls now use a single square indicator; visual state updates immediately on deselection.
-
-
-## V10 update
-- Fixed Technical/Economic selection visual state so the selected square updates immediately.
-- Removed the inner-box visual treatment so each selection uses one square indicator only.
-- Replaced the failing direct NESO GeoJSON fetch with the NESO-hosted ArcGIS feature service, requesting WGS84 GeoJSON for the browser.
-- DNO map uses all available NESO DNO features, with unselected regions retained and faded during multi-region selection.
-
-
-## V11 update
-- Technical/Economic selector now updates its visual state directly on click.
-- DNO map no longer depends on a cross-origin GeoJSON request. It uses a published DNO regional map as the visual layer with interactive multi-select hotspots; selected regions remain visible while unselected regions fade.
-- DNO analytical results continue to use the dashboard's underlying DNO allocation data.
+## Deployment
+Place `index.html`, `README.md`, and the `data/` folder at the repository root and enable GitHub Pages from the repository's main branch/root folder.
