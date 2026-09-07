@@ -80,3 +80,9 @@ The dashboard uses a WGS84 GeoJSON snapshot of GB DNO licence-area boundaries. T
 - Removed the inner-box visual treatment so each selection uses one square indicator only.
 - Replaced the failing direct NESO GeoJSON fetch with the NESO-hosted ArcGIS feature service, requesting WGS84 GeoJSON for the browser.
 - DNO map uses all available NESO DNO features, with unselected regions retained and faded during multi-region selection.
+
+
+## V11 update
+- Technical/Economic selector now updates its visual state directly on click.
+- DNO map no longer depends on a cross-origin GeoJSON request. It uses a published DNO regional map as the visual layer with interactive multi-select hotspots; selected regions remain visible while unselected regions fade.
+- DNO analytical results continue to use the dashboard's underlying DNO allocation data.

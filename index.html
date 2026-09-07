@@ -56,7 +56,16 @@ svg{width:100%;height:100%}.dno-shape{stroke:#fff;stroke-width:1.5;cursor:pointe
   padding-bottom: 2px !important;
 }
 
-.filter-option{font-size:11px!important;line-height:1.1!important;padding:2px 6px!important;margin:1px 0!important;display:flex;align-items:center;gap:5px}</style>
+.filter-option{font-size:11px!important;line-height:1.1!important;padding:2px 6px!important;margin:1px 0!important;display:flex;align-items:center;gap:5px}
+.dno-image-map{position:relative;width:100%;height:100%;min-height:420px;background:#f7f7f6;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.dno-image-map>img{width:100%;height:100%;object-fit:contain;display:block}
+.dno-hotspot-layer{position:absolute;inset:0}
+.dno-hotspot{position:absolute!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;width:auto;color:transparent;box-shadow:none;cursor:pointer;z-index:3}
+.dno-hotspot.selected{outline:2px solid #111!important;outline-offset:-2px;background:rgba(255,255,255,.10)!important}
+.dno-selected-outline{position:absolute;border:2px solid #111;pointer-events:none;z-index:4;display:flex;align-items:flex-start;justify-content:flex-end}
+.dno-selected-outline span{background:#111;color:#fff;font-size:10px;font-weight:700;padding:2px 4px}
+.dno-selection-note{position:absolute;left:16px;top:14px;background:rgba(255,255,255,.94);padding:6px 9px;font-size:11px;color:#555;z-index:5;border:1px solid #ddd}
+</style>
 </head>
 <body>
 <header><div class="kicker">GHD | ENERGY ADVISORY</div><h1>GB Non-Domestic Flexibility Explorer</h1><p>Consumer-led flexibility potential by DNO area, sector, segment and end-use</p></header>
@@ -157,7 +166,16 @@ function populate(){
   optionBox('potentialBox',[
     {value:'Economic',label:'Economic'},
     {value:'Technical',label:'Technical'}
-  ],[$('potentialValue').value],function(v){$('potentialValue').value=v;populate();render();});
+  ],[$('potentialValue').value],function(v){
+    $('potentialValue').value=v;
+    var opts=document.querySelectorAll('#potentialBox .filter-option');
+    Array.prototype.forEach.call(opts,function(el){
+      var on=el.textContent.trim()===v;
+      el.classList.toggle('active',on);
+      el.setAttribute('aria-checked',on?'true':'false');
+    });
+    render();
+  });
   var endItems=allEnduseKeys().map(function(k){
     var p=k.split('|');return{value:k,label:(p[0]==='Industrial'?'Ind | ':'Com | ')+p.slice(1).join('|')};
   });
@@ -204,67 +222,38 @@ function dnoValues(rows){
    The analytical values remain the model's DNO allocations. */
 
 var dnoGeoJSON=null;
-var dnoGeoURL='https://services-eu1.arcgis.com/89ur7pRPzrA8NWtj/ArcGIS/rest/services/gb_dno_license_areas_20240503_as_geojson_%282%29/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson';
+var dnoImageURL='https://www.businessenergydeals.co.uk/wp-content/uploads/2024/07/Distribution-Network-Operators-by-region-UK.webp';
 
-function dnoKey(p){
-  p=p||{};
-  var s=String(p.DNO_Full||p.DNO||p.Area||p.Name||p.name||p.ID||'').toUpperCase();
-  if(s.indexOf('ELECTRICITY NORTH WEST')>=0||s.indexOf('ENWL')>=0)return'ENWL';
-  if(s.indexOf('YORKSHIRE')>=0)return'NPG (Yorkshire Electric)';
-  if(s.indexOf('NORTHERN POWERGRID')>=0||s.indexOf('NORTHERN ELECTRIC')>=0)return'NPG (Northern Electric)';
-  if(s.indexOf('MANWEB')>=0)return'SPEN (SP MANWEB)';
-  if(s.indexOf('SP DISTRIBUTION')>=0)return'SPEN (SP Distribution)';
-  if(s.indexOf('SOUTHERN')>=0&&s.indexOf('SSE')>=0)return'SSE (Southern)';
-  if(s.indexOf('SSE')>=0||s.indexOf('NORTH SCOTLAND')>=0)return'SSE';
-  if(s.indexOf('LONDON')>=0)return'UKPN (London)';
-  if(s.indexOf('UKPN')>=0&&s.indexOf('SOUTH')>=0)return'UKPN (South)';
-  if(s.indexOf('UKPN')>=0&&s.indexOf('EAST')>=0)return'UKPN (East)';
-  if(s.indexOf('EAST MIDLAND')>=0)return'WPD (East Midlands)';
-  if(s.indexOf('WEST MIDLAND')>=0||s.indexOf('MIDLANDS')>=0)return'WPD (Midlands)';
-  if(s.indexOf('SOUTH WALES')>=0)return'WPD (South Wales)';
-  if(s.indexOf('SOUTH WEST')>=0)return'WPD (South West)';
-  return null;
-}
-function eachRing(g,fn){
-  if(!g)return;
-  if(g.type==='Polygon')g.coordinates.forEach(fn);
-  else if(g.type==='MultiPolygon')g.coordinates.forEach(function(poly){poly.forEach(fn)});
-}
+/* Published DNO-region visual used as a robust browser fallback.
+   The analytical DNO allocations continue to come from the CLF dataset. */
+var dnoHotspots=[
+  ["SSE","14",40,13,34,28],["SPEN (SP MANWEB)","13",25,36,34,23],
+  ["ENWL","10",34,31,24,21],["NPG (Northern Electric)","12",55,30,24,22],
+  ["NPG (Yorkshire Electric)","11",56,44,25,21],["SPEN (SP Distribution)","9",33,25,25,20],
+  ["WPD (Midlands)","8",47,54,23,21],["WPD (East Midlands)","7",55,60,24,20],
+  ["WPD (South Wales)","6",28,56,25,21],["UKPN (East)","5",66,57,25,21],
+  ["UKPN (South)","4",66,68,24,21],["UKPN (London)","3",59,70,11,12],
+  ["SSE (Southern)","2",46,69,25,21],["WPD (South West)","1",25,75,28,24]
+];
+
 function drawMap(rows){
   var vals=dnoValues(rows),max=1;dnoOrder.forEach(function(d){max=Math.max(max,vals[d]||0)});
-  if(!dnoGeoJSON){$('mapWrap').innerHTML='<div class="map-loading">Loading NESO DNO licence-area boundaries…</div>';return;}
-
-  var minLon=Infinity,maxLon=-Infinity,minLat=Infinity,maxLat=-Infinity;
-  dnoGeoJSON.features.forEach(function(f){
-    eachRing(f.geometry,function(r){r.forEach(function(p){
-      minLon=Math.min(minLon,p[0]);maxLon=Math.max(maxLon,p[0]);
-      minLat=Math.min(minLat,p[1]);maxLat=Math.max(maxLat,p[1]);
-    })});
+  var hasSelection=selectedDnos.length>0;
+  var html='<div class="dno-image-map">';
+  html+='<img src="'+dnoImageURL+'" alt="GB DNO regional map" loading="eager">';
+  html+='<div class="dno-hotspot-layer">';
+  dnoHotspots.forEach(function(h){
+    var n=h[0],num=h[1],left=h[2],top=h[3],w=h[4],hh=h[5],sel=selectedDnos.indexOf(n)>=0;
+    var op=hasSelection?(sel?1:.22):1;
+    html+='<button type="button" class="dno-hotspot '+(sel?'selected':'')+'" data-dno="'+esc(n)+'" aria-label="'+esc(n)+'" style="left:'+left+'%;top:'+top+'%;width:'+w+'%;height:'+hh+'%;opacity:'+op+'"></button>';
+    if(sel) html+='<div class="dno-selected-outline" style="left:'+left+'%;top:'+top+'%;width:'+w+'%;height:'+hh+'%"><span>'+num+'</span></div>';
   });
-
-  /* Equirectangular display with longitude compressed by cos(latitude),
-     giving a recognisable GB silhouette while preserving relative geography. */
-  var W=1000,H=560,pad=24,midLat=(minLat+maxLat)/2*Math.PI/180,cosLat=Math.cos(midLat);
-  var xSpan=(maxLon-minLon)*cosLat,ySpan=(maxLat-minLat);
-  var scale=Math.min((W-2*pad)/xSpan,(H-2*pad)/ySpan);
-  var actualW=xSpan*scale,actualH=ySpan*scale,ox=(W-actualW)/2,oy=(H-actualH)/2;
-  function px(lon){return ox+(lon-minLon)*cosLat*scale}
-  function py(lat){return H-(oy+(lat-minLat)*scale)}
-  function path(r){return'M '+r.map(function(p,i){return(i?'L ':'')+px(p[0]).toFixed(2)+' '+py(p[1]).toFixed(2)}).join(' ')+' Z'}
-  function fill(v){var t=Math.sqrt((v||0)/max),g=Math.round(245-165*t);return'rgb('+g+','+g+','+g+')'}
-
-  var svg='<svg class="dno-svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" aria-label="GB DNO licence areas">';
-  dnoGeoJSON.features.forEach(function(f){
-    var n=dnoKey(f.properties);if(!n)return;
-    var selected=selectedDnos.indexOf(n)>=0;
-    var d='';eachRing(f.geometry,function(r){d+=path(r)+' ';});
-    var opacity=selectedDnos.length?(selected?1:.22):1;
-    var colour=selectedDnos.length?(selected?fill(vals[n]||0):'#d6d6d6'):fill(vals[n]||0);
-    svg+='<path class="dno-region '+(selected?'selected':'')+'" data-dno="'+esc(n)+'" d="'+d+'" fill="'+colour+'" fill-opacity="'+opacity+'" fill-rule="evenodd" stroke="#ffffff" stroke-width="1.1"><title>'+esc(n)+' — '+((vals[n]||0)/1000).toFixed(2)+' GW</title></path>';
-  });
-  svg+='</svg><div class="legend"><b>Selected flexibility</b><br><div class="legend-row"><span class="sw" style="background:#f5f5f5"></span>low</div><div class="legend-row"><span class="sw" style="background:#505050"></span>high</div></div>';
-  $('mapWrap').innerHTML=svg;
-  Array.prototype.forEach.call(document.querySelectorAll('.dno-region'),function(el){
+  html+='</div>';
+  html+='<div class="dno-selection-note">'+(hasSelection?selectedDnos.length+' DNO'+(selectedDnos.length===1?'':'s')+' selected':'Click regions to select one or more DNOs')+'</div>';
+  html+='<div class="legend"><b>Selected flexibility</b><br><div class="legend-row"><span class="sw" style="background:#f5f5f5"></span>low</div><div class="legend-row"><span class="sw" style="background:#505050"></span>high</div></div>';
+  html+='</div>';
+  $('mapWrap').innerHTML=html;
+  Array.prototype.forEach.call(document.querySelectorAll('.dno-hotspot'),function(el){
     el.addEventListener('click',function(){
       var n=el.getAttribute('data-dno'),i=selectedDnos.indexOf(n);
       if(i>=0)selectedDnos.splice(i,1);else selectedDnos.push(n);
@@ -272,17 +261,7 @@ function drawMap(rows){
     });
   });
 }
-function loadDnoGeo(){
-  fetch(dnoGeoURL,{mode:'cors'})
-    .then(function(r){if(!r.ok)throw Error('HTTP '+r.status);return r.json()})
-    .then(function(g){
-      if(!g.features||!g.features.length)throw Error('No DNO features returned');
-      dnoGeoJSON=g;render();
-    })
-    .catch(function(e){
-      $('mapWrap').innerHTML='<div class="map-loading">Unable to load the DNO boundary layer ('+esc(e.message)+').</div>';
-    });
-}
+function loadDnoGeo(){ render(); }
 function render(){
   var rows=filtered();cards(rows);bars("dnoChart",agg(rows,"DNO"),"");bars("archChart",agg(rows,"Archetype"),"light");bars("endChart",agg(rows,"End-use"),"teal");costCurve(rows);detail(rows);drawMap(rows);saveState();
 }
