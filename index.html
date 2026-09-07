@@ -66,6 +66,106 @@ main{padding:22px 24px 28px;max-width:1580px;width:100%;margin:auto}
 .dno-selected-outline span{background:#111;color:#fff;font-size:10px;font-weight:700;padding:2px 4px}
 .dno-selection-note{position:absolute;left:16px;top:14px;background:rgba(255,255,255,.94);padding:6px 9px;font-size:11px;color:#555;z-index:5;border:1px solid #ddd}
 </style>
+
+<style id="v13-overrides">
+/* V13 visual system */
+:root{
+  --ink:#111111;
+  --muted:#666666;
+  --line:#d9d9d9;
+  --panel:#ffffff;
+  --soft:#f7f7f5;
+  --accent:#0b6e69;
+  --accent2:#dfeeed;
+}
+body{background:#fff;color:var(--ink);}
+.topbar,.header,.hero,header{
+  background:#fff !important;
+  color:#111 !important;
+  position:sticky !important;
+  top:0;
+  z-index:1000;
+  border-bottom:1px solid #d9d9d9;
+}
+.topbar *,.header *,.hero *,header *{color:#111 !important;}
+/* Make headline metrics part of the fixed header when they are inside it */
+.topbar .headline,.topbar .metrics,.topbar .kpis,.header .headline,.header .metrics,.header .kpis,
+.hero .headline,.hero .metrics,.hero .kpis{color:#111 !important;}
+/* Cleaner white panels */
+.card,.panel,.filter-panel,.control-panel,.chart-panel,.map-panel{
+  background:#fff !important;
+  border-color:#dedede !important;
+  box-shadow:none !important;
+}
+/* Selection controls: only the square/check changes, never the label */
+.optionBox, .option, .filter-option, label.optionBox{
+  font-weight:400 !important;
+  color:#222 !important;
+  background:transparent !important;
+}
+.optionBox.active, .option.active, .filter-option.active, label.optionBox.active{
+  font-weight:400 !important;
+  color:#222 !important;
+  background:transparent !important;
+}
+/* Hide common text-selection/highlight treatments */
+.optionBox.active span,.option.active span,.filter-option.active span,
+.optionBox.selected span,.option.selected span,.filter-option.selected span{
+  font-weight:400 !important;
+  color:#222 !important;
+  background:transparent !important;
+}
+/* Checkbox itself: outline + checkmark, not filled box */
+.optionBox::before,.option::before,.filter-option::before{
+  background:#fff !important;
+  border:1px solid #777 !important;
+  box-shadow:none !important;
+  color:#111 !important;
+  content:"" !important;
+}
+.optionBox.active::before,.option.active::before,.filter-option.active::before,
+.optionBox.selected::before,.option.selected::before,.filter-option.selected::before{
+  background:#fff !important;
+  border:1px solid #111 !important;
+  color:#111 !important;
+  content:"✓" !important;
+  font-weight:700 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+/* Don't allow a selected label to inherit an accent fill */
+label:has(input:checked), label:has(input:checked) span{
+  background:transparent !important;
+  color:#222 !important;
+  font-weight:400 !important;
+}
+/* Map viewport: provide zoom/pan canvas */
+.map-wrap,.map-container,.mapViewport,.map-area{
+  overflow:hidden !important;
+  position:relative !important;
+}
+#dnoMap, #dno-map, svg.dno-map, .dno-map svg{
+  transform-origin:center center;
+  cursor:grab;
+}
+.zoom-controls{
+  position:absolute;right:14px;top:14px;z-index:20;
+  display:flex;gap:4px;
+}
+.zoom-controls button{
+  width:32px;height:32px;border:1px solid #ccc;background:#fff;color:#111;
+  border-radius:3px;font-size:18px;line-height:1;cursor:pointer;
+}
+.zoom-controls button:hover{background:#f2f2f2;}
+.map-reset{
+  font-size:12px !important;
+}
+/* Europe context */
+.europe-context{fill:#f1f1ef;stroke:#d0d0cc;stroke-width:1;}
+.gb-context-outline{fill:none;stroke:#aaa;stroke-width:1;}
+</style>
+
 </head>
 <body>
 <header><h1>GB Non-Domestic Flexibility Explorer</h1><p>Consumer-led flexibility potential by DNO area, sector, segment and end-use</p></header>
@@ -304,4 +404,81 @@ function init(){
 init();
 })();
 </script>
+
+<script id="v13-patch">
+(function(){
+  "use strict";
+
+  /* Keep option text visually identical whether selected or not. */
+  function normalizeOptions(){
+    document.querySelectorAll('.optionBox,.option,.filter-option,label').forEach(function(el){
+      var txt = el.querySelector('span') || el;
+      if (txt && !txt.querySelector('input,button')) {
+        txt.style.fontWeight='400';
+        txt.style.background='transparent';
+        txt.style.color='#222';
+      }
+    });
+  }
+
+  /* Add zoom controls and mouse/touch pan to the DNO SVG, if present. */
+  function setupMap(){
+    var svg = document.querySelector('#dnoMap, #dno-map, svg.dno-map, .dno-map svg');
+    if(!svg || svg.dataset.v13Ready) return;
+    svg.dataset.v13Ready='1';
+
+    var parent = svg.parentElement;
+    if(!parent) return;
+    parent.style.position='relative';
+    parent.style.overflow='hidden';
+
+    var controls=document.createElement('div');
+    controls.className='zoom-controls';
+    controls.innerHTML='<button type="button" aria-label="Zoom in">+</button>'+
+                       '<button type="button" aria-label="Zoom out">−</button>'+
+                       '<button type="button" class="map-reset" aria-label="Reset map">Reset</button>';
+    parent.appendChild(controls);
+
+    var scale=1, tx=0, ty=0, dragging=false, sx=0, sy=0, ox=0, oy=0;
+    function apply(){
+      svg.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')';
+    }
+    controls.children[0].onclick=function(){scale=Math.min(4,scale*1.25);apply();};
+    controls.children[1].onclick=function(){scale=Math.max(.75,scale/1.25);apply();};
+    controls.children[2].onclick=function(){scale=1;tx=0;ty=0;apply();};
+
+    svg.addEventListener('mousedown',function(e){
+      dragging=true;sx=e.clientX;sy=e.clientY;ox=tx;oy=ty;
+      svg.style.cursor='grabbing';e.preventDefault();
+    });
+    window.addEventListener('mousemove',function(e){
+      if(!dragging)return;
+      tx=ox+(e.clientX-sx);ty=oy+(e.clientY-sy);apply();
+    });
+    window.addEventListener('mouseup',function(){
+      dragging=false;svg.style.cursor='grab';
+    });
+    svg.addEventListener('wheel',function(e){
+      e.preventDefault();
+      var rect=svg.getBoundingClientRect();
+      var mx=e.clientX-rect.left-rect.width/2;
+      var my=e.clientY-rect.top-rect.height/2;
+      var old=scale;
+      scale=Math.max(.75,Math.min(4,scale*(e.deltaY<0?1.15:.87)));
+      tx += mx*(1-scale/old);
+      ty += my*(1-scale/old);
+      apply();
+    },{passive:false});
+  }
+
+  /* Re-run after dynamic renders. */
+  normalizeOptions();
+  setupMap();
+  new MutationObserver(function(){
+    normalizeOptions();
+    setupMap();
+  }).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
+})();
+</script>
+
 </body></html>
