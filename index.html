@@ -166,6 +166,109 @@ label:has(input:checked), label:has(input:checked) span{
 .gb-context-outline{fill:none;stroke:#aaa;stroke-width:1;}
 </style>
 
+
+<style id="v14-colour-system">
+:root{
+  --ind-bg:#EAF4FA;
+  --ind-accent:#75B6D6;
+  --com-bg:#EAF7EF;
+  --com-accent:#76C69A;
+  --map-low:#EEE9F8;
+  --map-mid:#C8B9E3;
+  --map-high:#9278C7;
+  --ink:#18202A;
+  --muted:#68727D;
+  --line:#DCE2E7;
+  --white:#FFFFFF;
+}
+
+/* White/light dashboard */
+body{background:var(--white)!important;color:var(--ink)!important;}
+.topbar,.header,.hero,header{
+  background:var(--white)!important;
+  color:var(--ink)!important;
+  border-bottom:1px solid var(--line)!important;
+}
+
+/* Fixed KPI/control header */
+.topbar,.header,.hero,header{
+  position:sticky!important;
+  top:0!important;
+  z-index:1000!important;
+}
+
+/* Industrial / Commercial UI accents */
+.industry,.industrial,.sector-industry,[data-sector="Industry"]{
+  --category-bg:var(--ind-bg);
+  --category-accent:var(--ind-accent);
+}
+.commercial,.sector-commercial,[data-sector="Commercial"]{
+  --category-bg:var(--com-bg);
+  --category-accent:var(--com-accent);
+}
+
+/* Common option styling: labels never bold/highlight */
+.optionBox,.option,.filter-option,label.optionBox{
+  font-weight:400!important;
+  color:#26313A!important;
+  background:transparent!important;
+}
+.optionBox.active,.option.active,.filter-option.active,
+.optionBox.selected,.option.selected,.filter-option.selected{
+  font-weight:400!important;
+  color:#26313A!important;
+  background:transparent!important;
+}
+.optionBox span,.option span,.filter-option span{
+  font-weight:400!important;
+  color:#26313A!important;
+  background:transparent!important;
+}
+
+/* Checkmark-only state */
+.optionBox::before,.option::before,.filter-option::before{
+  background:#fff!important;
+  border:1px solid #9AA5AF!important;
+  color:transparent!important;
+  content:""!important;
+}
+.optionBox.active::before,.option.active::before,.filter-option.active::before,
+.optionBox.selected::before,.option.selected::before,.filter-option.selected::before{
+  background:#fff!important;
+  border:1px solid #64707A!important;
+  color:#26313A!important;
+  content:"✓"!important;
+  font-weight:700!important;
+}
+
+/* Subtle category tinting where existing markup exposes sector */
+.optionBox.industry::before,.option.industry::before,
+.optionBox.industrial::before,.option.industrial::before{
+  border-color:var(--ind-accent)!important;
+}
+.optionBox.commercial::before,.option.commercial::before{
+  border-color:var(--com-accent)!important;
+}
+
+/* Map uses third colour: lavender/purple intensity */
+.dno-region,.gsp-region{
+  stroke:#fff!important;
+}
+.map-legend-gradient{
+  background:linear-gradient(90deg,var(--map-low),var(--map-mid),var(--map-high))!important;
+}
+.map-flex-low{fill:var(--map-low)!important;}
+.map-flex-mid{fill:var(--map-mid)!important;}
+.map-flex-high{fill:var(--map-high)!important;}
+
+/* Floating filter panel */
+.filter-panel,.controls-panel,.side-panel{
+  background:rgba(255,255,255,.97)!important;
+  border:1px solid var(--line)!important;
+  box-shadow:0 8px 28px rgba(30,45,60,.10)!important;
+}
+</style>
+
 </head>
 <body>
 <header><h1>GB Non-Domestic Flexibility Explorer</h1><p>Consumer-led flexibility potential by DNO area, sector, segment and end-use</p></header>
@@ -478,6 +581,31 @@ init();
     normalizeOptions();
     setupMap();
   }).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
+})();
+</script>
+
+
+<script id="v14-map-colour">
+(function(){
+  function addLegend(){
+    var host=document.querySelector('.map-container,.map-wrap,.map-area,#map,#dnoMap');
+    if(!host || document.querySelector('.v14-map-legend')) return;
+    host.style.position='relative';
+    var legend=document.createElement('div');
+    legend.className='v14-map-legend';
+    legend.innerHTML=
+      '<div style="font-size:11px;font-weight:600;color:#44505B;margin-bottom:4px">Selected flexibility</div>'+
+      '<div style="display:flex;align-items:center;gap:6px">'+
+      '<span style="font-size:10px;color:#68727D">Low</span>'+
+      '<span class="map-legend-gradient" style="display:block;width:110px;height:7px;border-radius:4px"></span>'+
+      '<span style="font-size:10px;color:#68727D">High</span></div>';
+    legend.style.cssText +=
+      'position:absolute;left:16px;bottom:14px;z-index:25;background:rgba(255,255,255,.94);'+
+      'border:1px solid #DCE2E7;border-radius:5px;padding:8px 10px;';
+    host.appendChild(legend);
+  }
+  addLegend();
+  new MutationObserver(addLegend).observe(document.body,{childList:true,subtree:true});
 })();
 </script>
 
