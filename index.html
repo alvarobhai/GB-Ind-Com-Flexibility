@@ -12,6 +12,10 @@ header{background:var(--navy);color:#fff;padding:22px 28px}header h1{margin:0;fo
 aside{background:#fff;border-right:1px solid var(--line);padding:18px;position:sticky;top:0;height:calc(100vh - 84px);overflow:auto}
 label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);margin:15px 0 6px}
 select{width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:6px;background:#fff}
+.filter-box{border:1px solid #cbd5e1;border-radius:7px;background:#fff;max-height:190px;overflow:auto;padding:4px;margin-bottom:10px}
+.filter-option{display:block;padding:7px 8px;border-radius:5px;font-size:12px;cursor:pointer;color:var(--text);line-height:1.2}
+.filter-option:hover{background:#f1f5f9}.filter-option.active{background:#e8f1fb;color:var(--blue);font-weight:700}
+.filter-option .prefix{font-weight:700;color:var(--muted)}
 input[type=range]{width:100%;accent-color:var(--blue)}
 .range{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}#costValue{font-weight:700;color:var(--blue)}
 button{width:100%;padding:9px;border:1px solid #cbd5e1;background:#fff;border-radius:6px;font-weight:600;cursor:pointer;margin-top:16px}
@@ -26,7 +30,7 @@ svg{width:100%;height:100%}.dno-shape{stroke:#fff;stroke-width:1.5;cursor:pointe
 .legend{position:absolute;right:14px;bottom:14px;background:#fff;border:1px solid var(--line);padding:8px;border-radius:6px;font-size:10px}
 .legend-row{display:flex;align-items:center;gap:5px}.sw{width:14px;height:9px;border:1px solid #d5dee8}
 .chart{padding:12px 14px;min-height:285px}.bar-row{display:grid;grid-template-columns:150px 1fr 62px;gap:8px;align-items:center;margin:7px 0;font-size:11px}.bar-bg{height:14px;background:#edf2f7;border-radius:3px;overflow:hidden}.bar-fill{height:100%;background:var(--blue);border-radius:3px}.bar-fill.teal{background:var(--teal)}.bar-fill.light{background:var(--blue2)}
-.cost-chart{height:255px;position:relative;padding:14px 42px 34px 48px}.cost-svg{width:100%;height:100%}
+.cost-chart{height:300px;position:relative;padding:14px 18px 34px 52px}.cost-svg{width:100%;height:100%}
 .detail{max-height:360px;overflow:auto}.detail table{border-collapse:collapse;width:100%;font-size:10px}.detail th,.detail td{padding:7px 9px;border-bottom:1px solid #edf2f7;text-align:left}.detail th{position:sticky;top:0;background:#f8fafc;text-transform:uppercase;color:var(--muted)}
 .status{padding:7px 14px;border-top:1px solid var(--line);font-size:10px;color:var(--muted)}.footer{font-size:10px;color:#718096;margin-top:12px;line-height:1.5}
 .error{background:#fff4f4;color:#9b1c1c;padding:10px;border:1px solid #f3c4c4;border-radius:6px;margin-bottom:12px;display:none}
@@ -37,15 +41,15 @@ svg{width:100%;height:100%}.dno-shape{stroke:#fff;stroke-width:1.5;cursor:pointe
 <header><h1>GB Non-Domestic Flexibility Explorer</h1><p>Consumer-led flexibility potential by DNO area, sector, archetype and end-use</p></header>
 <div class="layout">
 <aside>
-<label>Sector</label><select id="sector"><option>All</option><option>Industrial</option><option>Commercial</option></select>
-<label>Archetype</label><select id="archetype"><option>All</option></select>
-<label>End-use</label><select id="enduse"><option>All</option></select>
-<label>Potential</label><select id="potential"><option>Economic</option><option>Technical</option></select>
+<label>Sector</label><div id="sectorBox" class="filter-box"></div>
+<label>Archetype</label><div id="archetypeBox" class="filter-box"></div>
+<label>End-use</label><div id="enduseBox" class="filter-box"></div>
+<label>Potential</label><div id="potentialBox" class="filter-box"></div>
 <label>Maximum hurdle cost</label>
 <div class="range"><span>£150</span><span id="costValue">£500/MWh</span><span>£1,000</span></div>
 <input id="cost" type="range" min="150" max="1000" step="50" value="500">
 <button id="reset">Reset filters</button>
-<div class="footer"><b>Scope</b><br>DNO → Sector → Archetype → End-use → Technical Flex MW → Hurdle Cost → Economic Flex MW.<br><br>No achievable-potential layer.</div>
+<input type="hidden" id="sectorValue" value="All"><input type="hidden" id="archetypeValue" value="All"><input type="hidden" id="enduseValue" value="All"><input type="hidden" id="potentialValue" value="Economic"><div class="footer"><b>Scope</b><br>DNO → Sector → Archetype → End-use → Technical Flex MW → Hurdle Cost → Economic Flex MW.<br><br>No achievable-potential layer.</div>
 </aside>
 <main>
 <div id="error" class="error"></div>
@@ -57,7 +61,7 @@ svg{width:100%;height:100%}.dno-shape{stroke:#fff;stroke-width:1.5;cursor:pointe
 </section>
 <section class="grid">
 <div class="panel wide"><div class="panel-head"><span>GB DNO areas</span><span class="note">Click a region to filter</span></div>
-<div id="map"><div class="map-wrap" id="mapWrap"></div></div><div class="status" id="mapStatus">DNO areas are shown as schematic licence-area regions; values are allocated using the CLF model's DNO shares.</div></div>
+<div id="map"><div class="map-wrap" id="mapWrap"></div></div><div class="status" id="mapStatus">DNO areas are shown as simplified geographic licence-area shapes; values are allocated using the CLF model's DNO shares.</div></div>
 <div class="panel"><div class="panel-head">Flexibility by DNO area</div><div class="chart" id="dnoChart"></div></div>
 <div class="panel"><div class="panel-head">Flexibility by archetype</div><div class="chart" id="archChart"></div></div>
 <div class="panel"><div class="panel-head">Flexibility by end-use</div><div class="chart" id="endChart"></div></div>
@@ -78,32 +82,70 @@ function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&am
 function uniq(a){var o={};a.forEach(function(x){o[x]=1});return Object.keys(o).sort()}
 function num(v){return Number(v)||0}
 function selectedMW(r){
-  if($("potential").value==="Technical") return num(r["Technical Flex MW"]);
+  if($("potentialValue").value==="Technical") return num(r["Technical Flex MW"]);
   return num(r["Central Hurdle Cost (£/MWh)"])<=num($("cost").value)?num(r["Technical Flex MW"]):0;
 }
 function filtered(){
-  var s=$("sector").value,a=$("archetype").value,e=$("enduse").value;
+  var sec=currentSector(),a=currentArchetype(),as=currentArchetypeSector(),e=currentEnduse(),es=currentEnduseSector();
   return DATA.filter(function(r){
-    return (s==="All"||r.Sector===s)&&(a==="All"||r.Archetype===a)&&(e==="All"||r["End-use"]===e)&&(!selectedDno||r.DNO===selectedDno);
+    var ok=(sec==='All'||r.Sector===sec);
+    if(a!==null) ok=ok&&r.Archetype===a&&r.Sector===as;
+    if(e!==null) ok=ok&&r['End-use']===e&&r.Sector===es;
+    if(selectedDno) ok=ok&&r.DNO===selectedDno;
+    return ok;
   });
 }
 function agg(rows,key){
   var m={};rows.forEach(function(r){m[r[key]]=(m[r[key]]||0)+selectedMW(r)});
   return Object.keys(m).map(function(k){return [k,m[k]]}).sort(function(a,b){return b[1]-a[1]});
 }
+function optionBox(id,items,selected,prefixMode,callback){
+  var box=$(id); box.innerHTML='';
+  items.forEach(function(item){
+    var val=item.value, label=item.label, active=selected===val;
+    var el=document.createElement('div'); el.className='filter-option'+(active?' active':'');
+    el.dataset.value=val;
+    el.innerHTML=esc(label);
+    el.addEventListener('click',function(){callback(val)});
+    box.appendChild(el);
+  });
+}
 function populate(){
-  var s=$("sector").value,a=$("archetype").value;
-  var av=uniq(DATA.filter(function(r){return s==="All"||r.Sector===s}).map(function(r){return r.Archetype}));
-  $("archetype").innerHTML="<option>All</option>"+av.map(function(x){return "<option>"+esc(x)+"</option>"}).join("");
-  if(a!=="All"&&av.indexOf(a)>=0)$("archetype").value=a;
+  var s=$('sectorValue').value,a=$('archetypeValue').value,e=$('enduseValue').value;
+  optionBox('sectorBox',[{value:'All',label:'All'},{value:'Industrial',label:'Industrial'},{value:'Commercial',label:'Commercial'}],s,false,function(v){
+    $('sectorValue').value=v; $('archetypeValue').value='All'; $('enduseValue').value='All'; selectedDno=null; populate(); render();
+  });
+  var rowsA=DATA.filter(function(r){return s==='All'||r.Sector===s});
+  var amap={},alist=[];
+  rowsA.forEach(function(r){var key=r.Sector+'|'+r.Archetype;if(!amap[key]){amap[key]=1;alist.push({value:key,label:(s==='All'?r.Sector+' | ':'')+r.Archetype,sector:r.Sector,arch:r.Archetype})}});
+  alist.sort(function(x,y){return x.label.localeCompare(y.label)});
+  var aitems=[{value:'All',label:'All'}].concat(alist);
+  if(a!=='All' && !alist.some(function(x){return x.value===a})) a='All';
+  $('archetypeValue').value=a;
+  optionBox('archetypeBox',aitems,a,false,function(v){$('archetypeValue').value=v;$('enduseValue').value='All';selectedDno=null;populateEnd();render()});
   populateEnd();
+  optionBox('potentialBox',[{value:'Economic',label:'Economic'},{value:'Technical',label:'Technical'}],$('potentialValue').value,false,function(v){$('potentialValue').value=v;render()});
 }
 function populateEnd(){
-  var s=$("sector").value,a=$("archetype").value,e=$("enduse").value;
-  var ev=uniq(DATA.filter(function(r){return (s==="All"||r.Sector===s)&&(a==="All"||r.Archetype===a)}).map(function(r){return r["End-use"]}));
-  $("enduse").innerHTML="<option>All</option>"+ev.map(function(x){return "<option>"+esc(x)+"</option>"}).join("");
-  if(e!=="All"&&ev.indexOf(e)>=0)$("enduse").value=e;
+  var s=$('sectorValue').value,a=$('archetypeValue').value,e=$('enduseValue').value;
+  var rows=DATA.filter(function(r){
+    var okS=s==='All'||r.Sector===s;
+    var okA=a==='All'||(r.Sector+'|'+r.Archetype===a);
+    return okS&&okA;
+  });
+  var emap={},elist=[];
+  rows.forEach(function(r){var key=r.Sector+'|'+r['End-use'];if(!emap[key]){emap[key]=1;elist.push({value:key,label:(s==='All'?r.Sector+' | ':'')+r['End-use']})}});
+  elist.sort(function(x,y){return x.label.localeCompare(y.label)});
+  var eitems=[{value:'All',label:'All'}].concat(elist);
+  if(e!=='All'&&!elist.some(function(x){return x.value===e}))e='All';
+  $('enduseValue').value=e;
+  optionBox('enduseBox',eitems,e,false,function(v){$('enduseValue').value=v;selectedDno=null;render()});
 }
+function currentSector(){return $('sectorValue').value}
+function currentArchetype(){var v=$('archetypeValue').value;return v==='All'?null:v.split('|').slice(1).join('|')}
+function currentArchetypeSector(){var v=$('archetypeValue').value;return v==='All'?null:v.split('|')[0]}
+function currentEnduse(){var v=$('enduseValue').value;return v==='All'?null:v.split('|').slice(1).join('|')}
+function currentEnduseSector(){var v=$('enduseValue').value;return v==='All'?null:v.split('|')[0]}
 function bars(id,entries,cls){
   var top=entries.slice(0,12),max=top.length?top[0][1]:1;
   $(id).innerHTML=top.map(function(x){return '<div class="bar-row"><div title="'+esc(x[0])+'">'+esc(x[0])+'</div><div class="bar-bg"><div class="bar-fill '+cls+'" style="width:'+Math.max(0,100*x[1]/max)+'%"></div></div><div>'+Math.round(x[1]).toLocaleString()+' MW</div></div>'}).join("")||'<div style="color:#718096">No flexibility in current selection.</div>';
@@ -114,14 +156,16 @@ function cards(rows){
 }
 function costCurve(rows){
   var thresholds=[150,200,250,300,400,500,750,1000], pts=[];
-  thresholds.forEach(function(c){
-    var v=0;rows.forEach(function(r){if(num(r["Central Hurdle Cost (£/MWh)"])<=c)v+=num(r["Technical Flex MW"])});
-    pts.push([v/1000,c]);
-  });
-  var w=560,h=215,pL=45,pR=15,pT=10,pB=30,maxX=Math.max(1,pts[pts.length-1][0]);
-  var path=pts.map(function(p,j){var x=pL+(p[0]/maxX)*(w-pL-pR),y=pT+(1-(p[1]-150)/(1000-150))*(h-pT-pB);return (j?"L":"M")+x.toFixed(1)+" "+y.toFixed(1)}).join(" ");
-  var circles=pts.map(function(p){var x=pL+(p[0]/maxX)*(w-pL-pR),y=pT+(1-(p[1]-150)/(1000-150))*(h-pT-pB);return '<circle cx="'+x+'" cy="'+y+'" r="4" fill="#0b5cad"><title>'+p[0].toFixed(2)+' GW at £'+p[1]+'/MWh</title></circle>'}).join("");
-  $("costChart").innerHTML='<svg class="cost-svg" viewBox="0 0 '+w+' '+h+'"><line x1="'+pL+'" y1="'+(h-pB)+'" x2="'+(w-pR)+'" y2="'+(h-pB)+'" stroke="#cbd5e1"/><line x1="'+pL+'" y1="'+pT+'" x2="'+pL+'" y2="'+(h-pB)+'" stroke="#cbd5e1"/><path d="'+path+'" fill="none" stroke="#0b5cad" stroke-width="3"/>'+circles+'<text x="'+(w/2)+'" y="'+(h-5)+'" text-anchor="middle" font-size="11" fill="#64748b">Cumulative flexibility (GW)</text><text x="12" y="'+(h/2)+'" transform="rotate(-90 12 '+(h/2)+')" text-anchor="middle" font-size="11" fill="#64748b">£/MWh</text><text x="'+pL+'" y="'+(h-8)+'" font-size="9" fill="#64748b">0</text><text x="'+(w-pR-20)+'" y="'+(h-8)+'" font-size="9" fill="#64748b">'+maxX.toFixed(1)+'</text></svg>';
+  thresholds.forEach(function(c){var v=0;rows.forEach(function(r){if(num(r['Central Hurdle Cost (£/MWh)'])<=c)v+=num(r['Technical Flex MW'])});pts.push([v/1000,c])});
+  var w=620,h=250,pL=58,pR=18,pT=12,pB=42,maxX=Math.max(4.5,Math.ceil((pts[pts.length-1][0]+0.25)*2)/2),yMax=1000;
+  function X(x){return pL+(x/maxX)*(w-pL-pR)} function Y(y){return pT+(1-y/yMax)*(h-pT-pB)}
+  var path='M '+X(0).toFixed(1)+' '+Y(150).toFixed(1);
+  pts.forEach(function(p){path+=' H '+X(p[0]).toFixed(1)+' V '+Y(p[1]).toFixed(1)});
+  var grid='';
+  for(var y=0;y<=1000;y+=100){grid+='<line x1="'+pL+'" y1="'+Y(y)+'" x2="'+(w-pR)+'" y2="'+Y(y)+'" stroke="#e5e7eb"/><text x="'+(pL-8)+'" y="'+(Y(y)+4)+'" text-anchor="end" font-size="10" fill="#64748b">'+y+'</text>'}
+  for(var x=0;x<=maxX+0.001;x+=0.5){grid+='<line x1="'+X(x)+'" y1="'+pT+'" x2="'+X(x)+'" y2="'+(h-pB)+'" stroke="#f1f5f9"/><text x="'+X(x)+'" y="'+(h-pB+18)+'" text-anchor="middle" font-size="10" fill="#64748b">'+x.toFixed(1)+'</text>'}
+  var circles=pts.map(function(p){return '<circle cx="'+X(p[0])+'" cy="'+Y(p[1])+'" r="4" fill="#0b5cad"><title>'+p[0].toFixed(2)+' GW at £'+p[1]+'/MWh</title></circle>'}).join('');
+  $('costChart').innerHTML='<svg class="cost-svg" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+grid+'<line x1="'+pL+'" y1="'+(h-pB)+'" x2="'+(w-pR)+'" y2="'+(h-pB)+'" stroke="#94a3b8"/><line x1="'+pL+'" y1="'+pT+'" x2="'+pL+'" y2="'+(h-pB)+'" stroke="#94a3b8"/><path d="'+path+'" fill="none" stroke="#0b5cad" stroke-width="3"/>'+circles+'<text x="'+((pL+w-pR)/2)+'" y="'+(h-5)+'" text-anchor="middle" font-size="11" fill="#64748b">Cumulative flexibility (GW)</text><text x="15" y="'+((pT+h-pB)/2)+'" transform="rotate(-90 15 '+((pT+h-pB)/2)+')" text-anchor="middle" font-size="11" fill="#64748b">Marginal flexibility cost (£/MWh)</text></svg>';
 }
 function detail(rows){
   var r=rows.slice().sort(function(a,b){return selectedMW(b)-selectedMW(a)}).slice(0,300);
@@ -135,42 +179,64 @@ function dnoValues(rows){
    The analytical values remain the model's DNO allocations. */
 function drawMap(rows){
   var vals=dnoValues(rows), max=1;dnoOrder.forEach(function(d){max=Math.max(max,vals[d])});
+  // Approximate geographic DNO polygons. They are deliberately simplified for a lightweight static map.
   var shapes=[
-    ["SSE",330,30,80,95],["NPG (Northern Electric)",400,100,70,65],["NPG (Yorkshire Electric)",390,170,75,70],
-    ["ENWL",330,190,60,70],["SPEN (SP Distribution)",270,125,75,60],["SPEN (SP MANWEB)",285,205,75,60],
-    ["WPD (North)",220,245,70,50],["WPD (East Midlands)",355,255,80,60],["WPD (Midlands)",265,270,85,70],
-    ["WPD (South Wales)",220,355,85,55],["WPD (South West)",300,350,80,75],["UKPN (East)",440,300,100,70],
-    ["UKPN (London)",430,375,55,45],["UKPN (South)",370,420,100,55],["SSE (Southern)",500,390,80,55]
+    ['SSE','-6.7,58.9 -4.7,59.0 -3.6,58.0 -3.9,56.7 -4.8,56.0 -5.8,56.6 -6.7,58.9'],
+    ['SPEN (SP Distribution)','-5.7,56.8 -4.1,57.0 -3.5,56.1 -3.4,54.9 -4.3,54.2 -5.3,54.8 -5.7,56.8'],
+    ['NPG (Northern Electric)','-3.6,55.6 -2.0,55.9 -1.0,55.1 -1.2,53.9 -2.0,53.5 -3.0,54.2 -3.6,55.6'],
+    ['ENWL','-3.4,54.6 -2.2,54.9 -1.8,54.1 -2.0,53.2 -2.9,52.9 -3.5,53.5 -3.4,54.6'],
+    ['NPG (Yorkshire Electric)','-2.0,54.1 -0.8,54.1 -0.3,53.2 -0.8,52.6 -1.9,52.5 -2.5,53.2 -2.0,54.1'],
+    ['SPEN (SP MANWEB)','-3.5,53.7 -2.5,53.5 -2.1,52.8 -2.7,52.2 -3.8,52.7 -4.0,53.3 -3.5,53.7'],
+    ['WPD (Midlands)','-2.8,52.8 -1.6,53.0 -0.8,52.5 -1.0,51.6 -1.9,51.4 -2.8,52.0 -2.8,52.8'],
+    ['WPD (East Midlands)','-1.5,53.2 -0.3,53.0 0.4,52.4 0.2,51.6 -0.7,51.4 -1.1,52.1 -1.5,53.2'],
+    ['WPD (South Wales)','-4.8,52.2 -3.6,52.5 -2.8,51.9 -2.9,51.1 -3.9,50.9 -5.0,51.5 -4.8,52.2'],
+    ['WPD (South West)','-5.6,51.6 -4.7,51.7 -3.8,51.0 -2.8,50.6 -3.4,49.9 -4.7,50.1 -5.7,50.8 -5.6,51.6'],
+    ['UKPN (East)','0.0,53.0 1.6,52.7 1.7,51.7 1.2,51.0 0.2,50.9 -0.3,51.7 0.0,53.0'],
+    ['UKPN (London)','-0.6,51.9 0.4,52.0 0.6,51.3 0.2,50.9 -0.7,51.1 -0.9,51.6 -0.6,51.9'],
+    ['UKPN (South)','-0.9,51.4 0.2,51.5 1.0,51.0 1.2,50.2 0.4,49.8 -0.7,50.2 -1.1,50.9 -0.9,51.4'],
+    ['SSE (Southern)','-1.6,51.0 -0.7,51.3 0.0,50.8 0.4,50.0 -0.3,49.7 -1.5,49.8 -1.6,51.0']
   ];
-  var body='<svg viewBox="0 0 600 500" role="img" aria-label="Schematic GB DNO map"><rect width="600" height="500" fill="#edf3f8"/>';
+  var minLon=-7.2,maxLon=2.0,minLat=49.5,maxLat=59.3,W=720,H=520;
+  function px(lon){return (lon-minLon)/(maxLon-minLon)*W} function py(lat){return (maxLat-lat)/(maxLat-minLat)*H}
+  var body='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Approximate GB DNO licence areas">';
+  // faint GB coastline silhouette for orientation
+  var coast='-6.2,58.7 -5.2,59.0 -4.2,58.5 -3.3,58.6 -2.5,57.8 -1.8,57.2 -2.0,56.2 -1.2,55.5 -1.4,54.6 -0.6,53.7 0.3,53.0 1.6,52.7 1.6,51.7 1.2,50.9 0.4,50.0 -0.4,49.7 -1.6,49.8 -2.8,50.2 -4.7,50.0 -5.8,50.6 -5.5,51.5 -5.1,52.0 -4.9,52.5 -4.4,53.0 -4.1,53.7 -4.7,54.4 -5.7,55.1 -6.2,56.0 -6.0,57.0 -6.8,58.0 -6.2,58.7';
+  body+='<polygon points="'+coast.split(' ').map(function(p){var a=p.split(',');return px(+a[0])+','+py(+a[1])}).join(' ')+'" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>';
   shapes.forEach(function(s){
-    var name=s[0],v=vals[name]||0,t=v/max,fill="rgb("+Math.round(245-150*t)+","+Math.round(249-80*t)+","+Math.round(252-20*t)+")";
-    body+='<rect class="dno-shape '+(selectedDno===name?"selected":"")+'" data-dno="'+esc(name)+'" x="'+s[1]+'" y="'+s[2]+'" width="'+s[3]+'" height="'+s[4]+'" rx="7" fill="'+fill+'"/>';
-    body+='<text class="map-label" x="'+(s[1]+s[3]/2)+'" y="'+(s[2]+s[4]/2)+'">'+esc(name.replace(" (","\\n("))+'</text>';
+    var name=s[0],v=vals[name]||0,t=v/max,fill='rgb('+Math.round(245-150*t)+','+Math.round(249-80*t)+','+Math.round(252-20*t)+')';
+    var pts=s[1].split(' ').map(function(p){var a=p.split(',');return px(+a[0])+','+py(+a[1])}).join(' ');
+    body+='<polygon class="dno-shape '+(selectedDno===name?'selected':'')+'" data-dno="'+esc(name)+'" points="'+pts+'" fill="'+fill+'"/>';
+    var coords=s[1].split(' ').map(function(p){var a=p.split(',');return [+a[0],+a[1]]}); var lon=coords.reduce(function(a,p){return a+p[0]},0)/coords.length,lat=coords.reduce(function(a,p){return a+p[1]},0)/coords.length;
+    var short=name.replace('NPG (Northern Electric)','NPG North').replace('NPG (Yorkshire Electric)','NPG York').replace('SPEN (SP Distribution)','SPEN Dist').replace('SPEN (SP MANWEB)','SPEN Manweb').replace('WPD (East Midlands)','WPD East').replace('WPD (South Wales)','WPD Wales').replace('WPD (South West)','WPD SW').replace('WPD (Midlands)','WPD Mid').replace('UKPN (East)','UKPN East').replace('UKPN (London)','UKPN London').replace('UKPN (South)','UKPN South').replace('SSE (Southern)','SSE South');
+    body+='<text class="map-label" x="'+px(lon)+'" y="'+py(lat)+'">'+esc(short)+'</text>';
   });
   body+='</svg><div class="legend"><b>Selected flexibility</b><br><div class="legend-row"><span class="sw" style="background:#f5f9fc"></span>low</div><div class="legend-row"><span class="sw" style="background:#b5cee6"></span>high</div></div>';
-  $("mapWrap").innerHTML=body;
-  Array.prototype.forEach.call(document.querySelectorAll(".dno-shape"),function(el){el.addEventListener("click",function(){var d=el.getAttribute("data-dno");selectedDno=selectedDno===d?null:d;render()})});
+  $('mapWrap').innerHTML=body;
+  Array.prototype.forEach.call(document.querySelectorAll('.dno-shape'),function(el){el.addEventListener('click',function(){var d=el.getAttribute('data-dno');selectedDno=selectedDno===d?null:d;render()})});
 }
 function render(){
   var rows=filtered();cards(rows);bars("dnoChart",agg(rows,"DNO"),"");bars("archChart",agg(rows,"Archetype"),"light");bars("endChart",agg(rows,"End-use"),"teal");costCurve(rows);detail(rows);drawMap(rows);saveState();
 }
 function saveState(){
-  var q=new URLSearchParams();if($("sector").value!=="All")q.set("sector",$("sector").value);if($("archetype").value!=="All")q.set("archetype",$("archetype").value);if($("enduse").value!=="All")q.set("enduse",$("enduse").value);q.set("potential",$("potential").value);q.set("cost",$("cost").value);if(selectedDno)q.set("dno",selectedDno);history.replaceState(null,"","#"+q.toString())
+  var q=new URLSearchParams();if($("sectorValue").value!=="All")q.set("sector",$("sectorValue").value);if($("archetypeValue").value!=="All")q.set("archetype",$("archetypeValue").value);if($("enduseValue").value!=="All")q.set("enduse",$("enduseValue").value);q.set("potential",$("potentialValue").value);q.set("cost",$("cost").value);if(selectedDno)q.set("dno",selectedDno);history.replaceState(null,"","#"+q.toString())
 }
 function restore(){
-  var q=new URLSearchParams(location.hash.slice(1));if(q.get("sector"))$("sector").value=q.get("sector");populate();if(q.get("archetype"))$("archetype").value=q.get("archetype");populateEnd();if(q.get("enduse"))$("enduse").value=q.get("enduse");$("potential").value=q.get("potential")||"Economic";$("cost").value=q.get("cost")||500;$("costValue").textContent="£"+$("cost").value+"/MWh";selectedDno=q.get("dno")||null
+  var q=new URLSearchParams(location.hash.slice(1));
+  $('sectorValue').value=q.get('sector')||'All';
+  $('archetypeValue').value=q.get('archetype')||'All';
+  $('enduseValue').value=q.get('enduse')||'All';
+  $('potentialValue').value=q.get('potential')||'Economic';
+  $('cost').value=q.get('cost')||500;
+  $('costValue').textContent='£'+$('cost').value+'/MWh';
+  selectedDno=q.get('dno')||null;
+  populate();
 }
 function init(){
-  fetch("data/data.json").then(function(r){if(!r.ok)throw Error("Data file returned "+r.status);return r.json()}).then(function(p){
-    DATA=p.rows||[];if(!DATA.length)throw Error("No dashboard rows were found.");restore();render();
-    $("sector").addEventListener("change",function(){populate();selectedDno=null;render()});
-    $("archetype").addEventListener("change",function(){populateEnd();selectedDno=null;render()});
-    $("enduse").addEventListener("change",function(){selectedDno=null;render()});
-    $("potential").addEventListener("change",render);
-    $("cost").addEventListener("input",function(){$("costValue").textContent="£"+$("cost").value+"/MWh";render()});
-    $("reset").addEventListener("click",function(){$("sector").value="All";populate();$("archetype").value="All";populateEnd();$("enduse").value="All";$("potential").value="Economic";$("cost").value=500;$("costValue").textContent="£500/MWh";selectedDno=null;render()});
-  }).catch(function(e){$("error").style.display="block";$("error").textContent="Dashboard failed to load its local data: "+e.message+". Make sure index.html and the data folder are both in the repository root.";});
+  fetch('data/data.json').then(function(r){if(!r.ok)throw Error('Data file returned '+r.status);return r.json()}).then(function(p){
+    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();render();
+    $('cost').addEventListener('input',function(){$('costValue').textContent='£'+$('cost').value+'/MWh';render()});
+    $('reset').addEventListener('click',function(){$('sectorValue').value='All';$('archetypeValue').value='All';$('enduseValue').value='All';$('potentialValue').value='Economic';$('cost').value=500;$('costValue').textContent='£500/MWh';selectedDno=null;populate();render()});
+  }).catch(function(e){$('error').style.display='block';$('error').textContent='Dashboard failed to load its local data: '+e.message+'. Make sure index.html and the data folder are both in the repository root.';});
 }
 init();
 })();

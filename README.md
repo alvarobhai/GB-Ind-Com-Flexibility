@@ -45,3 +45,7 @@ No achievable potential.
 The current map is a **schematic interactive DNO-area representation** designed to make the dashboard robust on GitHub Pages. The analytical DNO values are the model's DNO allocations.
 
 For the next visual iteration, replace the schematic with the official NESO DNO polygon GeoJSON after confirming the field-name and projection handling.
+
+
+### Map note
+The dashboard uses simplified geographic DNO area shapes for the static client-side map. The authoritative NESO DNO licence-area dataset is the source reference for geography; NESO notes that licence boundaries are approximate and can change over time.
