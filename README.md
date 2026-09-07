@@ -59,3 +59,10 @@ The dashboard uses a WGS84 GeoJSON snapshot of GB DNO licence-area boundaries. T
 - Filter behaviour and independent Sector/Segment/End-use dimensions are preserved.
 - FES scenario/year functionality remains the basis for projected demand; FES does not determine flexibility capacity.
 - Intended geography architecture: GB → DNO → GSP.
+
+
+## V7 update
+- Removed all explicit “All” options from Sector, Segment and End-use menus.
+- Sector, Segment and End-use are independent multi-select dimensions; all items are selected by default.
+- Replaced the schematic DNO polygons with the authoritative NESO 2024 DNO licence-area GeoJSON loaded from the NESO data portal.
+- Sector selection does not change the Segment or End-use lists; it only filters the results.
