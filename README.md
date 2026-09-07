@@ -73,3 +73,10 @@ The dashboard uses a WGS84 GeoJSON snapshot of GB DNO licence-area boundaries. T
 - All DNO regions remain visible; selected regions are highlighted and unselected regions fade rather than disappearing.
 - Multiple DNO regions can be selected simultaneously.
 - Sector/Segment/End-use selection controls now use a single square indicator; visual state updates immediately on deselection.
+
+
+## V10 update
+- Fixed Technical/Economic selection visual state so the selected square updates immediately.
+- Removed the inner-box visual treatment so each selection uses one square indicator only.
+- Replaced the failing direct NESO GeoJSON fetch with the NESO-hosted ArcGIS feature service, requesting WGS84 GeoJSON for the browser.
+- DNO map uses all available NESO DNO features, with unselected regions retained and faded during multi-region selection.
