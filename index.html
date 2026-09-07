@@ -270,121 +270,89 @@ body{background:var(--white)!important;color:var(--ink)!important;}
 </style>
 
 
-<style id="v15-structure">
+<style id="v15-corrected">
 :root{
-  --ind-bg:#EAF4FA;
-  --ind-accent:#75B6D6;
-  --com-bg:#EAF7EF;
-  --com-accent:#76C69A;
-  --flex-low:#EEE9F8;
-  --flex-mid:#C8B9E3;
-  --flex-high:#9278C7;
-  --ink:#18202A;
-  --muted:#68727D;
-  --line:#DCE2E7;
-  --white:#FFFFFF;
+ --ind-bg:#EAF4FA;--ind-accent:#75B6D6;
+ --com-bg:#EAF7EF;--com-accent:#76C69A;
+ --flex-low:#F3EFFA;--flex-mid:#CFC2E6;--flex-high:#9278C7;
+ --ink:#17212B;--muted:#6B7680;--line:#DCE3E8;
 }
-
-/* Fixed application header */
-body{padding-top:0!important;}
-.v15-fixed-header{
-  position:fixed;
-  top:0;left:0;right:0;
-  z-index:5000;
-  background:rgba(255,255,255,.98);
-  border-bottom:1px solid var(--line);
-  box-shadow:0 2px 12px rgba(25,40,55,.06);
-  font-family:inherit;
+body{background:#fff!important;color:var(--ink)!important;padding-top:91px!important;}
+.app-header{
+ position:fixed!important;top:0;left:0;right:0;z-index:9999;
+ background:rgba(255,255,255,.98)!important;color:var(--ink)!important;
+ border-bottom:1px solid var(--line)!important;
+ box-shadow:0 2px 14px rgba(30,45,60,.07)!important;
 }
-.v15-header-main{
-  max-width:1500px;margin:0 auto;
-  padding:10px 22px 8px;
-  display:flex;align-items:center;gap:24px;
+.app-header-top{height:52px;display:flex;align-items:center;gap:28px;padding:0 24px;max-width:1500px;margin:auto;}
+.brand{font-size:15px;font-weight:600;letter-spacing:.01em;white-space:nowrap;}
+.header-kpis{display:flex;align-items:center;gap:25px;min-width:0;}
+.header-kpi{display:flex;align-items:baseline;gap:5px;white-space:nowrap;}
+.header-kpi span{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+.header-kpi strong{font-size:17px;font-weight:600;color:#2A3440;}
+.header-kpi em{font-size:9px;font-style:normal;color:var(--muted);}
+.header-kpi.ind-kpi strong{color:#4E8FB1}.header-kpi.com-kpi strong{color:#4F9D77}
+.header-controls{height:38px;border-top:1px solid #EEF1F3;display:flex;align-items:center;gap:15px;padding:0 24px;max-width:1500px;margin:auto;overflow-x:auto;}
+.header-control{display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.header-control label{font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+.header-control select{height:25px;padding:2px 24px 2px 7px;border:1px solid #CBD5DC;border-radius:4px;background:#fff;color:var(--ink);font-size:10px;}
+.year-choices{display:flex;gap:2px;}
+.year-choice{border:1px solid transparent;background:#fff;color:#65717B;font-size:10px;padding:4px 7px;border-radius:4px;cursor:pointer;}
+.year-choice.active{background:#F3EFFA;border-color:#B9A8D5;color:#624C8A;}
+/* Floating side filter panel */
+aside{
+ position:sticky!important;top:105px!important;align-self:start;
+ max-height:calc(100vh - 120px)!important;overflow-y:auto!important;
+ background:rgba(255,255,255,.97)!important;
+ box-shadow:0 8px 28px rgba(30,45,60,.10)!important;
+ border:1px solid var(--line)!important;
+ scrollbar-width:thin;
 }
-.v15-title{
-  font-size:15px;font-weight:600;letter-spacing:.02em;
-  white-space:nowrap;color:var(--ink);
-}
-.v15-kpis{
-  display:flex;align-items:center;gap:22px;flex:1;
-}
-.v15-kpi{display:flex;align-items:baseline;gap:7px;white-space:nowrap;}
-.v15-kpi .label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
-.v15-kpi .value{font-size:18px;font-weight:600;color:var(--ink);}
-.v15-kpi.ind .value{color:#4E8FB1;}
-.v15-kpi.com .value{color:#4F9D77;}
-.v15-kpi.flex .value{color:#795EAA;}
-.v15-controls{
-  max-width:1500px;margin:0 auto;
-  padding:7px 22px 9px;
-  display:flex;align-items:center;gap:10px;
-  border-top:1px solid #EEF1F3;
-  overflow-x:auto;
-}
-.v15-control{
-  display:flex;align-items:center;gap:6px;
-  white-space:nowrap;
-  font-size:11px;color:var(--muted);
-}
-.v15-control select{
-  font:inherit;color:var(--ink);
-  border:1px solid #CBD3D9;border-radius:4px;
-  background:#fff;padding:5px 25px 5px 8px;
-}
-.v15-timeframe{
-  display:flex;align-items:center;gap:5px;
-  margin-left:4px;
-}
-.v15-year{
-  border:1px solid transparent;background:#fff;
-  border-radius:4px;padding:5px 7px;
-  font:inherit;font-size:11px;color:#56616B;
-  cursor:pointer;
-}
-.v15-year.active{border-color:#A99AC7;background:#F5F1FA;color:#5E4789;}
-.v15-spacer{flex:1}
-
-/* Give page content clearance for the fixed header without changing the
-   existing dashboard's internal layout */
-body > *:first-child{}
-
-/* Floating-panel legend */
-.v15-panel-legend{
-  display:flex;gap:12px;align-items:center;
-  padding:7px 0 8px;
-  margin-bottom:7px;
-  border-bottom:1px solid #EEF1F3;
-  font-size:10px;color:#59646E;
-}
-.v15-legend-item{display:flex;align-items:center;gap:5px;white-space:nowrap;}
-.v15-swatch{width:10px;height:10px;border-radius:2px;display:inline-block;}
-.v15-swatch.ind{background:var(--ind-accent);}
-.v15-swatch.com{background:var(--com-accent);}
-
-/* Explicit chart colours */
-.v15-chart-industrial{--chart-colour:var(--ind-accent);}
-.v15-chart-commercial{--chart-colour:var(--com-accent);}
-.v15-chart-industrial .bar,.v15-chart-industrial .series{fill:var(--ind-accent)!important;background:var(--ind-accent)!important;}
-.v15-chart-commercial .bar,.v15-chart-commercial .series{fill:var(--com-accent)!important;background:var(--com-accent)!important;}
-
-/* Preserve the no-bolding/no-highlight selection behaviour */
-.optionBox,.option,.filter-option,
-.optionBox.active,.option.active,.filter-option.active,
-.optionBox.selected,.option.selected,.filter-option.selected{
-  font-weight:400!important;
-  color:#26313A!important;
-  background:transparent!important;
-}
-.optionBox span,.option span,.filter-option span{
-  font-weight:400!important;color:#26313A!important;background:transparent!important;
-}
+aside > label{font-size:10px!important;font-weight:500!important;color:#59646E!important;letter-spacing:.03em;}
+/* legend inside floating panel */
+.v15-sector-legend{display:flex;gap:12px;align-items:center;padding:7px 0 8px;margin-bottom:8px;border-bottom:1px solid #EEF1F3;font-size:9px;color:#65717B;}
+.v15-sector-legend span{display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.v15-sector-legend i{width:9px;height:9px;border-radius:2px;display:inline-block;}
+.v15-sector-legend .ind i{background:var(--ind-accent)}.v15-sector-legend .com i{background:var(--com-accent)}
+/* Filter options: never bold/highlight text; checkmark only */
+.filter-option{font-weight:400!important;color:#26313A!important;background:transparent!important;border-radius:3px!important;}
+.filter-option.active{font-weight:400!important;color:#26313A!important;background:transparent!important;}
+.filter-option::before{content:""!important;width:11px!important;height:11px!important;background:#fff!important;border:1px solid #AAB4BC!important;border-radius:2px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 11px!important;box-sizing:border-box!important;}
+.filter-option.active::before{content:"✓"!important;color:#26313A!important;border-color:#77838D!important;font-size:9px!important;font-weight:700!important;}
+/* Sector/segment/end-use colour cue in charts */
+.bar-fill.ind{background:var(--ind-accent)!important;}
+.bar-fill.com{background:var(--com-accent)!important;}
+.bar-fill.light{background:var(--ind-accent)!important}.bar-fill.teal{background:var(--com-accent)!important}
+/* map = third colour */
+.map-wrap{background:#F6F5F9!important;}
+.dno-shape{stroke:#fff!important;}.dno-shape.selected{stroke:#594A78!important;stroke-width:2.8!important;}
+/* Map controls */
+.v15-map-legend{position:absolute;right:14px;bottom:14px;background:rgba(255,255,255,.95);border:1px solid var(--line);padding:8px 10px;border-radius:4px;font-size:9px;box-shadow:0 2px 8px rgba(30,45,60,.08);z-index:50;}
+.v15-gradient{width:105px;height:7px;border-radius:5px;background:linear-gradient(90deg,var(--flex-low),var(--flex-mid),var(--flex-high));}
+@media(max-width:1000px){body{padding-top:112px!important}.app-header-top{height:auto;min-height:56px;flex-wrap:wrap;padding:8px 14px}.header-controls{padding:0 14px;overflow-x:auto}.header-kpis{gap:12px;overflow-x:auto}}
 </style>
-
 </head>
 <body>
-<header><h1>GB Non-Domestic Flexibility Explorer</h1><p>Consumer-led flexibility potential by DNO area, sector, segment and end-use</p></header>
+<header id="appHeader" class="app-header">
+  <div class="app-header-top">
+    <div class="brand">GB Non-Domestic Flexibility Explorer</div>
+    <div class="header-kpis">
+      <div class="header-kpi"><span>Total selected flex</span><strong id="total">—</strong><em>GW</em></div>
+      <div class="header-kpi ind-kpi"><span>Industrial flex</span><strong id="ind">—</strong><em>GW</em></div>
+      <div class="header-kpi com-kpi"><span>Commercial flex</span><strong id="com">—</strong><em>GW</em></div>
+      <div class="header-kpi"><span>Selected geography</span><strong id="dno">GB</strong></div>
+    </div>
+  </div>
+  <div class="header-controls">
+    <div class="header-control"><label>Geography</label><select id="geoChoice"><option value="DNO">DNO Region</option><option value="GSP">GSP</option></select></div>
+    <div class="header-control"><label>Potential</label><select id="potentialChoice"><option value="Technical">Technical</option><option value="Economic">Economic</option></select></div>
+    <div class="header-control"><label>Scenario</label><select id="scenarioChoice"><option>FES 2025</option></select></div>
+    <div class="header-control timeframe"><label>Timeframe</label><div id="yearChoices" class="year-choices"><button type="button" data-year="2024" class="year-choice active">2024</button><button type="button" data-year="2030" class="year-choice">2030</button><button type="button" data-year="2035" class="year-choice">2035</button><button type="button" data-year="2040" class="year-choice">2040</button><button type="button" data-year="2045" class="year-choice">2045</button><button type="button" data-year="2050" class="year-choice">2050</button></div></div>
+  </div>
+</header>
 <div class="layout">
 <aside>
+<div class="v15-sector-legend"><span class="ind"><i></i>Industrial</span><span class="com"><i></i>Commercial</span></div>
 <label>Sector</label><div id="sectorBox" class="filter-box"></div>
 <label>Segment</label><div id="segmentBox" class="filter-box"></div>
 <label>End-use</label><div id="enduseBox" class="filter-box"></div>
@@ -397,12 +365,7 @@ body > *:first-child{}
 </aside>
 <main>
 <div id="error" class="error"></div>
-<section class="cards">
-<div class="card"><div class="label">Selected flexibility</div><div class="value" id="total">—</div><div class="sub">GW</div></div>
-<div class="card"><div class="label">Industrial</div><div class="value" id="ind">—</div><div class="sub">GW</div></div>
-<div class="card"><div class="label">Commercial</div><div class="value" id="com">—</div><div class="sub">GW</div></div>
-<div class="card"><div class="label">Selected DNO</div><div class="value" id="dno">GB</div><div class="sub">click a region to focus</div></div>
-</section>
+
 <section class="grid">
 <div class="panel wide"><div class="panel-head"><span>GB DNO areas</span><span class="note">Click a region to filter</span></div>
 <div id="map"><div class="map-wrap" id="mapWrap"></div></div><div class="status" id="mapStatus">DNO areas are shown as DNO licence-area shapes; values are allocated using the CLF model's DNO shares.</div></div>
@@ -497,16 +460,17 @@ function populate(){
   optionBox('enduseBox',endItems,ends,function(v){toggleList('enduseValue',v);selectedDnos=[];populate();render();});
 }
 function bars(id,entries,cls){
-  var top=entries.slice(0,12),max=top.length?top[0][1]:1;
+  var isDno=(id==="dnoChart"), top=entries.slice(0,12), max=top.length?top[0][1]:1;
   $(id).innerHTML=top.map(function(x){
-    var lab=x[0];
-    if(id==='archChart'||id==='endChart'){
-      var rowsForLabel=DATA.filter(function(r){return id==='archChart'?r.Archetype===x[0]:r['End-use']===x[0]});
-      if(rowsForLabel.length){ lab=(rowsForLabel[0].Sector==='Industrial'?'Ind | ':'Com | ')+x[0]; }
+    var lab=x[0], sector=null, value=x[1];
+    if(!isDno){
+      var parts=x[0].split("|"); sector=parts[0]; lab=(sector==="Industrial"?"Ind | ":"Com | ")+parts.slice(1).join("|");
     }
-    return '<div class="bar-row"><div title="'+esc(lab)+'">'+esc(lab)+'</div><div class="bar-bg"><div class="bar-fill '+cls+'" style="width:'+Math.max(0,100*x[1]/max)+'%"></div></div><div>'+Math.round(x[1]).toLocaleString()+' MW</div></div>';
+    var colour=isDno?"":(sector==="Industrial"?"ind":"com");
+    return '<div class="bar-row"><div title="'+esc(lab)+'">'+esc(lab)+'</div><div class="bar-bg"><div class="bar-fill '+colour+'" style="width:'+Math.max(0,100*value/max)+'%"></div></div><div>'+Math.round(value).toLocaleString()+' MW</div></div>';
   }).join("")||'<div style="color:#777">No flexibility in current selection.</div>';
 }
+
 function cards(rows){
   var t=0,i=0,c=0;rows.forEach(function(r){var v=selectedMW(r);t+=v;if(r.Sector==="Industrial")i+=v;else c+=v});
   $("total").textContent=(t/1000).toFixed(2);$("ind").textContent=(i/1000).toFixed(2);$("com").textContent=(c/1000).toFixed(2);$("dno").textContent=selectedDnos.length?selectedDnos.length+" DNO"+(selectedDnos.length===1?"":"s"):"GB";
@@ -588,7 +552,7 @@ function drawMap(rows){
 }
 function loadDnoGeo(){ render(); }
 function render(){
-  var rows=filtered();cards(rows);bars("dnoChart",agg(rows,"DNO"),"");bars("archChart",agg(rows,"Archetype"),"light");bars("endChart",agg(rows,"End-use"),"teal");costCurve(rows);detail(rows);drawMap(rows);saveState();
+  var rows=filtered();cards(rows);bars("dnoChart",agg(rows,"DNO"),"");bars("archChart",agg(rows.map(function(r){var q=Object.assign({},r);q["SegmentKey"]=r.Sector+"|"+r.Archetype;return q}),"SegmentKey"),"");bars("endChart",agg(rows.map(function(r){var q=Object.assign({},r);q["EndUseKey"]=r.Sector+"|"+r["End-use"];return q}),"EndUseKey"),"");costCurve(rows);detail(rows);drawMap(rows);saveState();
 }
 function saveState(){
   var q=new URLSearchParams(),s=parseList('sectorValue'),a=parseList('segmentValue'),e=parseList('enduseValue');
@@ -721,81 +685,38 @@ init();
 </script>
 
 
-<script id="v15-ui">
+<script id="v15-functional">
 (function(){
-  "use strict";
-
-  function makeHeader(){
-    if(document.querySelector('.v15-fixed-header')) return;
-
-    var h=document.createElement('div');
-    h.className='v15-fixed-header';
-    h.innerHTML=
-      '<div class="v15-header-main">'+
-        '<div class="v15-title">GB NON-DOMESTIC FLEXIBILITY EXPLORER</div>'+
-        '<div class="v15-kpis">'+
-          '<div class="v15-kpi flex"><span class="label">Total selected flex</span><span class="value" id="v15-total">—</span></div>'+
-          '<div class="v15-kpi ind"><span class="label">Industrial</span><span class="value" id="v15-ind">—</span></div>'+
-          '<div class="v15-kpi com"><span class="label">Commercial</span><span class="value" id="v15-com">—</span></div>'+
-        '</div>'+
-      '</div>'+
-      '<div class="v15-controls">'+
-        '<div class="v15-control">Geography <select id="v15-geo"><option>DNO Region</option><option>GSP</option></select></div>'+
-        '<div class="v15-control">Potential <select id="v15-potential"><option>Technical</option><option>Economic</option></select></div>'+
-        '<div class="v15-control">Scenario <select id="v15-scenario"><option>FES 2025</option></select></div>'+
-        '<div class="v15-control">Timeframe</div>'+
-        '<div class="v15-timeframe" id="v15-years">'+
-          '<button class="v15-year active" data-year="2024">2024</button>'+
-          '<button class="v15-year" data-year="2030">2030</button>'+
-          '<button class="v15-year" data-year="2035">2035</button>'+
-          '<button class="v15-year" data-year="2040">2040</button>'+
-          '<button class="v15-year" data-year="2045">2045</button>'+
-          '<button class="v15-year" data-year="2050">2050</button>'+
-        '</div>'+
-      '</div>';
-    document.body.appendChild(h);
-
-    document.querySelectorAll('.v15-year').forEach(function(btn){
-      btn.addEventListener('click',function(){
-        document.querySelectorAll('.v15-year').forEach(function(x){x.classList.remove('active');});
-        btn.classList.add('active');
-        window.dispatchEvent(new CustomEvent('clf-timeframe-change',{detail:{year:btn.dataset.year}}));
-      });
-    });
+  function syncHeader(){
+    var p=document.getElementById('potentialValue');
+    var hp=document.getElementById('potentialChoice');
+    if(p&&hp){hp.value=p.value;}
+    var total=document.getElementById('total'),ind=document.getElementById('ind'),com=document.getElementById('com');
+    if(total && ind && com){
+      // Values are already maintained by the dashboard's cards() function.
+    }
   }
-
-  function addLegend(){
-    if(document.querySelector('.v15-panel-legend')) return;
-    var panel=document.querySelector('.filter-panel,.controls-panel,.side-panel');
-    if(!panel) return;
-    var legend=document.createElement('div');
-    legend.className='v15-panel-legend';
-    legend.innerHTML=
-      '<span class="v15-legend-item"><span class="v15-swatch ind"></span>Industrial</span>'+
-      '<span class="v15-legend-item"><span class="v15-swatch com"></span>Commercial</span>';
-    panel.insertBefore(legend,panel.firstChild);
-  }
-
-  function recolourCharts(){
-    document.querySelectorAll('[data-sector="Industry"],[data-sector="Industrial"]').forEach(function(el){
-      var c=el.closest('.chart,.chart-panel,.card,.panel');
-      if(c)c.classList.add('v15-chart-industrial');
+  var hp=document.getElementById('potentialChoice');
+  if(hp) hp.addEventListener('change',function(){
+    var p=document.getElementById('potentialValue');
+    if(p){p.value=hp.value; if(typeof populate==='function')populate(); if(typeof render==='function')render();}
+  });
+  document.querySelectorAll('.year-choice').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.year-choice').forEach(function(x){x.classList.remove('active')});
+      b.classList.add('active');
+      // Future years are intentionally UI controls until FES demand projections are connected.
+      document.dispatchEvent(new CustomEvent('clf-timeframe-change',{detail:{year:b.dataset.year}}));
     });
-    document.querySelectorAll('[data-sector="Commercial"]').forEach(function(el){
-      var c=el.closest('.chart,.chart-panel,.card,.panel');
-      if(c)c.classList.add('v15-chart-commercial');
-    });
-  }
-
-  makeHeader();
-  addLegend();
-  recolourCharts();
-
-  new MutationObserver(function(){
-    addLegend();
-    recolourCharts();
-  }).observe(document.body,{childList:true,subtree:true});
+  });
+  var geo=document.getElementById('geoChoice');
+  if(geo) geo.addEventListener('change',function(){
+    if(geo.value==='GSP'){
+      alert('GSP geography is reserved for the next data layer; the current dashboard uses NESO DNO geography.');
+      geo.value='DNO';
+    }
+  });
+  syncHeader();
 })();
 </script>
-
 </body></html>
