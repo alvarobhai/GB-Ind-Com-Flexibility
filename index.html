@@ -759,6 +759,10 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 .header-dropdown select{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;}
 .header-controls,.header-control{overflow:visible!important;}
 </style>
+<style id="v81-header-label-fix">
+/* V81 header terminology and DNO count styling */
+.header-kpi .dno-count{font-size:9px!important;font-weight:400!important;color:var(--muted)!important;letter-spacing:.06em!important;}
+</style>
 <style id="v79-header-decoration-fix">
 /* Remove the rotated-square decoration inherited from the generic <header> rule.
    It created the downward-facing triangle lines at the far-right of the white controls row. */
@@ -773,11 +777,11 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
       <div class="header-kpi"><span>Total selected flex</span><strong id="total">—</strong><em>GW</em></div>
       <div class="header-kpi ind-kpi"><span>Industrial flex</span><strong id="ind">—</strong><em>GW</em></div>
       <div class="header-kpi com-kpi"><span>Commercial flex</span><strong id="com">—</strong><em>GW</em></div>
-      <div class="header-kpi"><span>Selected geography</span><strong id="dno">14 DNO Areas</strong></div>
+      <div class="header-kpi"><span>Selected networks</span><strong id="dno" class="dno-count">14 DNO Areas</strong></div>
     </div>
   </div>
   <div class="header-controls">
-    <div class="header-control"><label>Geography</label><div class="header-dropdown" data-select="geoChoice"><button type="button" class="header-dropdown-btn" aria-haspopup="listbox" aria-expanded="false">DNO Region</button><div class="header-dropdown-menu" role="listbox"><button type="button" data-value="DNO" role="option">DNO Region</button><button type="button" data-value="GSP" role="option">GSP</button></div></div></div>
+    <div class="header-control"><label>Geography Unit</label><div class="header-dropdown" data-select="geoChoice"><button type="button" class="header-dropdown-btn" aria-haspopup="listbox" aria-expanded="false">DNO Area</button><div class="header-dropdown-menu" role="listbox"><button type="button" data-value="DNO" role="option">DNO Area</button><button type="button" data-value="GSP" role="option">GSP</button></div></div></div>
     <div class="header-control"><label>Potential</label><div class="header-dropdown" data-select="potentialChoice"><button type="button" class="header-dropdown-btn" aria-haspopup="listbox" aria-expanded="false">Technical</button><div class="header-dropdown-menu" role="listbox"><button type="button" data-value="Technical" role="option">Technical</button><button type="button" data-value="Economic" role="option">Economic</button></div></div></div>
     <div class="header-control timeframe"><label>Timeframe</label><div id="yearChoices" class="year-choices"><button type="button" data-year="2024" class="year-choice active">2024</button><button type="button" data-year="2030" class="year-choice disabled" disabled aria-disabled="true">2030</button><button type="button" data-year="2035" class="year-choice disabled" disabled aria-disabled="true">2035</button><button type="button" data-year="2040" class="year-choice disabled" disabled aria-disabled="true">2040</button><button type="button" data-year="2045" class="year-choice disabled" disabled aria-disabled="true">2045</button><button type="button" data-year="2050" class="year-choice disabled" disabled aria-disabled="true">2050</button></div></div>
   </div>
@@ -1442,7 +1446,7 @@ function drawMap(rows){
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');controls[0].onclick=function(){mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();};controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.50);applyTransform();};controls[2].onclick=function(){centerGB();applyTransform();};
   bindMapGestures(svg,applyTransform);
 }
-function gspMapProjection(lon,lat){/* Match the native GB background/DNO SVG coordinate system: same equirectangular-style scale used by the embedded GB context. */return[556.6+58.05*lon,6535.2-107.0*lat];}
+function gspMapProjection(lon,lat){return[140+((lon+8.5)/11.5)*528,300+((59.5-lat)/9.8)*950];}
 // GSP geometry is projected directly into the same native SVG coordinate system as the DNO map; no independent scale/offset is applied.
 function drawGspMap(rows){
   if(!gspLoaded||!GSP_DATA.length){$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">Loading NESO GSP data…</div>';return;}
@@ -1502,7 +1506,7 @@ function bindMapGestures(svg,applyTransform){
     if(!dragging)return;
     var dx=e.clientX-startX,dy=e.clientY-startY;
     if(Math.abs(dx)+Math.abs(dy)>3)moved=true;
-    mapState.tx=startTx+dx;mapState.ty=startTy+dy;applyTransform();e.preventDefault();
+    mapState.tx=startTx+dx*1.12;mapState.ty=startTy+dy*1.12;applyTransform();e.preventDefault();
   },true);
   function end(e){if(!dragging)return;dragging=false;svg.style.cursor='grab';try{svg.releasePointerCapture(e.pointerId);}catch(_){ }}
   svg.addEventListener('pointerup',end,true);svg.addEventListener('pointercancel',end,true);
@@ -1516,7 +1520,7 @@ function bindMapGestures(svg,applyTransform){
   svg.addEventListener('wheel',function(e){
     e.preventDefault();e.stopPropagation();
     var old=mapState.scale;
-    var step=e.ctrlKey?1.02:1.035; var factor=e.deltaY<0?step:(1/step);
+    var step=e.ctrlKey?1.08:1.07; var factor=e.deltaY<0?step:(1/step);
     mapState.scale=Math.max(.45,Math.min(8,old*factor));
     var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);
     mapState.tx+=mx*(1-mapState.scale/old)*.35;mapState.ty+=my*(1-mapState.scale/old)*.35;applyTransform();
@@ -1608,4 +1612,13 @@ init();
 
 <style id="v77-final">
 .header-dropdown{position:relative!important;display:inline-block!important;min-width:112px!important;z-index:30000!important;overflow:visible!important}.header-dropdown-btn{display:block!important;width:112px!important;height:30px!important;box-sizing:border-box!important;padding:5px 28px 5px 8px!important;border:1px solid #C9D3DA!important;border-radius:4px!important;background:#fff!important;color:#26313A!important;font:inherit!important;font-size:10px!important;text-align:left!important;cursor:pointer!important;pointer-events:auto!important}.header-dropdown-menu{display:none!important;position:absolute!important;left:0!important;top:calc(100% + 3px)!important;width:112px!important;min-width:112px!important;z-index:30010!important;background:#fff!important;border:1px solid #CBD5DC!important;border-radius:4px!important;box-shadow:0 5px 16px rgba(30,45,60,.14)!important;padding:3px!important}.header-dropdown.open .header-dropdown-menu{display:block!important}.header-dropdown-menu button{display:block!important;width:100%!important;box-sizing:border-box!important;border:0!important;border-radius:3px!important;background:#fff!important;color:#26313A!important;padding:7px 8px!important;text-align:left!important;font:inherit!important;font-size:11px!important;cursor:pointer!important}.header-dropdown-menu button[aria-selected="true"]{background:#EEE8F6!important;color:#26313A!important;font-weight:600!important}.header-dropdown-menu button:hover{background:#F5F2FA!important}.header-controls,.header-control,.app-header,.app-header-top{overflow:visible!important}.cost-block{pointer-events:all!important;cursor:crosshair!important}.year-choice.disabled,.year-choice:disabled{background:#F1F3F4!important;color:#A1A8AE!important;border-color:#E2E5E7!important;opacity:1!important;cursor:not-allowed!important}
+</style>
+
+<style id="v80-header-alignment">
+.header-controls{align-items:center!important;}
+.header-control{display:flex!important;align-items:center!important;height:30px!important;gap:7px!important;margin:0!important;}
+.header-control label{display:flex!important;align-items:center!important;height:30px!important;margin:0!important;line-height:30px!important;}
+.header-dropdown{display:block!important;height:30px!important;margin:0!important;vertical-align:middle!important;}
+.header-dropdown-btn{height:30px!important;margin:0!important;line-height:18px!important;vertical-align:middle!important;}
+.header-control.timeframe{height:30px!important;align-items:center!important;}
 </style>
