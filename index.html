@@ -580,6 +580,48 @@ aside label{font-weight:750!important;font-size:11px!important;color:#25323B!imp
 .map-popup.v19-hover-popup{right:auto!important;top:auto!important;min-width:220px!important;}
 </style>
 
+
+<style id="v20-final">
+.brand{font-size:21.25px!important;}
+.brand-description{font-size:8.25px!important;line-height:1.35!important;max-width:680px!important;}
+.app-header-top{height:116px!important;grid-template-rows:auto auto!important;padding-bottom:12px!important;}
+.header-kpi span{font-size:13.3px!important;}
+.header-kpi strong,.header-kpi em{font-size:18px!important;}
+.header-kpis{padding-top:5px!important;}
+.header-controls{height:48px!important;}
+aside{height:462px!important;max-height:462px!important;}
+#map{height:420px!important;}
+</style>
+
+<style id="v20-ne-css">
+.v20-country{fill:#E9ECEF;stroke:#9CA7AE;stroke-width:1.4px;vector-effect:non-scaling-stroke;}
+.v20-ne-labels text{font-size:12px;font-weight:600;fill:#68747C;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round;}
+</style>
+<style id="v20-map-hover-fix">
+#mapWrap{position:relative!important;}
+#mapPopup{
+  position:absolute!important;
+  z-index:999!important;
+  pointer-events:none!important;
+  background:#fff!important;
+  border:1px solid #CCD5DA!important;
+  border-radius:6px!important;
+  box-shadow:0 8px 24px rgba(20,40,55,.18)!important;
+  padding:9px 11px!important;
+  min-width:220px!important;
+  font-size:10px!important;
+  line-height:1.5!important;
+  color:#34414A!important;
+}
+#mapPopup .map-popup-title{
+  font-weight:750!important;
+  font-size:11px!important;
+  color:#182A35!important;
+  margin-bottom:4px!important;
+}
+#mapPopup b{font-weight:750!important;color:#182A35!important;}
+</style>
+
 </head>
 <body>
 <header id="appHeader" class="app-header">
@@ -589,7 +631,7 @@ aside label{font-weight:750!important;font-size:11px!important;color:#25323B!imp
       <div class="header-kpi"><span>Total selected flex</span><strong id="total">—</strong><em>GW</em></div>
       <div class="header-kpi ind-kpi"><span>Industrial flex</span><strong id="ind">—</strong><em>GW</em></div>
       <div class="header-kpi com-kpi"><span>Commercial flex</span><strong id="com">—</strong><em>GW</em></div>
-      <div class="header-kpi"><span>Selected geography</span><strong id="dno">0 DNO Areas</strong></div>
+      <div class="header-kpi"><span>Selected geography</span><strong id="dno">14 DNO Areas</strong></div>
     </div>
   </div>
   <div class="header-controls">
@@ -745,7 +787,7 @@ function bars(id,entries,cls,sourceRows){
         });
         lines.sort(function(a,b){return b[1]-a[1]}).slice(0,3);
         lines=lines.slice(0,3).map(function(x){return[(x[0].split("|")[0]==="Industrial"?"Ind | ":"Com | ")+x[0].split("|").slice(1).join("|"),x[1]];});
-        showChartTooltip(e,'Key I&C Segments',lines);
+        showChartTooltip(e,key+' | Top 3 Segments',lines);
       }else{
         var parts=key.split("|"),sector=parts[0],label=parts.slice(1).join("|");
         if(id==="archChart"){
@@ -754,14 +796,14 @@ function bars(id,entries,cls,sourceRows){
             if(found)found[1]+=vv;else lines.push([k,vv]);
           });
           lines.sort(function(a,b){return b[1]-a[1]});lines=lines.slice(0,3);
-          showChartTooltip(e,'Key I&C End-Uses',lines);
+          showChartTooltip(e,key+' | Top 3 End-Uses',lines);
         }else{
           (sourceRows||[]).filter(function(r){return r.Sector===sector&&r['End-use']===label;}).forEach(function(r){
             var k=r.Archetype,vv=selectedMW(r),found=lines.find(function(x){return x[0]===k;});
             if(found)found[1]+=vv;else lines.push([k,vv]);
           });
           lines.sort(function(a,b){return b[1]-a[1]});lines=lines.slice(0,3).map(function(x){return[(sector==="Industrial"?"Ind | ":"Com | ")+x[0],x[1]];});
-          showChartTooltip(e,'Key I&C Segments',lines);
+          showChartTooltip(e,key+' | Top 3 Segments',lines);
         }
       }
     });
@@ -772,7 +814,7 @@ function bars(id,entries,cls,sourceRows){
 
 function cards(rows){
   var t=0,i=0,c=0;rows.forEach(function(r){var v=selectedMW(r);t+=v;if(r.Sector==="Industrial")i+=v;else c+=v});
-  $("total").textContent=(t/1000).toFixed(2);$("ind").textContent=(i/1000).toFixed(2);$("com").textContent=(c/1000).toFixed(2);$("dno").textContent=selectedDnos.length+" DNO Areas";
+  $("total").textContent=(t/1000).toFixed(2);$("ind").textContent=(i/1000).toFixed(2);$("com").textContent=(c/1000).toFixed(2);$("dno").textContent=(selectedDnos.length?selectedDnos.length:14)+" DNO Areas";
 }
 function costCurve(rows){
   var thresholds=[150,200,250,300,400,500,750,1000], pts=[];
@@ -884,7 +926,6 @@ function drawMap(rows){
   function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
   applyTransform();
   Array.prototype.forEach.call(document.querySelectorAll('.dno-shape'),function(el){
-    var hoverTimer=null;
     function choose(e){
       if(e && e.defaultPrevented)return;
       var n=el.getAttribute('data-dno'),i=selectedDnos.indexOf(n);
@@ -892,20 +933,35 @@ function drawMap(rows){
       render();
     }
     el.addEventListener('click',choose);
+
+    /* Hover popup: show beside the cursor, update as the cursor moves,
+       and remove immediately when the pointer leaves the DNO region. */
     el.addEventListener('mouseenter',function(e){
       var n=el.getAttribute('data-dno');
-      hoverTimer=setTimeout(function(){showRegionPopup(n,baseFiltered(),e.clientX,e.clientY);},40);
+      showRegionPopup(n,baseFiltered(),e.clientX,e.clientY);
     });
     el.addEventListener('mousemove',function(e){
-      var p=$('mapPopup');if(p)positionMapPopup(p,e.clientX,e.clientY);
+      var p=$('mapPopup');
+      if(p)positionMapPopup(p,e.clientX,e.clientY);
     });
     el.addEventListener('mouseleave',function(){
-      if(hoverTimer)clearTimeout(hoverTimer);
-      var p=$('mapPopup');if(p)p.remove();
+      var p=$('mapPopup');
+      if(p)p.remove();
     });
-    el.addEventListener('dblclick',function(e){e.preventDefault();mapState.scale=Math.min(8,mapState.scale*1.18);applyTransform();});
-    el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();choose(e);}});
+
+    el.addEventListener('dblclick',function(e){
+      e.preventDefault();
+      mapState.scale=Math.min(8,mapState.scale*1.18);
+      applyTransform();
+    });
+    el.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key===' '){
+        e.preventDefault();
+        choose(e);
+      }
+    });
   });
+
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');
   controls[0].onclick=function(){mapState.scale=Math.min(8,mapState.scale*1.18);applyTransform();};
   controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.18);applyTransform();};
@@ -918,8 +974,8 @@ function drawMap(rows){
   });
   window.addEventListener('mousemove',function(e){
     if(!drag)return;
-    mapState.tx=otx+(e.clientX-sx)*0.30;
-    mapState.ty=oty+(e.clientY-sy)*0.30;
+    mapState.tx=otx+(e.clientX-sx)*0.60;
+    mapState.ty=oty+(e.clientY-sy)*0.60;
     applyTransform();
   });
   window.addEventListener('mouseup',function(){drag=false;if(svg)svg.style.cursor='grab';});
@@ -973,6 +1029,88 @@ function init(){
   }).catch(function(e){$('error').style.display='block';$('error').textContent='Dashboard failed to load its local data: '+e.message+'. Make sure index.html and the data folder are both in the repository root.';});
 }
 init();
+})();
+</script>
+
+
+<script id="v20-natural-earth">
+(function(){
+  const NE_URL='https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson';
+  function project(lon,lat){
+    // Europe context canvas, with UK around the centre-left of the map.
+    const minLon=-15,maxLon=42,minLat=35,maxLat=72;
+    const x=220+(lon-minLon)/(maxLon-minLon)*1450;
+    const y=180+(maxLat-lat)/(maxLat-minLat)*850;
+    return [x,y];
+  }
+  function pathFromCoords(coords){
+    return coords.map(function(ring){
+      return ring.map(function(pt,i){
+        const p=project(pt[0],pt[1]);
+        return (i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1);
+      }).join(' ')+' Z';
+    }).join(' ');
+  }
+  function geometryPath(g){
+    if(!g)return '';
+    if(g.type==='Polygon')return pathFromCoords(g.coordinates);
+    if(g.type==='MultiPolygon')return g.coordinates.map(function(poly){return pathFromCoords(poly);}).join(' ');
+    return '';
+  }
+  function renderNE(svg){
+    fetch(NE_URL,{mode:'cors'}).then(r=>r.json()).then(function(fc){
+      const old=svg.querySelector('.v20-ne-layer'); if(old)old.remove();
+      const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+      g.setAttribute('class','v20-ne-layer');
+      fc.features.forEach(function(f){
+        const name=f.properties && (f.properties.NAME || f.properties.ADMIN || f.properties.GEOUNIT);
+        if(!name || name==='Antarctica')return;
+        const path=geometryPath(f.geometry);
+        if(!path)return;
+        const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+        p.setAttribute('d',path);
+        p.setAttribute('fill','#E9ECEF');
+        p.setAttribute('stroke','#9CA7AE');
+        p.setAttribute('stroke-width','1.4');
+        p.setAttribute('vector-effect','non-scaling-stroke');
+        p.setAttribute('class','v20-country');
+        p.setAttribute('aria-label',name);
+        g.appendChild(p);
+      });
+      // Put Europe behind DNO paths/labels.
+      svg.insertBefore(g,svg.firstChild);
+      // Country labels for the main European countries.
+      const labels={
+        'United Kingdom':[-2,54.5],'Ireland':[-8,53],'France':[2.5,46.5],
+        'Spain':[-3.5,40.2],'Portugal':[-8,39.6],'Belgium':[4.6,50.8],
+        'Netherlands':[5.4,52.2],'Germany':[10.2,51.2],'Denmark':[10,56.1],
+        'Norway':[10,62.2],'Sweden':[15.5,62.5],'Finland':[26,64],
+        'Poland':[19,52],'Czechia':[15.2,49.8],'Austria':[14.2,47.6],
+        'Switzerland':[8.2,46.8],'Italy':[12,42.8],'Hungary':[19.3,47.1],
+        'Romania':[25,46],'Greece':[22.5,39.5],'Bulgaria':[25.2,42.7],
+        'Ukraine':[31,49.2],'Belarus':[28,54.5],'Lithuania':[24,55.2],
+        'Latvia':[24.6,57],'Estonia':[25.8,58.6],'Turkey':[34,40.8]
+      };
+      const lg=document.createElementNS('http://www.w3.org/2000/svg','g');
+      lg.setAttribute('class','v20-ne-labels');
+      Object.keys(labels).forEach(function(n){
+        const p=project(labels[n][0],labels[n][1]);
+        const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+        t.setAttribute('x',p[0]);t.setAttribute('y',p[1]);
+        t.setAttribute('text-anchor','middle');t.textContent=n;
+        lg.appendChild(t);
+      });
+      svg.appendChild(lg);
+    }).catch(function(){
+      // Keep the embedded fallback Europe layer if the remote source is unavailable.
+    });
+  }
+  function watch(){
+    const svg=document.querySelector('#mapWrap svg.dno-svg');
+    if(svg && !svg.dataset.neLoaded){svg.dataset.neLoaded='1';renderNE(svg);}
+  }
+  watch();
+  new MutationObserver(watch).observe(document.body,{subtree:true,childList:true});
 })();
 </script>
 
