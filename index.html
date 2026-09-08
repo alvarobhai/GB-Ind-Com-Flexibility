@@ -718,6 +718,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 .dno-filter-box .filter-option.active::before{color:#8060B0!important;border-color:#8060B0!important;}
 .dno-filter-box .filter-option:hover{background:#F7F3FB!important;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
 <header id="appHeader" class="app-header">
@@ -1058,6 +1059,54 @@ function loadGspWeights(){
     });
   });
 }
+function loadGspShapes(){
+  /* Load the latest NESO GSP Regions package. The 2026-02-09 release contains
+     GeoJSON in both EPSG:4326 and EPSG:27700. We use the WGS84 GeoJSON so it
+     can be projected directly into the existing dashboard SVG. */
+  var zipUrl='https://api.neso.energy/dataset/2810092e-d4b2-472f-b955-d8bea01f9ec0/resource/5dfab3dd-f192-40ab-b97f-b365a594293c/download/gsp_regions_20260209.zip';
+  if(typeof JSZip==='undefined')return Promise.reject(Error('GeoJSON loader is unavailable'));
+  return fetch(zipUrl).then(function(r){if(!r.ok)throw Error('NESO GSP boundary package returned '+r.status);return r.arrayBuffer();})
+    .then(function(buf){return JSZip.loadAsync(buf);})
+    .then(function(zip){
+      var names=Object.keys(zip.files).filter(function(n){return /\.geojson$/i.test(n)&&!zip.files[n].dir;});
+      var preferred=names.find(function(n){return /4326|wgs.?84/i.test(n);})||names[0];
+      if(!preferred)throw Error('No GeoJSON boundary file found in NESO package');
+      return zip.files[preferred].async('string');
+    })
+    .then(function(txt){
+      var gj=JSON.parse(txt),features=(gj&&gj.features)||[],out=[];
+      function propValues(props){
+        var a=[];Object.keys(props||{}).forEach(function(k){var v=props[k];if(typeof v==='string'&&v.trim())a.push(v.trim());});return a;
+      }
+      function collectKeys(props){
+        var found=[];
+        propValues(props).forEach(function(v){
+          var bits=v.split(/[;,/|]+/).map(function(x){return x.trim();}).filter(Boolean);
+          bits.push(v);
+          bits.forEach(function(b){
+            var k=resolveFesGsp(b,'');
+            if(k&&found.indexOf(k)<0)found.push(k);
+            var n=normGsp(b);
+            if(gspDnoMap[n]&&found.indexOf(n)<0)found.push(n);
+          });
+        });
+        return found;
+      }
+      function ringPath(ring){return ring.map(function(c,i){var p=gspMapProjection(num(c[0]),num(c[1]));return (i?'L':'M')+p[0].toFixed(2)+' '+p[1].toFixed(2);}).join(' ')+' Z';}
+      function geomPath(g){
+        if(!g)return '';
+        if(g.type==='Polygon')return (g.coordinates||[]).map(ringPath).join(' ');
+        if(g.type==='MultiPolygon')return (g.coordinates||[]).map(function(poly){return (poly||[]).map(ringPath).join(' ');}).join(' ');
+        return '';
+      }
+      features.forEach(function(f){var keys=collectKeys(f.properties||{}),d=geomPath(f.geometry);if(keys.length&&d)out.push({keys:keys,path:d,props:f.properties||{}});});
+      if(!out.length)throw Error('No GSP boundaries could be matched to the NESO GSP lookup');
+      GSP_SHAPES=out;gspShapesLoaded=true;return out;
+    });
+}
+function gspShapeFlex(shape,gspFlex){return (shape.keys||[]).reduce(function(a,k){return a+(gspFlex[k]||0);},0);}
+function gspFill(v,max){if(v<=0)return '#f0f0ed';var t=Math.min(1,v/Math.max(1,max)),l=93-55*t;return 'hsl(268,55%,'+l+'%)';}
+
 function gspAgg(rows){
   var m={};
   rows.forEach(function(r){
@@ -1246,17 +1295,44 @@ function drawMap(rows){
 }
 function gspMapProjection(lon,lat){return[140+((lon+8.5)/11.5)*528,300+((59.5-lat)/9.8)*950];}
 function drawGspMap(rows){
-  if(!gspLoaded||!GSP_DATA.length){$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">Loading NESO GSP locations…</div>';return;}
-  var gspFlex={};gspAgg(rows).forEach(function(x){gspFlex[x[0]]=x[1];});var max=1;Object.keys(gspFlex).forEach(function(k){max=Math.max(max,gspFlex[k]);});
+  if(!gspLoaded||!GSP_DATA.length){$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">Loading NESO GSP data…</div>';return;}
+  var gspFlex={};gspAgg(rows).forEach(function(x){gspFlex[x[0]]=x[1];});
+  var max=1;Object.keys(gspFlex).forEach(function(k){max=Math.max(max,gspFlex[k]);});
   var visible=GSP_DATA.filter(function(g){return !selectedDnos.length||selectedDnos.indexOf(g.dno)>=0;});
-  var html='<svg class="dno-svg gsp-svg" viewBox="140 300 760 950" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GSP location map">';
-  dnoRegions.forEach(function(r){html+='<path d="'+r.path+'" fill="none" stroke="#D8DDE1" stroke-width="1" vector-effect="non-scaling-stroke" pointer-events="none"/>';});
-  visible.forEach(function(g){var p=gspMapProjection(g.lon,g.lat),v=gspFlex[g.key]||0,r=4+7*Math.sqrt(Math.max(0,v/max)),op=v>0?.85:.22;html+='<circle class="gsp-point" cx="'+p[0].toFixed(2)+'" cy="'+p[1].toFixed(2)+'" r="'+r.toFixed(2)+'" data-gsp="'+esc(g.key)+'" fill="#8060B0" fill-opacity="'+op+'" stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"><title>'+esc(g.gsp)+' — '+Math.round(v).toLocaleString()+' MW</title></circle>';});
-  html+='</svg><div class="map-legend"><b>GSP flexibility</b><div style="font-size:10px;color:#777;margin-top:5px">Circle size indicates selected flexibility. GSP locations are shown as points; NESO GSP boundaries are not embedded in this dashboard.</div></div>';
-  $('mapWrap').innerHTML=html;$('mapStatus').textContent='GSP view: NESO GSP locations with indicative DNO-to-GSP flexibility disaggregation.';var svg=$('mapWrap').querySelector('.gsp-svg');
-  function centerGB(){var rect=$('mapWrap').getBoundingClientRect();mapState.tx=Math.max(0,rect.width*.16);mapState.ty=0;mapState.scale=1.08;}function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}centerGB();applyTransform();
-  Array.prototype.forEach.call(svg.querySelectorAll('.gsp-point'),function(pt){pt.addEventListener('mouseenter',function(e){var g=pt.getAttribute('data-gsp'),v=gspFlex[g]||0;showChartTooltip(e,gspDisplayName(g),[['Selected flexibility',v]],'GSP location');});pt.addEventListener('mousemove',function(e){var p=$('chartTooltip');if(p)positionChartTooltip(p,e.clientX,e.clientY);});pt.addEventListener('mouseleave',function(){var p=$('chartTooltip');if(p)p.remove();});});
+  var visibleKeys={};visible.forEach(function(g){visibleKeys[g.key]=1;});
+  var html='<svg class="dno-svg gsp-svg" viewBox="140 300 760 950" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GSP geographic area map">';
+  dnoRegions.forEach(function(r){html+='<path d="'+r.path+'" fill="none" stroke="#bfc4c8" stroke-width="1.1" vector-effect="non-scaling-stroke" pointer-events="none"/>';});
+  if(gspShapesLoaded&&GSP_SHAPES.length){
+    GSP_SHAPES.forEach(function(shape){
+      var keys=shape.keys.filter(function(k){return visibleKeys[k];});if(!keys.length)return;
+      var v=keys.reduce(function(a,k){return a+(gspFlex[k]||0);},0);
+      var label=keys.map(gspDisplayName).join(' / ');
+      html+='<path class="gsp-area" data-gsp="'+esc(keys[0])+'" d="'+shape.path+'" fill="'+gspFill(v,max)+'" fill-opacity=".92" stroke="#ffffff" stroke-width=".7" vector-effect="non-scaling-stroke"><title>'+esc(label)+' — '+Math.round(v).toLocaleString()+' MW</title></path>';
+    });
+  } else {
+    visible.forEach(function(g){var p=gspMapProjection(g.lon,g.lat),v=gspFlex[g.key]||0,r=4+7*Math.sqrt(Math.max(0,v/max));html+='<circle class="gsp-point" cx="'+p[0].toFixed(2)+'" cy="'+p[1].toFixed(2)+'" r="'+r.toFixed(2)+'" data-gsp="'+esc(g.key)+'" fill="#8060B0" fill-opacity=".75" stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"><title>'+esc(g.gsp)+' — '+Math.round(v).toLocaleString()+' MW</title></circle>';});
+  }
+  html+='</svg><div class="map-legend"><b>GSP flexibility</b><div style="font-size:10px;color:#777;margin-top:5px">GSP feeding areas are shown using NESO geographic boundaries. Shading indicates selected flexibility.</div><div style="display:flex;align-items:center;gap:3px;margin-top:8px"><span style="font-size:9px">0</span><span style="display:inline-block;width:90px;height:8px;background:linear-gradient(90deg,#f0f0ed,hsl(268,55%,38%));border:1px solid #ddd"></span><span style="font-size:9px">'+Math.round(max).toLocaleString()+' MW</span></div></div>';
+  $('mapWrap').innerHTML=html;$('mapStatus').textContent='GSP view: NESO GSP geographic feeding areas with indicative DNO-to-GSP flexibility disaggregation.';
+  var svg=$('mapWrap').querySelector('.gsp-svg');
+  function centerGB(){var rect=$('mapWrap').getBoundingClientRect();mapState.tx=Math.max(0,rect.width*.16);mapState.ty=0;mapState.scale=1.08;}
+  function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
+  centerGB();applyTransform();
+  Array.prototype.forEach.call(svg.querySelectorAll('.gsp-area,.gsp-point'),function(pt){
+    pt.addEventListener('mouseenter',function(e){
+      var g=pt.getAttribute('data-gsp'),m={};
+      (rows||[]).forEach(function(r){(gspWeights[r.DNO]||[]).forEach(function(x){if(x.gsp===g){var v=selectedMW(r)*x.share;m[r.Sector+'|'+r.Archetype]=(m[r.Sector+'|'+r.Archetype]||0)+v;}});});
+      var keys=(pt.tagName.toLowerCase()==='path'?(GSP_SHAPES.find(function(s){return s.path===pt.getAttribute('d');})||{}).keys:[g]);
+      var total=keys.reduce(function(a,k){return a+(gspFlex[k]||0);},0),label=keys.map(gspDisplayName).join(' / ');
+      var lines=Object.keys(m).map(function(k){return[k,m[k]]}).sort(function(a,b){return b[1]-a[1]}).slice(0,3).map(function(x){var p=x[0].split('|');return[(p[0]==='Industrial'?'Ind | ':'Com | ')+p.slice(1).join('|'),x[1]];});
+      showChartTooltip(e,label,[['Selected flexibility',total]].concat(lines),'GSP area');
+    });
+    pt.addEventListener('mousemove',function(e){var p=$('chartTooltip');if(p)positionChartTooltip(p,e.clientX,e.clientY);});
+    pt.addEventListener('mouseleave',function(){var p=$('chartTooltip');if(p)p.remove();});
+  });
+  svg.addEventListener('wheel',function(e){e.preventDefault();var old=mapState.scale,factor=e.deltaY<0?1.025:.975;mapState.scale=Math.max(.45,Math.min(8,old*factor));var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);mapState.tx+=mx*(1-mapState.scale/old)*.35;mapState.ty+=my*(1-mapState.scale/old)*.35;applyTransform();},{passive:false});
 }
+
 function baseFiltered(){
   var secs=parseList('sectorValue'),segs=parseList('segmentValue'),ends=parseList('enduseValue');
   return DATA.filter(function(r){var ok=secs.indexOf(r.Sector)>=0;if(ok)ok=segs.indexOf(r.Sector+'|'+r.Archetype)>=0;if(ok)ok=ends.indexOf(r.Sector+'|'+r['End-use'])>=0;return ok;});
@@ -1283,7 +1359,7 @@ function restore(){
 }
 function init(){
   fetch('data/data.json').then(function(r){if(!r.ok)throw Error('Data file returned '+r.status);return r.json()}).then(function(p){
-    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();$('potentialChoice').value=$('potentialValue').value;render();loadDnoGeo();loadGspWeights().then(function(){render();}).catch(function(err){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">NESO GSP allocation could not be loaded. <span style="color:#a33">'+esc(err&&err.message?err.message:'Request failed')+'</span></div>';if(geoMode==='GSP')$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">NESO GSP data could not be loaded.</div>';});
+    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();$('potentialChoice').value=$('potentialValue').value;render();loadDnoGeo();loadGspWeights().then(function(){return loadGspShapes().catch(function(){gspShapesLoaded=false;return null;});}).then(function(){render();}).catch(function(err){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">NESO GSP allocation could not be loaded. <span style="color:#a33">'+esc(err&&err.message?err.message:'Request failed')+'</span></div>';if(geoMode==='GSP')$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">NESO GSP data could not be loaded.</div>';});
     $('potentialChoice').addEventListener('change',function(){ $('potentialValue').value=this.value; populate(); render(); });
     $('geoChoice').addEventListener('change',function(){ geoMode=this.value; render(); });
     $('cost').addEventListener('input',function(){$('costValue').textContent='£'+$('cost').value+'/MWh';render()});
