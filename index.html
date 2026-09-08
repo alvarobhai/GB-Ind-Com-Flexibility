@@ -1170,18 +1170,40 @@ function cards(rows){
   $("total").textContent=(t/1000).toFixed(2);$("ind").textContent=(i/1000).toFixed(2);$("com").textContent=(c/1000).toFixed(2);$("dno").textContent=(selectedDnos.length?selectedDnos.length:14)+" DNO Areas";
 }
 function costCurve(rows){
-  var thresholds=[150,200,250,300,400,500,750,1000], pts=[];
-  thresholds.forEach(function(c){var v=0;rows.forEach(function(r){if(num(r['Central Hurdle Cost (£/MWh)'])<=c)v+=num(r['Technical Flex MW'])});pts.push([v/1000,c])});
-  var w=620,h=250,pL=58,pR=18,pT=12,pB=42,maxX=Math.max(4.5,Math.ceil((pts[pts.length-1][0]+0.25)*2)/2),yMax=1000;
+  // Each block represents a unique Sector × Segment × End-use combination,
+  // aggregated across DNOs. Blocks are ordered by hurdle cost and sit on the x-axis.
+  var m={};
+  rows.forEach(function(r){
+    var mw=num(r['Technical Flex MW']);
+    if(mw<=0)return;
+    var cost=num(r['Central Hurdle Cost (£/MWh)']);
+    var key=r.Sector+'|'+r.Archetype+'|'+r['End-use'];
+    if(!m[key])m[key]={sector:r.Sector,segment:r.Archetype,enduse:r['End-use'],cost:cost,mw:0};
+    m[key].mw+=mw;
+  });
+  var blocks=Object.keys(m).map(function(k){return m[k]}).filter(function(b){return b.mw>0})
+    .sort(function(a,b){return a.cost-b.cost || b.mw-a.mw});
+  var totalGW=blocks.reduce(function(a,b){return a+b.mw},0)/1000;
+  var w=620,h=250,pL=58,pR=18,pT=12,pB=42;
+  var maxX=Math.max(4.5,Math.ceil((totalGW+0.25)*2)/2),yMax=Math.max(1000,Math.ceil(Math.max.apply(null,blocks.map(function(b){return b.cost}))/100)*100);
   function X(x){return pL+(x/maxX)*(w-pL-pR)} function Y(y){return pT+(1-y/yMax)*(h-pT-pB)}
-  var path='M '+X(0).toFixed(1)+' '+Y(150).toFixed(1);
-  pts.forEach(function(p){path+=' H '+X(p[0]).toFixed(1)+' V '+Y(p[1]).toFixed(1)});
   var grid='';
-  for(var y=0;y<=1000;y+=100){grid+='<line x1="'+pL+'" y1="'+Y(y)+'" x2="'+(w-pR)+'" y2="'+Y(y)+'" stroke="#e5e7eb"/><text x="'+(pL-8)+'" y="'+(Y(y)+4)+'" text-anchor="end" font-size="10" fill="#64748b">'+y+'</text>'}
-  for(var x=0;x<=maxX+0.001;x+=0.5){grid+='<line x1="'+X(x)+'" y1="'+pT+'" x2="'+X(x)+'" y2="'+(h-pB)+'" stroke="#f1f5f9"/><text x="'+X(x)+'" y="'+(h-pB+18)+'" text-anchor="middle" font-size="10" fill="#64748b">'+x.toFixed(1)+'</text>'}
-  var circles=pts.map(function(p){return '<circle cx="'+X(p[0])+'" cy="'+Y(p[1])+'" r="4" fill="#222222"><title>'+p[0].toFixed(2)+' GW at £'+p[1]+'/MWh</title></circle>'}).join('');
-  $('costChart').innerHTML='<svg style="touch-action:none;user-select:none;-webkit-user-select:none;" class="cost-svg" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+grid+'<line x1="'+pL+'" y1="'+(h-pB)+'" x2="'+(w-pR)+'" y2="'+(h-pB)+'" stroke="#94a3b8"/><line x1="'+pL+'" y1="'+pT+'" x2="'+pL+'" y2="'+(h-pB)+'" stroke="#94a3b8"/><path d="'+path+'" fill="none" stroke="#222222" stroke-width="3"/>'+circles+'<text x="'+((pL+w-pR)/2)+'" y="'+(h-5)+'" text-anchor="middle" font-size="11" fill="#64748b">Cumulative flexibility (GW)</text><text x="15" y="'+((pT+h-pB)/2)+'" transform="rotate(-90 15 '+((pT+h-pB)/2)+')" text-anchor="middle" font-size="11" fill="#64748b">Marginal flexibility cost (£/MWh)</text></svg>';
+  for(var y=0;y<=yMax;y+=100){grid+='<line x1="'+pL+'" y1="'+Y(y)+'" x2="'+(w-pR)+'" y2="'+Y(y)+'" stroke="#e5e7eb"/><text x="'+(pL-8)+'" y="'+(Y(y)+4)+'" text-anchor="end" font-size="10" fill="#64748b">'+y+'</text>'}
+  var step=maxX<=6?0.5:1;
+  for(var x=0;x<=maxX+0.001;x+=step){grid+='<line x1="'+X(x)+'" y1="'+pT+'" x2="'+X(x)+'" y2="'+(h-pB)+'" stroke="#f1f5f9"/><text x="'+X(x)+'" y="'+(h-pB+18)+'" text-anchor="middle" font-size="10" fill="#64748b">'+x.toFixed(1)+'</text>'}
+  var cur=0, rects='', outline='', ind='#2563eb', com='#22c55e';
+  blocks.forEach(function(b){
+    var x0=X(cur), x1=X(cur+b.mw/1000), y0=Y(0), y1=Y(b.cost);
+    var fill=b.sector==='Industrial'?ind:com;
+    var opacity=b.sector==='Industrial'?'0.72':'0.72';
+    var label=esc(b.sector+' | '+b.segment+' | '+b.enduse);
+    var tip=esc(b.sector+' | '+b.segment+' | '+b.enduse)+'\n'+(b.mw/1000).toFixed(3)+' GW\n£'+Math.round(b.cost)+'/MWh';
+    rects+='<rect class="cost-block" x="'+x0.toFixed(2)+'" y="'+y1.toFixed(2)+'" width="'+Math.max(0,x1-x0).toFixed(2)+'" height="'+Math.max(0,y0-y1).toFixed(2)+'" fill="'+fill+'" fill-opacity="'+opacity+'" stroke="#ffffff" stroke-width="0.7"><title>'+tip+'</title></rect>';
+    cur+=b.mw/1000;
+  });
+  $('costChart').innerHTML='<svg style="touch-action:none;user-select:none;-webkit-user-select:none;overflow:visible" class="cost-svg" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+grid+'<line x1="'+pL+'" y1="'+Y(0)+'" x2="'+(w-pR)+'" y2="'+Y(0)+'" stroke="#64748b" stroke-width="1.2"/><line x1="'+pL+'" y1="'+pT+'" x2="'+pL+'" y2="'+Y(0)+'" stroke="#94a3b8"/>'+rects+'<text x="'+((pL+w-pR)/2)+'" y="'+(h-5)+'" text-anchor="middle" font-size="11" fill="#64748b">Cumulative flexibility (GW)</text><text x="15" y="'+((pT+Y(0))/2)+'" transform="rotate(-90 15 '+((pT+Y(0))/2)+')" text-anchor="middle" font-size="11" fill="#64748b">Marginal flexibility cost (£/MWh)</text></svg>';
 }
+
 function detail(rows){
   var r=rows.slice().sort(function(a,b){return selectedMW(b)-selectedMW(a)}).slice(0,300);
   $("detailBody").innerHTML=r.map(function(x){return "<tr><td>"+esc(x.DNO)+"</td><td>"+esc(x.Sector)+"</td><td>"+esc(x.Archetype)+"</td><td>"+esc(x["End-use"])+"</td><td>"+Math.round(num(x["Technical Flex MW"])).toLocaleString()+"</td><td>£"+Math.round(num(x["Central Hurdle Cost (£/MWh)"]))+"</td><td>"+Math.round(selectedMW(x)).toLocaleString()+"</td></tr>"}).join("");
@@ -1312,7 +1334,7 @@ function drawMap(rows){
   if(geoMode==='GSP'){drawGspMap(rows);return;}
   var vals=dnoValues(rows),max=1;dnoOrder.forEach(function(d){max=Math.max(max,vals[d]||0)});
   var html='<svg class="dno-svg" viewBox="140 300 760 950" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GB DNO licence area map">';
-  dnoRegions.forEach(function(r){var sel=selectedDnos.indexOf(r.name)>=0;html+='<path class="dno-shape '+(sel?'selected':'')+'" data-dno="'+esc(r.name)+'" d="'+r.path+'" fill="'+dnoFill(vals[r.name]||0,max,sel)+'" opacity="1" tabindex="0" role="button" aria-label="'+esc(r.name)+'" title="'+esc(r.name)+' — '+(vals[r.name]||0).toFixed(0)+' MW"/>';});
+  dnoRegions.forEach(function(r){var sel=!selectedDnos.length || selectedDnos.indexOf(r.name)>=0;html+='<path class="dno-shape '+(sel?'selected':'')+'" data-dno="'+esc(r.name)+'" d="'+r.path+'" fill="'+dnoFill(vals[r.name]||0,max,sel)+'" opacity="1" tabindex="0" role="button" aria-label="'+esc(r.name)+'" title="'+esc(r.name)+' — '+(vals[r.name]||0).toFixed(0)+' MW"/>';});
   dnoRegions.forEach(function(r){var xy=r.label,off=dnoLabelOffsets[r.name]||[0,0];html+='<text class="map-label '+(r.name.length>19?'small':'')+'" x="'+(xy[0]+off[0])+'" y="'+(xy[1]+off[1])+'">'+esc(r.name)+'</text>';});
   html+='</svg><div class="map-zoom-controls"><button type="button" data-z="in">+</button><button type="button" data-z="out">−</button><button type="button" data-z="reset">Reset</button></div><div class="map-legend"><b>Flexibility potential</b><div class="map-gradient"></div><div class="map-gradient-labels"><span>Low</span><span>High</span></div></div>';
   $('mapWrap').innerHTML=html;var svg=$('mapWrap').querySelector('.dno-svg');
@@ -1321,7 +1343,7 @@ function drawMap(rows){
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');controls[0].onclick=function(){mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();};controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.50);applyTransform();};controls[2].onclick=function(){centerGB();applyTransform();};
   bindMapGestures(svg,applyTransform);
 }
-function gspMapProjection(lon,lat){return[25+((lon+8.5)/11.5)*643,25+((59.5-lat)/9.8)*1200];}
+function gspMapProjection(lon,lat){return[140+((lon+8.5)/11.5)*528,300+((59.5-lat)/9.8)*950];}
 // GSP geometry is projected directly into the same native SVG coordinate system as the DNO map; no independent scale/offset is applied.
 function drawGspMap(rows){
   if(!gspLoaded||!GSP_DATA.length){$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">Loading NESO GSP data…</div>';return;}
