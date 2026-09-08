@@ -762,12 +762,25 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 <style id="v81-header-label-fix">
 /* V81 header terminology and DNO count styling */
 .header-kpi .dno-count{font-size:19px!important;font-weight:600!important;color:#fff!important;letter-spacing:0!important;}
-.header-kpi .dno-count + em{font-size:8px!important;font-style:normal!important;color:#D6E2E8!important;}
+.header-kpi .dno-unit{font-size:8px!important;font-style:normal!important;color:#fff!important;}
 </style>
 <style id="v79-header-decoration-fix">
 /* Remove the rotated-square decoration inherited from the generic <header> rule.
    It created the downward-facing triangle lines at the far-right of the white controls row. */
 #appHeader::after{display:none!important;content:none!important;border:0!important;}
+</style>
+
+<style id="v83-final-fixes">
+/* V83: final header KPI/dropdown styling and exact GSP/DNO map coordinate alignment */
+.header-kpi .dno-count{font-size:19px!important;font-weight:600!important;color:#fff!important;letter-spacing:0!important;}
+.header-kpi .dno-unit{font-size:8px!important;font-style:normal!important;color:#fff!important;}
+.header-dropdown-btn.is-selected{background:#EEE8F6!important;border-color:#C9D3DA!important;color:#26313A!important;}
+.header-control{align-items:center!important;}
+.header-control label{height:30px!important;line-height:30px!important;display:flex!important;align-items:center!important;margin:0 7px 0 0!important;}
+</style>
+<style id="v83-dno-unit-final">
+/* Keep the Selected networks unit as one explicit element. */
+.header-kpi .dno-unit{display:inline-block!important;font-size:8px!important;font-style:normal!important;font-weight:400!important;color:#fff!important;letter-spacing:0!important;white-space:nowrap!important;}
 </style>
 </head>
 <body>
@@ -778,7 +791,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
       <div class="header-kpi"><span>Total selected flex</span><strong id="total">—</strong><em>GW</em></div>
       <div class="header-kpi ind-kpi"><span>Industrial flex</span><strong id="ind">—</strong><em>GW</em></div>
       <div class="header-kpi com-kpi"><span>Commercial flex</span><strong id="com">—</strong><em>GW</em></div>
-      <div class="header-kpi"><span>Selected networks</span><strong id="dno" class="dno-count">14</strong><em>DNO Areas</em></div>
+      <div class="header-kpi"><span>Selected networks</span><strong id="dno" class="dno-count">14</strong><span id="dnoUnit" class="dno-unit">DNO Areas</span></div>
     </div>
   </div>
   <div class="header-controls">
@@ -1170,7 +1183,14 @@ function loadGspShapes(){
       var lonW=Math.atan2(Y2,X2);
       return [lonW*180/Math.PI,latW*180/Math.PI];
     }
-    function ringPath(ring){return ring.map(function(c,i){var ll=bngToWgs84(num(c[0]),num(c[1])),p=gspMapProjection(ll[0],ll[1]);return(i?'L':'M')+p[0].toFixed(2)+' '+p[1].toFixed(2);}).join(' ')+' Z';}
+    function bngToMap(E,N){
+      /* The underlying DNO map uses a normalized British National Grid coordinate
+         space: eastings are scaled by 1,000 and northings are inverted from the
+         same 1,225 reference used by the native DNO SVG. Using this transform
+         keeps GSP polygons in the exact same map space as the DNO polygons. */
+      return [num(E)/1000+18,1225-num(N)/1000];
+    }
+    function ringPath(ring){return ring.map(function(c,i){var p=bngToMap(num(c[0]),num(c[1]));return(i?'L':'M')+p[0].toFixed(2)+' '+p[1].toFixed(2);}).join(' ')+' Z';}
     function geomPath(g){if(!g)return '';if(g.type==='Polygon')return(g.coordinates||[]).map(ringPath).join(' ');if(g.type==='MultiPolygon')return(g.coordinates||[]).map(function(poly){return(poly||[]).map(ringPath).join(' ');}).join(' ');return '';}
     features.forEach(function(f){
       var keys=collectKeys(f.properties||{}),d=geomPath(f.geometry);
@@ -1256,7 +1276,7 @@ function renderGspChart(rows){
 
 function cards(rows){
   var t=0,i=0,c=0;rows.forEach(function(r){var v=selectedMW(r);t+=v;if(r.Sector==="Industrial")i+=v;else c+=v});
-  $("total").textContent=(t/1000).toFixed(2);$("ind").textContent=(i/1000).toFixed(2);$("com").textContent=(c/1000).toFixed(2);$("dno").textContent=(selectedDnos.length?selectedDnos.length:14)+" DNO Areas";
+  $("total").textContent=(t/1000).toFixed(2);$("ind").textContent=(i/1000).toFixed(2);$("com").textContent=(c/1000).toFixed(2);$("dno").textContent=(selectedDnos.length?selectedDnos.length:14);
 }
 function costCurve(rows){
   // Each block represents a unique Sector × Segment × End-use combination,

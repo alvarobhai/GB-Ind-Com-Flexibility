@@ -32,7 +32,7 @@ GSP results are indicative regionalisation of DNO-level flexibility using NESO F
 - Marginal cost curve uses blue Industrial and green Commercial blocks representing Segment × End-use combinations aggregated across DNOs.
 
 
-### V82 UI fixes
+### V83 UI fixes
 - Restored the GSP and DNO maps to the shared native SVG coordinate system (viewBox 25 25 643 1200) so GSP polygons align with the underlying GB map.
 - Selected networks count now uses the same white dynamic-number styling as the other KPI values.
 - “DNO Areas” unit is white and uses the KPI unit styling.
