@@ -1,12 +1,14 @@
-# GB Industrial & Commercial Flexibility Explorer — V84
+# GB Industrial & Commercial Flexibility Explorer — V85
 
 Static GitHub Pages dashboard package.
 
-## V84 changes
+## V85 changes
 - Corrected the Selected Networks KPI so the dynamic count is numeric only; `DNO Areas` is a separate white unit label.
 - Retained the V83 dashboard terminology and controls.
 - GSP polygons continue to use NESO EPSG:27700 boundary data and the same map coordinate system as the DNO map.
-- GSP polygons are clipped to their associated DNO licence-area boundary to prevent the GSP layer from spilling outside the underlying GB network map.
+- GSP polygons use the native DNO map coordinate system with a small calibration offset to improve visual registration against the GB/DNO base map.
+- GSP polygons remain clipped to their associated DNO licence-area boundary.
+- Trackpad/mouse-wheel zoom sensitivity is reduced by approximately 50% from V84.
 
 ## Package
 - `index.html` — dashboard application

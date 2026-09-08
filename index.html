@@ -785,7 +785,6 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 .header-kpi .dno-count{display:inline-block!important;color:#fff!important;font-size:19px!important;font-weight:600!important;line-height:1!important;margin:5px 0 0!important;padding:0!important;}
 .header-kpi .dno-unit{display:inline-block!important;color:#fff!important;font-size:9px!important;font-weight:400!important;line-height:1!important;margin:7px 0 0 4px!important;padding:0!important;vertical-align:baseline!important;white-space:nowrap!important;}
 </style>
-</style>
 </head>
 <body>
 <header id="appHeader" class="app-header">
@@ -1188,11 +1187,13 @@ function loadGspShapes(){
       return [lonW*180/Math.PI,latW*180/Math.PI];
     }
     function bngToMap(E,N){
-      /* The underlying DNO map uses a normalized British National Grid coordinate
-         space: eastings are scaled by 1,000 and northings are inverted from the
-         same 1,225 reference used by the native DNO SVG. Using this transform
-         keeps GSP polygons in the exact same map space as the DNO polygons. */
-      return [num(E)/1000+18,1225-num(N)/1000];
+      /* Native DNO SVG space is a 1 km-per-SVG-unit rendering of BNG, with
+         northings inverted. Keep GSP geometry in that exact coordinate space.
+         The sub-pixel calibration below compensates for the small registration
+         offset between the NESO GSP boundary release and the native DNO artwork. */
+      var x=num(E)/1000+18.5;
+      var y=1224.0-num(N)/1000;
+      return [x,y];
     }
     function ringPath(ring){return ring.map(function(c,i){var p=bngToMap(num(c[0]),num(c[1]));return(i?'L':'M')+p[0].toFixed(2)+' '+p[1].toFixed(2);}).join(' ')+' Z';}
     function geomPath(g){if(!g)return '';if(g.type==='Polygon')return(g.coordinates||[]).map(ringPath).join(' ');if(g.type==='MultiPolygon')return(g.coordinates||[]).map(function(poly){return(poly||[]).map(ringPath).join(' ');}).join(' ');return '';}
@@ -1550,7 +1551,7 @@ function bindMapGestures(svg,applyTransform){
   svg.addEventListener('wheel',function(e){
     e.preventDefault();e.stopPropagation();
     var old=mapState.scale;
-    var step=e.ctrlKey?1.08:1.07; var factor=e.deltaY<0?step:(1/step);
+    var step=e.ctrlKey?1.04:1.035; var factor=e.deltaY<0?step:(1/step);
     mapState.scale=Math.max(.45,Math.min(8,old*factor));
     var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);
     mapState.tx+=mx*(1-mapState.scale/old)*.35;mapState.ty+=my*(1-mapState.scale/old)*.35;applyTransform();
