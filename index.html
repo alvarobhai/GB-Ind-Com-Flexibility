@@ -660,7 +660,7 @@ aside{top:176px!important;height:420px!important;max-height:420px!important;}
 .dno-filter-box .filter-option.active:hover{background:transparent!important;color:#26313A!important;font-weight:400!important;border-left-color:transparent!important;box-shadow:none!important;}
 .dno-filter-box .filter-option.active::before{content:"✓"!important;color:#8060B0!important;border-color:#8060B0!important;background:#fff!important;text-align:center!important;line-height:13px!important;font-weight:700!important;}
 .dno-filter-box .filter-option::before{color:#8060B0!important;}
-.dno-shape{pointer-events:all!important;cursor:pointer!important;}
+.dno-shape{pointer-events:visiblePainted!important;cursor:pointer!important;}
 .map-popup{pointer-events:none!important;z-index:2147483647!important;}
 </style>
 
@@ -796,9 +796,9 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 <div id="map"><div class="map-wrap" id="mapWrap"></div></div><div class="status" id="mapStatus"></div></div>
 <div class="charts-area">
 <div class="panel"><div class="panel-head">Flexibility by DNO Area</div><div class="chart" id="dnoChart"></div></div>
-<div class="panel"><div class="panel-head">Flexibility by GSP | Top 15</div><div class="chart" id="gspChart"></div></div>
-<div class="panel"><div class="panel-head">Flexibility by Segment | Top 15</div><div class="chart" id="archChart"></div></div>
-<div class="panel"><div class="panel-head">Flexibility by End-Use | Top 15</div><div class="chart" id="endChart"></div></div>
+<div class="panel"><div class="panel-head">Top 15 GSPs by Flexibility</div><div class="chart" id="gspChart"></div></div>
+<div class="panel"><div class="panel-head">Top 15 Segments by Flexibility</div><div class="chart" id="archChart"></div></div>
+<div class="panel"><div class="panel-head">Top 15 End Uses by Flexibility</div><div class="chart" id="endChart"></div></div>
 <div class="panel cost-panel"><div class="panel-head">Flexibility Marginal Cost Curve</div><div class="cost-chart" id="costChart"></div></div>
 </div>
 <div class="panel wide"><div class="panel-head"><span>Selected detail</span><span class="note" id="rowCount"></span></div><div class="detail"><table><thead><tr><th>DNO</th><th>Sector</th><th>Segment</th><th>End-use</th><th>Technical MW</th><th>Hurdle £/MWh</th><th>Economic MW</th></tr></thead><tbody id="detailBody"></tbody></table></div></div>
@@ -1280,11 +1280,9 @@ function findDnoAtPoint(svg,clientX,clientY){
 }
 function bindDnoMapInteractions(svg){
   if(!svg)return;
-  var active=null;
   Array.prototype.forEach.call(svg.querySelectorAll('.dno-shape'),function(pt){
-    pt.style.pointerEvents='all';
-    pt.addEventListener('mouseenter',function(e){
-      active=pt;
+    pt.style.pointerEvents='visiblePainted';
+    function enter(e){
       var name=pt.getAttribute('data-dno'), vals=dnoValues(filtered()), total=vals[name]||0, rows=filtered(), m={};
       rows.forEach(function(r){
         if(r.DNO!==name)return;
@@ -1296,16 +1294,19 @@ function bindDnoMapInteractions(svg){
         return[(p[0]==='Industrial'?'Ind | ':'Com | ')+p.slice(1).join('|'),x[1]];
       });
       showChartTooltip(e,name,[['Selected flexibility',total]].concat(lines),'DNO area');
-    });
-    pt.addEventListener('mousemove',function(e){var p=$('chartTooltip');if(p)positionChartTooltip(p,e.clientX,e.clientY);});
-    pt.addEventListener('mouseleave',function(){if(active===pt)active=null;var p=$('chartTooltip');if(p)p.remove();});
+    }
+    pt.addEventListener('mouseenter',enter,false);
+    pt.addEventListener('pointerenter',enter,false);
+    pt.addEventListener('mousemove',function(e){var p=$('chartTooltip');if(p)positionChartTooltip(p,e.clientX,e.clientY);},false);
+    pt.addEventListener('pointermove',function(e){var p=$('chartTooltip');if(p)positionChartTooltip(p,e.clientX,e.clientY);},false);
+    pt.addEventListener('mouseleave',function(){var p=$('chartTooltip');if(p)p.remove();},false);
+    pt.addEventListener('pointerleave',function(){var p=$('chartTooltip');if(p)p.remove();},false);
     pt.addEventListener('click',function(e){
       e.preventDefault();e.stopPropagation();toggleDnoFromMap(pt.getAttribute('data-dno'));
     },false);
     pt.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleDnoFromMap(pt.getAttribute('data-dno'));}},false);
   });
 }
-
 
 function drawMap(rows){
   if(geoMode==='GSP'){drawGspMap(rows);return;}
@@ -1320,7 +1321,8 @@ function drawMap(rows){
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');controls[0].onclick=function(){mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();};controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.50);applyTransform();};controls[2].onclick=function(){centerGB();applyTransform();};
   bindMapGestures(svg,applyTransform);
 }
-function gspMapProjection(lon,lat){return[140+((lon+8.5)/11.5)*528,300+((59.5-lat)/9.8)*950];}
+function gspMapProjection(lon,lat){return[25+((lon+8.5)/11.5)*643,25+((59.5-lat)/9.8)*1200];}
+// GSP geometry is projected directly into the same native SVG coordinate system as the DNO map; no independent scale/offset is applied.
 function drawGspMap(rows){
   if(!gspLoaded||!GSP_DATA.length){$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">Loading NESO GSP data…</div>';return;}
   var gspFlex={};gspAgg(rows).forEach(function(x){gspFlex[x[0]]=x[1];});
@@ -1330,7 +1332,7 @@ function drawGspMap(rows){
   var html='<svg class="dno-svg gsp-svg" viewBox="140 300 760 950" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GSP geographic area map">';
   dnoRegions.forEach(function(r){html+='<path d="'+r.path+'" fill="none" stroke="#bfc4c8" stroke-width="1.1" vector-effect="non-scaling-stroke" pointer-events="none"/>';});
   if(gspShapesLoaded&&GSP_SHAPES.length){
-    html+='<g class="gsp-shape-layer" transform="translate(500 775) scale(1.30) translate(-500 -775)">';
+    html+='<g class="gsp-shape-layer">';
     GSP_SHAPES.forEach(function(shape){
       var keys=shape.keys.filter(function(k){return visibleKeys[k];});if(!keys.length)return;
       var v=keys.reduce(function(a,k){return a+(gspFlex[k]||0);},0);
