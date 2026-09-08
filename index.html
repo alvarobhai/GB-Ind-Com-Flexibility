@@ -781,6 +781,10 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 <style id="v83-dno-unit-final">
 /* Keep the Selected networks unit as one explicit element. */
 .header-kpi .dno-unit{display:inline-block!important;font-size:8px!important;font-style:normal!important;font-weight:400!important;color:#fff!important;letter-spacing:0!important;white-space:nowrap!important;}
+<style id="v84-kpi-clean">
+.header-kpi .dno-count{display:inline-block!important;color:#fff!important;font-size:19px!important;font-weight:600!important;line-height:1!important;margin:5px 0 0!important;padding:0!important;}
+.header-kpi .dno-unit{display:inline-block!important;color:#fff!important;font-size:9px!important;font-weight:400!important;line-height:1!important;margin:7px 0 0 4px!important;padding:0!important;vertical-align:baseline!important;white-space:nowrap!important;}
+</style>
 </style>
 </head>
 <body>
@@ -1276,7 +1280,7 @@ function renderGspChart(rows){
 
 function cards(rows){
   var t=0,i=0,c=0;rows.forEach(function(r){var v=selectedMW(r);t+=v;if(r.Sector==="Industrial")i+=v;else c+=v});
-  $("total").textContent=(t/1000).toFixed(2);$("ind").textContent=(i/1000).toFixed(2);$("com").textContent=(c/1000).toFixed(2);$("dno").textContent=(selectedDnos.length?selectedDnos.length:14);
+  $("total").textContent=(t/1000).toFixed(2);$("ind").textContent=(i/1000).toFixed(2);$("com").textContent=(c/1000).toFixed(2);$("dno").textContent=String(selectedDnos.length?selectedDnos.length:14);$("dnoUnit").textContent="DNO Areas";
 }
 function costCurve(rows){
   // Each block represents a unique Sector × Segment × End-use combination,
@@ -1468,14 +1472,16 @@ function drawMap(rows){
   bindMapGestures(svg,applyTransform);
 }
 function gspMapProjection(lon,lat){return[25+((lon+8.5)/11.5)*643,25+((59.5-lat)/9.8)*1200];}
-// GSP geometry is projected directly into the same native SVG coordinate system as the DNO map; no independent scale/offset is applied.
+// GSP geometry is projected directly into the same native SVG coordinate system as the DNO map. GSP polygons are additionally clipped to their mapped DNO licence-area boundary so the overlay cannot spill outside the underlying GB network map.
 function drawGspMap(rows){
   if(!gspLoaded||!GSP_DATA.length){$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">Loading NESO GSP data…</div>';return;}
   var gspFlex={};gspAgg(rows).forEach(function(x){gspFlex[x[0]]=x[1];});
   var max=1;Object.keys(gspFlex).forEach(function(k){max=Math.max(max,gspFlex[k]);});
   var visible=GSP_DATA;
   var visibleKeys={};visible.forEach(function(g){visibleKeys[g.key]=1;});
-  var html='<svg class="dno-svg gsp-svg" viewBox="25 25 643 1200" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GSP geographic area map">';
+  var html='<svg class="dno-svg gsp-svg" viewBox="25 25 643 1200" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GSP geographic area map"><defs>';
+  dnoRegions.forEach(function(r,i){html+='<clipPath id="gspClip'+i+'"><path d="'+r.path+'"/></clipPath>';});
+  html+='</defs>';
   dnoRegions.forEach(function(r){html+='<path d="'+r.path+'" fill="none" stroke="#bfc4c8" stroke-width="1.1" vector-effect="non-scaling-stroke" pointer-events="none"/>';});
   if(gspShapesLoaded&&GSP_SHAPES.length){
     html+='<g class="gsp-shape-layer">';
@@ -1485,7 +1491,10 @@ function drawGspMap(rows){
       var selectedShape=keys.some(function(k){var gg=GSP_DATA.find(function(x){return x.key===k;});return isDnoSelected(gg&&gg.dno);});
       var label=keys.map(gspDisplayName).join(' / ');
       var fill=selectedShape?gspFill(v,max):'#F1F3F4';
-      html+='<path class="gsp-area" data-gsp="'+esc(keys[0])+'" d="'+shape.path+'" fill="'+fill+'" fill-opacity=".92" stroke="#ffffff" stroke-width=".7" vector-effect="non-scaling-stroke"><title>'+esc(label)+' — '+Math.round(v).toLocaleString()+' MW</title></path>';
+      var gg=GSP_DATA.find(function(x){return x.key===keys[0];});
+      var ci=dnoRegions.findIndex(function(dr){return dr.name===((gg&&gg.dno)||'');});
+      var clipAttr=ci>=0?' clip-path="url(#gspClip'+ci+')"':'';
+      html+='<path class="gsp-area" data-gsp="'+esc(keys[0])+'" d="'+shape.path+'" fill="'+fill+'" fill-opacity=".92" stroke="#ffffff" stroke-width=".7" vector-effect="non-scaling-stroke"'+clipAttr+'><title>'+esc(label)+' — '+Math.round(v).toLocaleString()+' MW</title></path>';
     });
     html+='</g>';
   } else {
