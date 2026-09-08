@@ -761,7 +761,8 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 </style>
 <style id="v81-header-label-fix">
 /* V81 header terminology and DNO count styling */
-.header-kpi .dno-count{font-size:9px!important;font-weight:400!important;color:var(--muted)!important;letter-spacing:.06em!important;}
+.header-kpi .dno-count{font-size:19px!important;font-weight:600!important;color:#fff!important;letter-spacing:0!important;}
+.header-kpi .dno-count + em{font-size:8px!important;font-style:normal!important;color:#D6E2E8!important;}
 </style>
 <style id="v79-header-decoration-fix">
 /* Remove the rotated-square decoration inherited from the generic <header> rule.
@@ -777,7 +778,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
       <div class="header-kpi"><span>Total selected flex</span><strong id="total">—</strong><em>GW</em></div>
       <div class="header-kpi ind-kpi"><span>Industrial flex</span><strong id="ind">—</strong><em>GW</em></div>
       <div class="header-kpi com-kpi"><span>Commercial flex</span><strong id="com">—</strong><em>GW</em></div>
-      <div class="header-kpi"><span>Selected networks</span><strong id="dno" class="dno-count">14 DNO Areas</strong></div>
+      <div class="header-kpi"><span>Selected networks</span><strong id="dno" class="dno-count">14</strong><em>DNO Areas</em></div>
     </div>
   </div>
   <div class="header-controls">
@@ -1436,7 +1437,7 @@ function isDnoSelected(name){return !selectedDnos.length || selectedDnos.length=
 function drawMap(rows){
   if(geoMode==='GSP'){drawGspMap(rows);return;}
   var vals=dnoValues(rows),max=1;dnoOrder.forEach(function(d){max=Math.max(max,vals[d]||0)});
-  var html='<svg class="dno-svg" viewBox="140 300 760 950" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GB DNO licence area map">';
+  var html='<svg class="dno-svg" viewBox="25 25 643 1200" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GB DNO licence area map">';
   dnoRegions.forEach(function(r){var sel=isDnoSelected(r.name);html+='<path class="dno-shape '+(sel?'selected':'')+'" data-dno="'+esc(r.name)+'" d="'+r.path+'" fill="'+dnoFill(vals[r.name]||0,max,sel)+'" opacity="1" tabindex="0" role="button" aria-label="'+esc(r.name)+'" title="'+esc(r.name)+' — '+(vals[r.name]||0).toFixed(0)+' MW"/>';});
   dnoRegions.forEach(function(r){var xy=r.label,off=dnoLabelOffsets[r.name]||[0,0];html+='<text class="map-label '+(r.name.length>19?'small':'')+'" x="'+(xy[0]+off[0])+'" y="'+(xy[1]+off[1])+'">'+esc(r.name)+'</text>';});
   html+='</svg><div class="map-zoom-controls"><button type="button" data-z="in">+</button><button type="button" data-z="out">−</button><button type="button" data-z="reset">Reset</button></div><div class="map-legend"><b>Flexibility potential</b><div class="map-gradient"></div><div class="map-gradient-labels"><span>Low</span><span>High</span></div></div>';
@@ -1446,7 +1447,7 @@ function drawMap(rows){
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');controls[0].onclick=function(){mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();};controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.50);applyTransform();};controls[2].onclick=function(){centerGB();applyTransform();};
   bindMapGestures(svg,applyTransform);
 }
-function gspMapProjection(lon,lat){return[140+((lon+8.5)/11.5)*528,300+((59.5-lat)/9.8)*950];}
+function gspMapProjection(lon,lat){return[25+((lon+8.5)/11.5)*643,25+((59.5-lat)/9.8)*1200];}
 // GSP geometry is projected directly into the same native SVG coordinate system as the DNO map; no independent scale/offset is applied.
 function drawGspMap(rows){
   if(!gspLoaded||!GSP_DATA.length){$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">Loading NESO GSP data…</div>';return;}
@@ -1454,7 +1455,7 @@ function drawGspMap(rows){
   var max=1;Object.keys(gspFlex).forEach(function(k){max=Math.max(max,gspFlex[k]);});
   var visible=GSP_DATA;
   var visibleKeys={};visible.forEach(function(g){visibleKeys[g.key]=1;});
-  var html='<svg class="dno-svg gsp-svg" viewBox="140 300 760 950" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GSP geographic area map">';
+  var html='<svg class="dno-svg gsp-svg" viewBox="25 25 643 1200" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GSP geographic area map">';
   dnoRegions.forEach(function(r){html+='<path d="'+r.path+'" fill="none" stroke="#bfc4c8" stroke-width="1.1" vector-effect="non-scaling-stroke" pointer-events="none"/>';});
   if(gspShapesLoaded&&GSP_SHAPES.length){
     html+='<g class="gsp-shape-layer">';
