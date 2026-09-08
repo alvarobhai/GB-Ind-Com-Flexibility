@@ -661,7 +661,7 @@ aside{top:176px!important;height:420px!important;max-height:420px!important;}
 .dno-filter-box .filter-option.active::before{content:"✓"!important;color:#8060B0!important;border-color:#8060B0!important;background:#fff!important;text-align:center!important;line-height:13px!important;font-weight:700!important;}
 .dno-filter-box .filter-option::before{color:#8060B0!important;}
 .dno-shape{pointer-events:all!important;cursor:pointer!important;}
-.map-popup{pointer-events:auto!important;z-index:2147483647!important;}
+.map-popup{pointer-events:none!important;z-index:2147483647!important;}
 </style>
 
 <style id="methodology-style">
@@ -1263,22 +1263,44 @@ function findDnoAtPoint(svg,clientX,clientY){
 }
 function bindDnoMapInteractions(svg){
   if(!svg)return;
-  var active=null;
-  function enter(el,e){active=el;showRegionPopup(el.getAttribute('data-dno'),filtered(),e.clientX,e.clientY);}
-  function move(el,e){if(active===el){var p=$('mapPopup');if(p)positionMapPopup(p,e.clientX,e.clientY);}}
-  function leave(el){if(active===el){active=null;var p=$('mapPopup');if(p)p.remove();}}
-  function select(el,e){var name=el&&el.getAttribute('data-dno');if(!name)return;e.preventDefault();e.stopPropagation();toggleDnoFromMap(name);}
-  Array.prototype.forEach.call(svg.querySelectorAll('.dno-shape'),function(el){el.style.pointerEvents='all';el.addEventListener('mouseenter',function(e){enter(el,e)},false);el.addEventListener('mousemove',function(e){move(el,e)},false);el.addEventListener('mouseleave',function(){leave(el)},false);el.addEventListener('pointerup',function(e){if(e.button===undefined||e.button===0)select(el,e)},false);el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();select(el,e)}},false);});
-  svg.addEventListener('mouseover',function(e){var el=e.target&&e.target.closest?e.target.closest('.dno-shape'):null;if(el&&svg.contains(el))enter(el,e)},true);
-  svg.addEventListener('mousemove',function(e){var el=e.target&&e.target.closest?e.target.closest('.dno-shape'):null;if(el&&svg.contains(el))move(el,e)},true);
-  svg.addEventListener('mouseout',function(e){var el=e.target&&e.target.closest?e.target.closest('.dno-shape'):null;if(el&&svg.contains(el)&&(!e.relatedTarget||!el.contains(e.relatedTarget)))leave(el)},true);
-  svg.addEventListener('click',function(e){var el=e.target&&e.target.closest?e.target.closest('.dno-shape'):null;if(el&&svg.contains(el))select(el,e)},true);
-  svg.addEventListener('pointermove',function(e){
-    var el=findDnoAtPoint(svg,e.clientX,e.clientY);
-    if(el){enter(el,e);move(el,e);}else if(active){leave(active);}
-  },true);
-  svg.addEventListener('pointerleave',function(){if(active)leave(active);},true);
+  var wrap=svg.parentElement, active=null;
+  function hit(e){
+    var el=null;
+    try{ el=document.elementFromPoint(e.clientX,e.clientY); }catch(err){}
+    if(el&&el.closest){ el=el.closest('.dno-shape'); if(el&&svg.contains(el))return el; }
+    return findDnoAtPoint(svg,e.clientX,e.clientY);
+  }
+  function enter(el,e){
+    if(!el)return;
+    if(active!==el){active=el;}
+    showRegionPopup(el.getAttribute('data-dno'),filtered(),e.clientX,e.clientY);
+  }
+  function move(e){
+    var el=hit(e);
+    if(el){enter(el,e);}
+    else if(active){
+      var p=$('mapPopup');if(p)p.remove();active=null;
+    }
+  }
+  function leave(){
+    active=null;var p=$('mapPopup');if(p)p.remove();
+  }
+  function select(el,e){
+    var name=el&&el.getAttribute('data-dno');if(!name)return;
+    e.preventDefault();e.stopPropagation();toggleDnoFromMap(name);
+  }
+  Array.prototype.forEach.call(svg.querySelectorAll('.dno-shape'),function(el){
+    el.style.pointerEvents='all';
+    el.addEventListener('click',function(e){select(el,e)},false);
+    el.addEventListener('pointerup',function(e){if(e.button===undefined||e.button===0)select(el,e)},false);
+    el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();select(el,e)}},false);
+  });
+  var target=wrap||svg;
+  target.addEventListener('pointermove',move,true);
+  target.addEventListener('pointerleave',leave,true);
+  target.addEventListener('mousemove',move,true);
 }
+
 
 function drawMap(rows){
   if(geoMode==='GSP'){drawGspMap(rows);return;}
@@ -1292,7 +1314,7 @@ function drawMap(rows){
   centerGB();applyTransform();bindDnoMapInteractions(svg);
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');controls[0].onclick=function(){mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();};controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.50);applyTransform();};controls[2].onclick=function(){centerGB();applyTransform();};
   var drag=false,sx=0,sy=0,otx=0,oty=0;svg.addEventListener('mousedown',function(e){if(e.target.classList.contains('dno-shape'))return;drag=true;sx=e.clientX;sy=e.clientY;otx=mapState.tx;oty=mapState.ty;svg.style.cursor='grabbing';e.preventDefault();});window.addEventListener('mousemove',function(e){if(!drag)return;mapState.tx=otx+(e.clientX-sx)*.60;mapState.ty=oty+(e.clientY-sy)*.60;applyTransform();});window.addEventListener('mouseup',function(){drag=false;if(svg)svg.style.cursor='grab';});
-  svg.addEventListener('dblclick',function(e){if(e.target.classList.contains('dno-shape'))return;e.preventDefault();mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();});svg.addEventListener('wheel',function(e){e.preventDefault();var old=mapState.scale,factor=e.deltaY<0?1.025:.975;mapState.scale=Math.max(.45,Math.min(8,old*factor));var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);mapState.tx+=mx*(1-mapState.scale/old)*.35;mapState.ty+=my*(1-mapState.scale/old)*.35;applyTransform();},{passive:false});
+  svg.addEventListener('dblclick',function(e){e.preventDefault();mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();});svg.addEventListener('wheel',function(e){e.preventDefault();var old=mapState.scale,factor=e.deltaY<0?1.10:.90;mapState.scale=Math.max(.45,Math.min(8,old*factor));var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);mapState.tx+=mx*(1-mapState.scale/old)*.35;mapState.ty+=my*(1-mapState.scale/old)*.35;applyTransform();},{passive:false});
 }
 function gspMapProjection(lon,lat){return[140+((lon+8.5)/11.5)*528,300+((59.5-lat)/9.8)*950];}
 function drawGspMap(rows){
@@ -1304,6 +1326,7 @@ function drawGspMap(rows){
   var html='<svg class="dno-svg gsp-svg" viewBox="140 300 760 950" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GSP geographic area map">';
   dnoRegions.forEach(function(r){html+='<path d="'+r.path+'" fill="none" stroke="#bfc4c8" stroke-width="1.1" vector-effect="non-scaling-stroke" pointer-events="none"/>';});
   if(gspShapesLoaded&&GSP_SHAPES.length){
+    html+='<g class="gsp-shape-layer" transform="translate(500 775) scale(1.30) translate(-500 -775)">';
     GSP_SHAPES.forEach(function(shape){
       var keys=shape.keys.filter(function(k){return visibleKeys[k];});if(!keys.length)return;
       var v=keys.reduce(function(a,k){return a+(gspFlex[k]||0);},0);
@@ -1331,7 +1354,7 @@ function drawGspMap(rows){
     pt.addEventListener('mousemove',function(e){var p=$('chartTooltip');if(p)positionChartTooltip(p,e.clientX,e.clientY);});
     pt.addEventListener('mouseleave',function(){var p=$('chartTooltip');if(p)p.remove();});
   });
-  svg.addEventListener('wheel',function(e){e.preventDefault();var old=mapState.scale,factor=e.deltaY<0?1.025:.975;mapState.scale=Math.max(.45,Math.min(8,old*factor));var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);mapState.tx+=mx*(1-mapState.scale/old)*.35;mapState.ty+=my*(1-mapState.scale/old)*.35;applyTransform();},{passive:false});
+  svg.addEventListener('wheel',function(e){e.preventDefault();var old=mapState.scale,factor=e.deltaY<0?1.10:.90;mapState.scale=Math.max(.45,Math.min(8,old*factor));var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);mapState.tx+=mx*(1-mapState.scale/old)*.35;mapState.ty+=my*(1-mapState.scale/old)*.35;applyTransform();},{passive:false});
 }
 
 function baseFiltered(){
