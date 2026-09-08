@@ -1,0 +1,1911 @@
+{
+  "source": "FES 2025 Building Blocks (fes2025_bb1_v006.csv)",
+  "basis": "2024 GWh demand, summed across FES pathways, normalised to GSP shares within each dashboard DNO",
+  "building_block_filter": "Unit=GWh; Building Block ID Number starts with Dem_",
+  "share_field": "Share of GSP (all retained rows had null Share of GSP, treated as 1.0)",
+  "dnos": {
+    "ENWL": [
+      {
+        "gsp": "Kearsley 132kV",
+        "share": 0.10489366549925964,
+        "fes_gwh_2024": 26517.763
+      },
+      {
+        "gsp": "Carrington",
+        "share": 0.0955608978220122,
+        "fes_gwh_2024": 24158.382
+      },
+      {
+        "gsp": "Penwortham East",
+        "share": 0.08845282292052532,
+        "fes_gwh_2024": 22361.417
+      },
+      {
+        "gsp": "Stalybridge",
+        "share": 0.08776716711349852,
+        "fes_gwh_2024": 22188.079
+      },
+      {
+        "gsp": "Harker",
+        "share": 0.08714097584250555,
+        "fes_gwh_2024": 22029.774
+      },
+      {
+        "gsp": "South Manchester",
+        "share": 0.06426361245501855,
+        "fes_gwh_2024": 16246.236
+      },
+      {
+        "gsp": "Whitegate",
+        "share": 0.0633842509119725,
+        "fes_gwh_2024": 16023.928
+      },
+      {
+        "gsp": "Penwortham West",
+        "share": 0.06024791098529596,
+        "fes_gwh_2024": 15231.042
+      },
+      {
+        "gsp": "Bredbury",
+        "share": 0.05942986519912217,
+        "fes_gwh_2024": 15024.235
+      },
+      {
+        "gsp": "Rochdale",
+        "share": 0.05285293640985615,
+        "fes_gwh_2024": 13361.547
+      },
+      {
+        "gsp": "Padiham",
+        "share": 0.04548711856262132,
+        "fes_gwh_2024": 11499.422999999999
+      },
+      {
+        "gsp": "Washway Farm",
+        "share": 0.04276140156926488,
+        "fes_gwh_2024": 10810.345000000001
+      },
+      {
+        "gsp": "Stanah",
+        "share": 0.03787659938310914,
+        "fes_gwh_2024": 9575.437
+      },
+      {
+        "gsp": "Hutton",
+        "share": 0.035110147620107474,
+        "fes_gwh_2024": 8876.061
+      },
+      {
+        "gsp": "Kearsley 33kV",
+        "share": 0.030045009626209915,
+        "fes_gwh_2024": 7595.563
+      },
+      {
+        "gsp": "Macclesfield",
+        "share": 0.020538163900550473,
+        "fes_gwh_2024": 5192.174
+      },
+      {
+        "gsp": "Heysham (NGET)",
+        "share": 0.017612380566242807,
+        "fes_gwh_2024": 4452.518
+      },
+      {
+        "gsp": "Kirkby ENW",
+        "share": 0.006575073612827518,
+        "fes_gwh_2024": 1662.219
+      },
+      {
+        "gsp": "Heysham (Barrow)",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Ormonde (Heysham)",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Robin Rigg (Harker)",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Walney 2 (Heysham)",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      }
+    ],
+    "NPG (Northern Electric)": [
+      {
+        "gsp": "Norton",
+        "share": 0.1363069672695095,
+        "fes_gwh_2024": 20811.105
+      },
+      {
+        "gsp": "Saltholme",
+        "share": 0.10517821143826678,
+        "fes_gwh_2024": 16058.421999999999
+      },
+      {
+        "gsp": "Osbaldwick",
+        "share": 0.10248674043021161,
+        "fes_gwh_2024": 15647.493
+      },
+      {
+        "gsp": "Spennymoor",
+        "share": 0.0743179287413616,
+        "fes_gwh_2024": 11346.729
+      },
+      {
+        "gsp": "West Boldon",
+        "share": 0.07077523611930528,
+        "fes_gwh_2024": 10805.837
+      },
+      {
+        "gsp": "Stella South",
+        "share": 0.07042574946463058,
+        "fes_gwh_2024": 10752.478
+      },
+      {
+        "gsp": "Stella North",
+        "share": 0.06308903826026423,
+        "fes_gwh_2024": 9632.322
+      },
+      {
+        "gsp": "Knaresborough",
+        "share": 0.05969136304897558,
+        "fes_gwh_2024": 9113.571
+      },
+      {
+        "gsp": "Blyth 66kV",
+        "share": 0.05206889399201075,
+        "fes_gwh_2024": 7949.786
+      },
+      {
+        "gsp": "Lackenby",
+        "share": 0.05085339644943069,
+        "fes_gwh_2024": 7764.206
+      },
+      {
+        "gsp": "Tynemouth 132kV",
+        "share": 0.049868966574727995,
+        "fes_gwh_2024": 7613.905
+      },
+      {
+        "gsp": "HartMoor",
+        "share": 0.047447972916162984,
+        "fes_gwh_2024": 7244.272
+      },
+      {
+        "gsp": "Hawthorn Pit",
+        "share": 0.042554288637595396,
+        "fes_gwh_2024": 6497.113
+      },
+      {
+        "gsp": "South Shields",
+        "share": 0.018714424485132358,
+        "fes_gwh_2024": 2857.285
+      },
+      {
+        "gsp": "Offerton",
+        "share": 0.01583015583905914,
+        "fes_gwh_2024": 2416.92
+      },
+      {
+        "gsp": "Poppleton",
+        "share": 0.01457454779453512,
+        "fes_gwh_2024": 2225.216
+      },
+      {
+        "gsp": "Blyth 132kV",
+        "share": 0.01220746490368741,
+        "fes_gwh_2024": 1863.814
+      },
+      {
+        "gsp": "Tynemouth 11kV",
+        "share": 0.011119352918309849,
+        "fes_gwh_2024": 1697.683
+      },
+      {
+        "gsp": "Fourstones",
+        "share": 0.002489300716823269,
+        "fes_gwh_2024": 380.062
+      }
+    ],
+    "NPG (Yorkshire Electric)": [
+      {
+        "gsp": "West Melton",
+        "share": 0.1448373748861161,
+        "fes_gwh_2024": 35403.845
+      },
+      {
+        "gsp": "Creyke Beck",
+        "share": 0.11793039690920498,
+        "fes_gwh_2024": 28826.740999999998
+      },
+      {
+        "gsp": "Skelton Grange",
+        "share": 0.11741456593768156,
+        "fes_gwh_2024": 28700.652000000002
+      },
+      {
+        "gsp": "Keadby",
+        "share": 0.09256245164455389,
+        "fes_gwh_2024": 22625.836
+      },
+      {
+        "gsp": "Bradford West",
+        "share": 0.08231991625839746,
+        "fes_gwh_2024": 20122.165
+      },
+      {
+        "gsp": "Elland",
+        "share": 0.07363611587382726,
+        "fes_gwh_2024": 17999.509
+      },
+      {
+        "gsp": "Grimsby West",
+        "share": 0.05987896371472821,
+        "fes_gwh_2024": 14636.73
+      },
+      {
+        "gsp": "Ferrybridge B",
+        "share": 0.04952851983904555,
+        "fes_gwh_2024": 12106.682
+      },
+      {
+        "gsp": "Thurcroft",
+        "share": 0.04640100641388474,
+        "fes_gwh_2024": 11342.197
+      },
+      {
+        "gsp": "Kirkstall B",
+        "share": 0.044845797860263464,
+        "fes_gwh_2024": 10962.044
+      },
+      {
+        "gsp": "Drax 132kV",
+        "share": 0.032594029881508196,
+        "fes_gwh_2024": 7967.2390000000005
+      },
+      {
+        "gsp": "Thorpe Marsh",
+        "share": 0.025942003537665504,
+        "fes_gwh_2024": 6341.227
+      },
+      {
+        "gsp": "Ferrybridge A",
+        "share": 0.022420702059415744,
+        "fes_gwh_2024": 5480.485
+      },
+      {
+        "gsp": "Saltend North",
+        "share": 0.020082487054346107,
+        "fes_gwh_2024": 4908.9349999999995
+      },
+      {
+        "gsp": "Neepsend",
+        "share": 0.01597547611537407,
+        "fes_gwh_2024": 3905.023
+      },
+      {
+        "gsp": "Sheffield City",
+        "share": 0.014860770822860098,
+        "fes_gwh_2024": 3632.546
+      },
+      {
+        "gsp": "Norton Lees",
+        "share": 0.010646620503662762,
+        "fes_gwh_2024": 2602.445
+      },
+      {
+        "gsp": "Pitsmoor",
+        "share": 0.009990427084717498,
+        "fes_gwh_2024": 2442.046
+      },
+      {
+        "gsp": "Jordanthorpe",
+        "share": 0.009113752938831073,
+        "fes_gwh_2024": 2227.753
+      },
+      {
+        "gsp": "Wincobank",
+        "share": 0.0046251901484675095,
+        "fes_gwh_2024": 1130.575
+      },
+      {
+        "gsp": "Camblesforth 66kV (Drax)",
+        "share": 0.0023334571640217915,
+        "fes_gwh_2024": 570.387
+      },
+      {
+        "gsp": "Templeborough",
+        "share": 0.0020599733514263838,
+        "fes_gwh_2024": 503.537
+      }
+    ],
+    "SPEN (SP Distribution)": [
+      {
+        "gsp": "Kaimes",
+        "share": 0.028798388805139487,
+        "fes_gwh_2024": 4957.943
+      },
+      {
+        "gsp": "Sighthill",
+        "share": 0.027255781133910972,
+        "fes_gwh_2024": 4692.367
+      },
+      {
+        "gsp": "Portobello",
+        "share": 0.02594334830599575,
+        "fes_gwh_2024": 4466.418
+      },
+      {
+        "gsp": "Newarthill",
+        "share": 0.02418541821718266,
+        "fes_gwh_2024": 4163.772
+      },
+      {
+        "gsp": "Easterhouse",
+        "share": 0.023872018674674547,
+        "fes_gwh_2024": 4109.817
+      },
+      {
+        "gsp": "Giffnock",
+        "share": 0.022097900196926788,
+        "fes_gwh_2024": 3804.384
+      },
+      {
+        "gsp": "Dewar Place",
+        "share": 0.021817469902927173,
+        "fes_gwh_2024": 3756.105
+      },
+      {
+        "gsp": "Stirling",
+        "share": 0.021590629159093065,
+        "fes_gwh_2024": 3717.052
+      },
+      {
+        "gsp": "Clyde's Mill",
+        "share": 0.02113115075281817,
+        "fes_gwh_2024": 3637.948
+      },
+      {
+        "gsp": "Wishaw",
+        "share": 0.020112165147357034,
+        "fes_gwh_2024": 3462.5190000000002
+      },
+      {
+        "gsp": "Drumchapel",
+        "share": 0.019524840870808698,
+        "fes_gwh_2024": 3361.4049999999997
+      },
+      {
+        "gsp": "Kilmarnock Town",
+        "share": 0.019357764150565844,
+        "fes_gwh_2024": 3332.641
+      },
+      {
+        "gsp": "Killermont",
+        "share": 0.018159881454757054,
+        "fes_gwh_2024": 3126.413
+      },
+      {
+        "gsp": "Bonnybridge",
+        "share": 0.01764762669331158,
+        "fes_gwh_2024": 3038.223
+      },
+      {
+        "gsp": "Coatbridge",
+        "share": 0.017541649959865922,
+        "fes_gwh_2024": 3019.978
+      },
+      {
+        "gsp": "Shrubhill",
+        "share": 0.01716969456918759,
+        "fes_gwh_2024": 2955.942
+      },
+      {
+        "gsp": "Strathaven",
+        "share": 0.01704895253804838,
+        "fes_gwh_2024": 2935.155
+      },
+      {
+        "gsp": "Cupar",
+        "share": 0.016646734676487508,
+        "fes_gwh_2024": 2865.909
+      },
+      {
+        "gsp": "Whitehouse",
+        "share": 0.016563655190684645,
+        "fes_gwh_2024": 2851.606
+      },
+      {
+        "gsp": "Broxburn",
+        "share": 0.01581468517475241,
+        "fes_gwh_2024": 2722.663
+      },
+      {
+        "gsp": "Livingston East",
+        "share": 0.01554497743761444,
+        "fes_gwh_2024": 2676.23
+      },
+      {
+        "gsp": "Dumfries 33",
+        "share": 0.015289982721348919,
+        "fes_gwh_2024": 2632.33
+      },
+      {
+        "gsp": "Dunfermline",
+        "share": 0.015063240722621336,
+        "fes_gwh_2024": 2593.294
+      },
+      {
+        "gsp": "Devonside",
+        "share": 0.015056049755451936,
+        "fes_gwh_2024": 2592.056
+      },
+      {
+        "gsp": "Linnmill",
+        "share": 0.014913380502128162,
+        "fes_gwh_2024": 2567.494
+      },
+      {
+        "gsp": "Cumbernauld",
+        "share": 0.014705179349284852,
+        "fes_gwh_2024": 2531.65
+      },
+      {
+        "gsp": "West George Street",
+        "share": 0.014413439836320112,
+        "fes_gwh_2024": 2481.424
+      },
+      {
+        "gsp": "Charlotte Street",
+        "share": 0.013934253068489666,
+        "fes_gwh_2024": 2398.927
+      },
+      {
+        "gsp": "Ayr",
+        "share": 0.01311416334171563,
+        "fes_gwh_2024": 2257.74
+      },
+      {
+        "gsp": "East Kilbride",
+        "share": 0.013104132000599674,
+        "fes_gwh_2024": 2256.013
+      },
+      {
+        "gsp": "Cockenzie",
+        "share": 0.012811747740174673,
+        "fes_gwh_2024": 2205.676
+      },
+      {
+        "gsp": "Johnstone",
+        "share": 0.012791330737266399,
+        "fes_gwh_2024": 2202.161
+      },
+      {
+        "gsp": "Chapelcross",
+        "share": 0.012554441226709298,
+        "fes_gwh_2024": 2161.378
+      },
+      {
+        "gsp": "Redhouse",
+        "share": 0.012494171860514056,
+        "fes_gwh_2024": 2151.002
+      },
+      {
+        "gsp": "Coylton",
+        "share": 0.01249047763182283,
+        "fes_gwh_2024": 2150.366
+      },
+      {
+        "gsp": "Bathgate",
+        "share": 0.012307915355462343,
+        "fes_gwh_2024": 2118.9359999999997
+      },
+      {
+        "gsp": "Leven",
+        "share": 0.011917779248111776,
+        "fes_gwh_2024": 2051.77
+      },
+      {
+        "gsp": "Strathleven",
+        "share": 0.011782905049667917,
+        "fes_gwh_2024": 2028.55
+      },
+      {
+        "gsp": "Partick",
+        "share": 0.011694301646435246,
+        "fes_gwh_2024": 2013.2959999999998
+      },
+      {
+        "gsp": "Govan",
+        "share": 0.011605285837169436,
+        "fes_gwh_2024": 1997.971
+      },
+      {
+        "gsp": "Inverkeithing",
+        "share": 0.011484770338921667,
+        "fes_gwh_2024": 1977.223
+      },
+      {
+        "gsp": "St Andrews Cross",
+        "share": 0.01117999647189543,
+        "fes_gwh_2024": 1924.753
+      },
+      {
+        "gsp": "Braehead Park",
+        "share": 0.010666155980209854,
+        "fes_gwh_2024": 1836.29
+      },
+      {
+        "gsp": "Galashiels",
+        "share": 0.010647342133148715,
+        "fes_gwh_2024": 1833.051
+      },
+      {
+        "gsp": "Port Dundas",
+        "share": 0.01057558348338233,
+        "fes_gwh_2024": 1820.697
+      },
+      {
+        "gsp": "Grangemouth A",
+        "share": 0.010269398142186331,
+        "fes_gwh_2024": 1767.984
+      },
+      {
+        "gsp": "Crookston A",
+        "share": 0.01023048676167921,
+        "fes_gwh_2024": 1761.285
+      },
+      {
+        "gsp": "Finnieston",
+        "share": 0.010114920135829122,
+        "fes_gwh_2024": 1741.389
+      },
+      {
+        "gsp": "Paisley",
+        "share": 0.00993261343503847,
+        "fes_gwh_2024": 1710.003
+      },
+      {
+        "gsp": "Berwick",
+        "share": 0.009727479189033161,
+        "fes_gwh_2024": 1674.6870000000001
+      },
+      {
+        "gsp": "Spango Valley",
+        "share": 0.009414695351306918,
+        "fes_gwh_2024": 1620.838
+      },
+      {
+        "gsp": "Saltcoats A",
+        "share": 0.009069993610029902,
+        "fes_gwh_2024": 1561.4940000000001
+      },
+      {
+        "gsp": "Dalmarnock",
+        "share": 0.008567897977485302,
+        "fes_gwh_2024": 1475.0529999999999
+      },
+      {
+        "gsp": "Westfield",
+        "share": 0.008379788549552299,
+        "fes_gwh_2024": 1442.668
+      },
+      {
+        "gsp": "Gorgie",
+        "share": 0.00836498840064468,
+        "fes_gwh_2024": 1440.1200000000001
+      },
+      {
+        "gsp": "Glenrothes",
+        "share": 0.008188263702640612,
+        "fes_gwh_2024": 1409.695
+      },
+      {
+        "gsp": "Elderslie",
+        "share": 0.008160661541098613,
+        "fes_gwh_2024": 1404.943
+      },
+      {
+        "gsp": "Saltcoats B",
+        "share": 0.00805487648933033,
+        "fes_gwh_2024": 1386.731
+      },
+      {
+        "gsp": "Kilwinning",
+        "share": 0.007832281785076863,
+        "fes_gwh_2024": 1348.409
+      },
+      {
+        "gsp": "Bainsford",
+        "share": 0.0077691488107923526,
+        "fes_gwh_2024": 1337.54
+      },
+      {
+        "gsp": "Grangemouth C",
+        "share": 0.0076021766441917,
+        "fes_gwh_2024": 1308.794
+      },
+      {
+        "gsp": "Telford Road",
+        "share": 0.0074299245186597185,
+        "fes_gwh_2024": 1279.1390000000001
+      },
+      {
+        "gsp": "Tongland",
+        "share": 0.007267936075670815,
+        "fes_gwh_2024": 1251.251
+      },
+      {
+        "gsp": "Devol Moor",
+        "share": 0.007033021467244245,
+        "fes_gwh_2024": 1210.808
+      },
+      {
+        "gsp": "Dunbar A",
+        "share": 0.0068069532586553134,
+        "fes_gwh_2024": 1171.888
+      },
+      {
+        "gsp": "Crookston B",
+        "share": 0.0067188900492407,
+        "fes_gwh_2024": 1156.727
+      },
+      {
+        "gsp": "Kilmarnock South",
+        "share": 0.006421005105528605,
+        "fes_gwh_2024": 1105.443
+      },
+      {
+        "gsp": "East Kilbride South",
+        "share": 0.0058107661557304435,
+        "fes_gwh_2024": 1000.384
+      },
+      {
+        "gsp": "Helensburgh",
+        "share": 0.005799921619619561,
+        "fes_gwh_2024": 998.5169999999999
+      },
+      {
+        "gsp": "Kilbowie 33",
+        "share": 0.005739675487567032,
+        "fes_gwh_2024": 988.145
+      },
+      {
+        "gsp": "Glenniston",
+        "share": 0.005712090751632069,
+        "fes_gwh_2024": 983.3960000000001
+      },
+      {
+        "gsp": "Maybole",
+        "share": 0.005705753639207337,
+        "fes_gwh_2024": 982.305
+      },
+      {
+        "gsp": "Hawick",
+        "share": 0.005682351048960555,
+        "fes_gwh_2024": 978.2760000000001
+      },
+      {
+        "gsp": "Haggs Road",
+        "share": 0.005333037330355181,
+        "fes_gwh_2024": 918.138
+      },
+      {
+        "gsp": "Erskine",
+        "share": 0.005170793311796445,
+        "fes_gwh_2024": 890.206
+      },
+      {
+        "gsp": "Eccles",
+        "share": 0.005109263493359072,
+        "fes_gwh_2024": 879.6129999999999
+      },
+      {
+        "gsp": "Glenluce",
+        "share": 0.0050160074530483,
+        "fes_gwh_2024": 863.558
+      },
+      {
+        "gsp": "Carntyne",
+        "share": 0.004658921913705722,
+        "fes_gwh_2024": 802.082
+      },
+      {
+        "gsp": "Ravenscraig",
+        "share": 0.004100477676548555,
+        "fes_gwh_2024": 705.94
+      },
+      {
+        "gsp": "Drumcross",
+        "share": 0.004041445528452735,
+        "fes_gwh_2024": 695.777
+      },
+      {
+        "gsp": "Currie",
+        "share": 0.0033424637705656295,
+        "fes_gwh_2024": 575.44
+      },
+      {
+        "gsp": "Dunbar B",
+        "share": 0.003102559629991631,
+        "fes_gwh_2024": 534.138
+      },
+      {
+        "gsp": "Kilbowie 11",
+        "share": 0.0024291470461592136,
+        "fes_gwh_2024": 418.20300000000003
+      },
+      {
+        "gsp": "Newton Stewart",
+        "share": 0.0023202718534102175,
+        "fes_gwh_2024": 399.459
+      },
+      {
+        "gsp": "Dumfries ICI",
+        "share": 0.0019007735982072072,
+        "fes_gwh_2024": 327.238
+      },
+      {
+        "gsp": "Hunterston Farm",
+        "share": 0.0012441186398059066,
+        "fes_gwh_2024": 214.188
+      },
+      {
+        "gsp": "Carsfad",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Kendoon",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Earlstoun",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Glenlee",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      }
+    ],
+    "SPEN (SP MANWEB)": [
+      {
+        "gsp": "Rainhill",
+        "share": 0.13015618013030106,
+        "fes_gwh_2024": 21730.047
+      },
+      {
+        "gsp": "Capenhurst",
+        "share": 0.1285589402451574,
+        "fes_gwh_2024": 21463.382
+      },
+      {
+        "gsp": "Frodsham",
+        "share": 0.11430595891438886,
+        "fes_gwh_2024": 19083.795
+      },
+      {
+        "gsp": "Fiddlers Ferry (Cuerdley 132kV)",
+        "share": 0.10372424242917937,
+        "fes_gwh_2024": 17317.139
+      },
+      {
+        "gsp": "Lister Drive",
+        "share": 0.10141018675173234,
+        "fes_gwh_2024": 16930.799
+      },
+      {
+        "gsp": "Legacy",
+        "share": 0.09700030365317239,
+        "fes_gwh_2024": 16194.553
+      },
+      {
+        "gsp": "Connah's Quay",
+        "share": 0.09517872004126271,
+        "fes_gwh_2024": 15890.433
+      },
+      {
+        "gsp": "Birkenhead",
+        "share": 0.08048674856022299,
+        "fes_gwh_2024": 13437.555
+      },
+      {
+        "gsp": "Kirkby SPEN",
+        "share": 0.06505977060744626,
+        "fes_gwh_2024": 10861.965
+      },
+      {
+        "gsp": "Trawsfynydd",
+        "share": 0.028509808040594165,
+        "fes_gwh_2024": 4759.816
+      },
+      {
+        "gsp": "Pentir",
+        "share": 0.023203454477707917,
+        "fes_gwh_2024": 3873.901
+      },
+      {
+        "gsp": "Wylfa",
+        "share": 0.018371508084352426,
+        "fes_gwh_2024": 3067.19
+      },
+      {
+        "gsp": "Imperial Park",
+        "share": 0.014034178064481997,
+        "fes_gwh_2024": 2343.057
+      },
+      {
+        "gsp": "St Asaph (Bodelwyddan)",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      }
+    ],
+    "SSE": [
+      {
+        "gsp": "Kintore",
+        "share": 0.06057966230001673,
+        "fes_gwh_2024": 4314.144
+      },
+      {
+        "gsp": "Inverness",
+        "share": 0.048692978435048134,
+        "fes_gwh_2024": 3467.641
+      },
+      {
+        "gsp": "Thurso",
+        "share": 0.0343093134470917,
+        "fes_gwh_2024": 2443.317
+      },
+      {
+        "gsp": "Milton of Craigie",
+        "share": 0.03385041746124502,
+        "fes_gwh_2024": 2410.637
+      },
+      {
+        "gsp": "Keith",
+        "share": 0.03384227304044358,
+        "fes_gwh_2024": 2410.0570000000002
+      },
+      {
+        "gsp": "Burghmuir",
+        "share": 0.03255082065922205,
+        "fes_gwh_2024": 2318.087
+      },
+      {
+        "gsp": "Persley",
+        "share": 0.03137188766400389,
+        "fes_gwh_2024": 2234.13
+      },
+      {
+        "gsp": "Braco West",
+        "share": 0.028630068401198944,
+        "fes_gwh_2024": 2038.873
+      },
+      {
+        "gsp": "Elgin",
+        "share": 0.027496140351961143,
+        "fes_gwh_2024": 1958.1209999999999
+      },
+      {
+        "gsp": "Abernethy",
+        "share": 0.02713209878424158,
+        "fes_gwh_2024": 1932.196
+      },
+      {
+        "gsp": "Dudhope",
+        "share": 0.02686257462413322,
+        "fes_gwh_2024": 1913.002
+      },
+      {
+        "gsp": "Nairn",
+        "share": 0.024631242040320637,
+        "fes_gwh_2024": 1754.099
+      },
+      {
+        "gsp": "Woodhill",
+        "share": 0.024210287821724803,
+        "fes_gwh_2024": 1724.1209999999999
+      },
+      {
+        "gsp": "Ardmore",
+        "share": 0.023475590854910723,
+        "fes_gwh_2024": 1671.8
+      },
+      {
+        "gsp": "Alness",
+        "share": 0.022161657063856262,
+        "fes_gwh_2024": 1578.229
+      },
+      {
+        "gsp": "Dyce",
+        "share": 0.02203489898355522,
+        "fes_gwh_2024": 1569.202
+      },
+      {
+        "gsp": "Taynuilt",
+        "share": 0.02188369359874503,
+        "fes_gwh_2024": 1558.434
+      },
+      {
+        "gsp": "Lunanhead",
+        "share": 0.020871328051021144,
+        "fes_gwh_2024": 1486.339
+      },
+      {
+        "gsp": "Fort William",
+        "share": 0.020095108580224542,
+        "fes_gwh_2024": 1431.061
+      },
+      {
+        "gsp": "Strichen",
+        "share": 0.019634443289169277,
+        "fes_gwh_2024": 1398.255
+      },
+      {
+        "gsp": "Rannoch",
+        "share": 0.01953079851341853,
+        "fes_gwh_2024": 1390.874
+      },
+      {
+        "gsp": "Redmoss",
+        "share": 0.01942618483243451,
+        "fes_gwh_2024": 1383.424
+      },
+      {
+        "gsp": "Beauly",
+        "share": 0.018989124319598587,
+        "fes_gwh_2024": 1352.299
+      },
+      {
+        "gsp": "Craigiebuckler",
+        "share": 0.018250635984480384,
+        "fes_gwh_2024": 1299.708
+      },
+      {
+        "gsp": "Bridge of Dun",
+        "share": 0.0182300502587995,
+        "fes_gwh_2024": 1298.242
+      },
+      {
+        "gsp": "Willowdale",
+        "share": 0.017969583256306536,
+        "fes_gwh_2024": 1279.693
+      },
+      {
+        "gsp": "Clayhills",
+        "share": 0.017748363936813616,
+        "fes_gwh_2024": 1263.939
+      },
+      {
+        "gsp": "Boat of Garten",
+        "share": 0.017189375827738197,
+        "fes_gwh_2024": 1224.131
+      },
+      {
+        "gsp": "Peterhead Grange",
+        "share": 0.01712127161931236,
+        "fes_gwh_2024": 1219.281
+      },
+      {
+        "gsp": "Coupar Angus",
+        "share": 0.016907368236435905,
+        "fes_gwh_2024": 1204.048
+      },
+      {
+        "gsp": "Tarland",
+        "share": 0.016622959445207672,
+        "fes_gwh_2024": 1183.794
+      },
+      {
+        "gsp": "Arbroath",
+        "share": 0.015254598455831858,
+        "fes_gwh_2024": 1086.347
+      },
+      {
+        "gsp": "Port Ann",
+        "share": 0.014375590777679147,
+        "fes_gwh_2024": 1023.749
+      },
+      {
+        "gsp": "Lyndhurst",
+        "share": 0.014212084509037813,
+        "fes_gwh_2024": 1012.105
+      },
+      {
+        "gsp": "Macduff",
+        "share": 0.013997479020919856,
+        "fes_gwh_2024": 996.822
+      },
+      {
+        "gsp": "Dunoon",
+        "share": 0.013619760443095808,
+        "fes_gwh_2024": 969.923
+      },
+      {
+        "gsp": "Fasnakyle",
+        "share": 0.01326589940137805,
+        "fes_gwh_2024": 944.7230000000001
+      },
+      {
+        "gsp": "Charleston",
+        "share": 0.013089530564712373,
+        "fes_gwh_2024": 932.163
+      },
+      {
+        "gsp": "Dunvegan",
+        "share": 0.011917337779812633,
+        "fes_gwh_2024": 848.6859999999999
+      },
+      {
+        "gsp": "Fraserburgh",
+        "share": 0.011490598214026811,
+        "fes_gwh_2024": 818.2959999999999
+      },
+      {
+        "gsp": "Fiddes",
+        "share": 0.01076226232070075,
+        "fes_gwh_2024": 766.428
+      },
+      {
+        "gsp": "Broadford",
+        "share": 0.009920775146653986,
+        "fes_gwh_2024": 706.502
+      },
+      {
+        "gsp": "Dounreay",
+        "share": 0.009248397041075754,
+        "fes_gwh_2024": 658.619
+      },
+      {
+        "gsp": "Tummel Bridge",
+        "share": 0.009190922706006277,
+        "fes_gwh_2024": 654.526
+      },
+      {
+        "gsp": "Mybster",
+        "share": 0.007879404156982588,
+        "fes_gwh_2024": 561.1270000000001
+      },
+      {
+        "gsp": "Carradale",
+        "share": 0.007193672009710958,
+        "fes_gwh_2024": 512.293
+      },
+      {
+        "gsp": "Killin",
+        "share": 0.006892300355847999,
+        "fes_gwh_2024": 490.831
+      },
+      {
+        "gsp": "Brora",
+        "share": 0.0055000677882610675,
+        "fes_gwh_2024": 391.684
+      },
+      {
+        "gsp": "Grudie Bridge",
+        "share": 0.004654199477507321,
+        "fes_gwh_2024": 331.446
+      },
+      {
+        "gsp": "Peterhead Shell",
+        "share": 0.003989670908529097,
+        "fes_gwh_2024": 284.122
+      },
+      {
+        "gsp": "St Fergus Gas Terminal",
+        "share": 0.002394768641929767,
+        "fes_gwh_2024": 170.542
+      },
+      {
+        "gsp": "Fort Augustus",
+        "share": 0.002373691442579832,
+        "fes_gwh_2024": 169.041
+      },
+      {
+        "gsp": "Clachan",
+        "share": 0.0023124116971014073,
+        "fes_gwh_2024": 164.677
+      },
+      {
+        "gsp": "Sloy",
+        "share": 0.0022579002461510767,
+        "fes_gwh_2024": 160.79500000000002
+      },
+      {
+        "gsp": "Ceannacroc",
+        "share": 0.0022249153419052425,
+        "fes_gwh_2024": 158.446
+      },
+      {
+        "gsp": "Kinlochleven",
+        "share": 0.0021617539543795886,
+        "fes_gwh_2024": 153.948
+      },
+      {
+        "gsp": "Shin",
+        "share": 0.002081489283170909,
+        "fes_gwh_2024": 148.232
+      },
+      {
+        "gsp": "Cassley",
+        "share": 0.0016653093802173,
+        "fes_gwh_2024": 118.594
+      },
+      {
+        "gsp": "Lairg",
+        "share": 0.0013993659568406077,
+        "fes_gwh_2024": 99.655
+      },
+      {
+        "gsp": "St Fillans",
+        "share": 0.0013667461473203554,
+        "fes_gwh_2024": 97.332
+      },
+      {
+        "gsp": "Gremista (Shetland)",
+        "share": 0.0005507313514353382,
+        "fes_gwh_2024": 39.22
+      },
+      {
+        "gsp": "Quoich",
+        "share": 0.00040456708225914155,
+        "fes_gwh_2024": 28.811
+      },
+      {
+        "gsp": "Rothienorman",
+        "share": 4.95967142598066e-05,
+        "fes_gwh_2024": 3.532
+      },
+      {
+        "gsp": "Cairnford",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Ardkinglas",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Berryburn",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Harris",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Eday (Orkney)",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Dallas",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Dunbeath",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Craig Murrail",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Glenfarclas",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Fetteresso",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Finstown (Orkney)",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Errochty",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Orrin",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Stannahs Gate",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Stornoway",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      }
+    ],
+    "SSE (Southern)": [
+      {
+        "gsp": "Fleet",
+        "share": 0.11394787919238115,
+        "fes_gwh_2024": 33503.393000000004
+      },
+      {
+        "gsp": "Mannington",
+        "share": 0.10424807729876598,
+        "fes_gwh_2024": 30651.42
+      },
+      {
+        "gsp": "Bramley",
+        "share": 0.09711822687575267,
+        "fes_gwh_2024": 28555.074
+      },
+      {
+        "gsp": "Cowley",
+        "share": 0.09316754723018379,
+        "fes_gwh_2024": 27393.48
+      },
+      {
+        "gsp": "Lovedean",
+        "share": 0.07563032983992046,
+        "fes_gwh_2024": 22237.12
+      },
+      {
+        "gsp": "East Claydon",
+        "share": 0.075189073103732,
+        "fes_gwh_2024": 22107.38
+      },
+      {
+        "gsp": "Melksham",
+        "share": 0.07217690238995587,
+        "fes_gwh_2024": 21221.73
+      },
+      {
+        "gsp": "Iver 132kV",
+        "share": 0.06281417180321161,
+        "fes_gwh_2024": 18468.864
+      },
+      {
+        "gsp": "Nursling",
+        "share": 0.045401655185511494,
+        "fes_gwh_2024": 13349.169
+      },
+      {
+        "gsp": "Laleham",
+        "share": 0.04103984221143429,
+        "fes_gwh_2024": 12066.692
+      },
+      {
+        "gsp": "Minety",
+        "share": 0.03504602551956332,
+        "fes_gwh_2024": 10304.367
+      },
+      {
+        "gsp": "Ealing",
+        "share": 0.03208146659128049,
+        "fes_gwh_2024": 9432.716
+      },
+      {
+        "gsp": "Iver 66kV",
+        "share": 0.028080899834516823,
+        "fes_gwh_2024": 8256.454
+      },
+      {
+        "gsp": "North Hyde",
+        "share": 0.026433846316679627,
+        "fes_gwh_2024": 7772.181
+      },
+      {
+        "gsp": "Fawley",
+        "share": 0.02550860841760315,
+        "fes_gwh_2024": 7500.139
+      },
+      {
+        "gsp": "Botley Wood",
+        "share": 0.017123036689814,
+        "fes_gwh_2024": 5034.581
+      },
+      {
+        "gsp": "Chickerell",
+        "share": 0.0140335219076113,
+        "fes_gwh_2024": 4126.19
+      },
+      {
+        "gsp": "Axminster H",
+        "share": 0.013455262675298712,
+        "fes_gwh_2024": 3956.168
+      },
+      {
+        "gsp": "Loudwater (Amersham)",
+        "share": 0.008097448832720504,
+        "fes_gwh_2024": 2380.843
+      },
+      {
+        "gsp": "Canal Bank (Willesden 66kV)",
+        "share": 0.0057467857028192,
+        "fes_gwh_2024": 1689.692
+      },
+      {
+        "gsp": "Greenford (Willesden 66kV)",
+        "share": 0.005424172407244257,
+        "fes_gwh_2024": 1594.836
+      },
+      {
+        "gsp": "Acton Lane 66kV",
+        "share": 0.004174984586283888,
+        "fes_gwh_2024": 1227.545
+      },
+      {
+        "gsp": "Perivale (Willesden 66kV)",
+        "share": 0.0027853625746810193,
+        "fes_gwh_2024": 818.963
+      },
+      {
+        "gsp": "Wesley Avenue (Willesden 66kV)",
+        "share": 0.0012748728130344807,
+        "fes_gwh_2024": 374.843
+      }
+    ],
+    "UKPN (East)": [
+      {
+        "gsp": "Bramford",
+        "share": 0.12253426739648522,
+        "fes_gwh_2024": 39221.293
+      },
+      {
+        "gsp": "Sundon",
+        "share": 0.09657547945450189,
+        "fes_gwh_2024": 30912.293
+      },
+      {
+        "gsp": "Walpole (_A)",
+        "share": 0.0921908092944095,
+        "fes_gwh_2024": 29508.829
+      },
+      {
+        "gsp": "Rayleigh",
+        "share": 0.0713285134069782,
+        "fes_gwh_2024": 22831.136
+      },
+      {
+        "gsp": "Rye House",
+        "share": 0.06448809004623349,
+        "fes_gwh_2024": 20641.624
+      },
+      {
+        "gsp": "Elstree",
+        "share": 0.059378932577514046,
+        "fes_gwh_2024": 19006.263
+      },
+      {
+        "gsp": "Tottenham",
+        "share": 0.053821224498615,
+        "fes_gwh_2024": 17227.327999999998
+      },
+      {
+        "gsp": "Burwell Main",
+        "share": 0.051758695854987324,
+        "fes_gwh_2024": 16567.145
+      },
+      {
+        "gsp": "Norwich Main",
+        "share": 0.04849400571315774,
+        "fes_gwh_2024": 15522.169
+      },
+      {
+        "gsp": "Brimsdown",
+        "share": 0.04734277142668316,
+        "fes_gwh_2024": 15153.677
+      },
+      {
+        "gsp": "Watford South",
+        "share": 0.0402756608960886,
+        "fes_gwh_2024": 12891.606
+      },
+      {
+        "gsp": "Pelham",
+        "share": 0.04023794582952997,
+        "fes_gwh_2024": 12879.534
+      },
+      {
+        "gsp": "Eaton Socon",
+        "share": 0.03579201367969701,
+        "fes_gwh_2024": 11456.461
+      },
+      {
+        "gsp": "Wymondley",
+        "share": 0.03551667369908528,
+        "fes_gwh_2024": 11368.329
+      },
+      {
+        "gsp": "Warley",
+        "share": 0.031486897566560285,
+        "fes_gwh_2024": 10078.461
+      },
+      {
+        "gsp": "Braintree",
+        "share": 0.030357894924687354,
+        "fes_gwh_2024": 9717.085
+      },
+      {
+        "gsp": "Tilbury",
+        "share": 0.030098581972856753,
+        "fes_gwh_2024": 9634.083
+      },
+      {
+        "gsp": "Mill Hill",
+        "share": 0.027675476423425244,
+        "fes_gwh_2024": 8858.485
+      },
+      {
+        "gsp": "Barking (Eastern)",
+        "share": 0.010483176427888449,
+        "fes_gwh_2024": 3355.5
+      },
+      {
+        "gsp": "West Thurrock",
+        "share": 0.006526665373715537,
+        "fes_gwh_2024": 2089.083
+      },
+      {
+        "gsp": "Amersham Main",
+        "share": 0.003636223536899571,
+        "fes_gwh_2024": 1163.8980000000001
+      },
+      {
+        "gsp": "Clacton (Bramford)",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      },
+      {
+        "gsp": "Sheringham Shoal (Norwich)",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      }
+    ],
+    "UKPN (London)": [
+      {
+        "gsp": "City Road",
+        "share": 0.13835381998796192,
+        "fes_gwh_2024": 31169.709000000003
+      },
+      {
+        "gsp": "St John's Wood",
+        "share": 0.1258397266422582,
+        "fes_gwh_2024": 28350.411
+      },
+      {
+        "gsp": "Wimbledon South",
+        "share": 0.11211766045385634,
+        "fes_gwh_2024": 25258.969
+      },
+      {
+        "gsp": "West Ham",
+        "share": 0.09089065728057068,
+        "fes_gwh_2024": 20476.741
+      },
+      {
+        "gsp": "New Cross 66kV",
+        "share": 0.07550020688239402,
+        "fes_gwh_2024": 17009.429
+      },
+      {
+        "gsp": "Lodge Road (St John's Wood)",
+        "share": 0.05690640287349319,
+        "fes_gwh_2024": 12820.434000000001
+      },
+      {
+        "gsp": "Hurst",
+        "share": 0.055826917852968526,
+        "fes_gwh_2024": 12577.237
+      },
+      {
+        "gsp": "Willesden 132kV",
+        "share": 0.051444198993214216,
+        "fes_gwh_2024": 11589.855
+      },
+      {
+        "gsp": "Barking West",
+        "share": 0.049310476429710884,
+        "fes_gwh_2024": 11109.149000000001
+      },
+      {
+        "gsp": "Hackney 66kV",
+        "share": 0.03659022642180218,
+        "fes_gwh_2024": 8243.406
+      },
+      {
+        "gsp": "Hackney 132kV",
+        "share": 0.03614147558980169,
+        "fes_gwh_2024": 8142.307000000001
+      },
+      {
+        "gsp": "Littlebrook LPN",
+        "share": 0.03509299507537031,
+        "fes_gwh_2024": 7906.094999999999
+      },
+      {
+        "gsp": "Islington",
+        "share": 0.03218590871786034,
+        "fes_gwh_2024": 7251.158
+      },
+      {
+        "gsp": "Beddington LPN",
+        "share": 0.028218956511899047,
+        "fes_gwh_2024": 6357.4439999999995
+      },
+      {
+        "gsp": "Redbridge",
+        "share": 0.02807541252871362,
+        "fes_gwh_2024": 6325.105
+      },
+      {
+        "gsp": "Wimbledon North",
+        "share": 0.022245722025103543,
+        "fes_gwh_2024": 5011.735
+      },
+      {
+        "gsp": "Willesden 66kV",
+        "share": 0.015942969783283564,
+        "fes_gwh_2024": 3591.789
+      },
+      {
+        "gsp": "Acton Lane 22kV",
+        "share": 0.007513539237254439,
+        "fes_gwh_2024": 1692.724
+      },
+      {
+        "gsp": "Barking (London)",
+        "share": 0.0018027267124832924,
+        "fes_gwh_2024": 406.13599999999997
+      }
+    ],
+    "UKPN (South)": [
+      {
+        "gsp": "Bolney",
+        "share": 0.23821588069488242,
+        "fes_gwh_2024": 41510.769
+      },
+      {
+        "gsp": "Beddington SPN",
+        "share": 0.1394242997526859,
+        "fes_gwh_2024": 24295.651
+      },
+      {
+        "gsp": "Northfleet East",
+        "share": 0.1263705236544561,
+        "fes_gwh_2024": 22020.94
+      },
+      {
+        "gsp": "Ninfield",
+        "share": 0.11103752691987569,
+        "fes_gwh_2024": 19349.059
+      },
+      {
+        "gsp": "Chessington",
+        "share": 0.08708373119889737,
+        "fes_gwh_2024": 15174.944
+      },
+      {
+        "gsp": "West Weybridge",
+        "share": 0.08013544528449008,
+        "fes_gwh_2024": 13964.157000000001
+      },
+      {
+        "gsp": "Sellindge",
+        "share": 0.06632000078688403,
+        "fes_gwh_2024": 11556.72
+      },
+      {
+        "gsp": "Kingsnorth",
+        "share": 0.05622661190630153,
+        "fes_gwh_2024": 9797.877
+      },
+      {
+        "gsp": "Kemsley",
+        "share": 0.04912909807078322,
+        "fes_gwh_2024": 8561.086
+      },
+      {
+        "gsp": "Canterbury",
+        "share": 0.043066733860932044,
+        "fes_gwh_2024": 7504.677000000001
+      },
+      {
+        "gsp": "Littlebrook SPN",
+        "share": 0.0022134155074712836,
+        "fes_gwh_2024": 385.703
+      },
+      {
+        "gsp": "Richborough",
+        "share": 0.000776732362340313,
+        "fes_gwh_2024": 135.351
+      }
+    ],
+    "WPD (East Midlands)": [
+      {
+        "gsp": "Grendon",
+        "share": 0.13336940947191311,
+        "fes_gwh_2024": 30159.451
+      },
+      {
+        "gsp": "Chesterfield",
+        "share": 0.1257523651932105,
+        "fes_gwh_2024": 28436.973
+      },
+      {
+        "gsp": "Willington",
+        "share": 0.11849439893781537,
+        "fes_gwh_2024": 26795.695
+      },
+      {
+        "gsp": "Coventry",
+        "share": 0.1101877081693483,
+        "fes_gwh_2024": 24917.264
+      },
+      {
+        "gsp": "Enderby",
+        "share": 0.10538753811848696,
+        "fes_gwh_2024": 23831.779
+      },
+      {
+        "gsp": "Ratcliffe",
+        "share": 0.08925041697603796,
+        "fes_gwh_2024": 20182.615999999998
+      },
+      {
+        "gsp": "Berkswell",
+        "share": 0.06361463406918047,
+        "fes_gwh_2024": 14385.476
+      },
+      {
+        "gsp": "Staythorpe",
+        "share": 0.057652152336445744,
+        "fes_gwh_2024": 13037.152
+      },
+      {
+        "gsp": "Walpole (_B)",
+        "share": 0.049887452698158925,
+        "fes_gwh_2024": 11281.284
+      },
+      {
+        "gsp": "West Burton",
+        "share": 0.04578814811421885,
+        "fes_gwh_2024": 10354.289
+      },
+      {
+        "gsp": "Drakelow",
+        "share": 0.04135814682167063,
+        "fes_gwh_2024": 9352.512
+      },
+      {
+        "gsp": "Stoke Bardolph",
+        "share": 0.038666503265529395,
+        "fes_gwh_2024": 8743.838
+      },
+      {
+        "gsp": "Bicker Fen",
+        "share": 0.02059112582798384,
+        "fes_gwh_2024": 4656.3679999999995
+      }
+    ],
+    "WPD (Midlands)": [
+      {
+        "gsp": "Cellarhead",
+        "share": 0.1451795987406874,
+        "fes_gwh_2024": 33264.044
+      },
+      {
+        "gsp": "Bishops Wood",
+        "share": 0.10184891849001634,
+        "fes_gwh_2024": 23335.971
+      },
+      {
+        "gsp": "Walham",
+        "share": 0.09195573450909567,
+        "fes_gwh_2024": 21069.211
+      },
+      {
+        "gsp": "Hams Hall (Lea Marston 132kV)",
+        "share": 0.08256621360877558,
+        "fes_gwh_2024": 18917.852
+      },
+      {
+        "gsp": "Kitwell",
+        "share": 0.07610795588517028,
+        "fes_gwh_2024": 17438.114
+      },
+      {
+        "gsp": "Feckenham",
+        "share": 0.07282733948546201,
+        "fes_gwh_2024": 16686.448
+      },
+      {
+        "gsp": "Nechells",
+        "share": 0.07068646260734474,
+        "fes_gwh_2024": 16195.923
+      },
+      {
+        "gsp": "Bustleholme",
+        "share": 0.06517048312894967,
+        "fes_gwh_2024": 14932.083
+      },
+      {
+        "gsp": "Penn",
+        "share": 0.063092611599413,
+        "fes_gwh_2024": 14455.994
+      },
+      {
+        "gsp": "Rugeley",
+        "share": 0.050758760328304314,
+        "fes_gwh_2024": 11630.02
+      },
+      {
+        "gsp": "Ironbridge",
+        "share": 0.04444940926048127,
+        "fes_gwh_2024": 10184.4
+      },
+      {
+        "gsp": "Bushbury",
+        "share": 0.03596628201296154,
+        "fes_gwh_2024": 8240.717
+      },
+      {
+        "gsp": "Willenhall",
+        "share": 0.03259247129292619,
+        "fes_gwh_2024": 7467.698
+      },
+      {
+        "gsp": "Oldbury",
+        "share": 0.024506793620669178,
+        "fes_gwh_2024": 5615.08
+      },
+      {
+        "gsp": "Shrewsbury",
+        "share": 0.022753947812533603,
+        "fes_gwh_2024": 5213.462
+      },
+      {
+        "gsp": "Ocker Hill",
+        "share": 0.019537017617209385,
+        "fes_gwh_2024": 4476.388
+      }
+    ],
+    "WPD (South Wales)": [
+      {
+        "gsp": "Swansea North",
+        "share": 0.28356439292603647,
+        "fes_gwh_2024": 28489.317
+      },
+      {
+        "gsp": "Rassau",
+        "share": 0.12539117944096323,
+        "fes_gwh_2024": 12597.876
+      },
+      {
+        "gsp": "Uskmouth",
+        "share": 0.10862655812117535,
+        "fes_gwh_2024": 10913.558
+      },
+      {
+        "gsp": "Upper Boat 132kV",
+        "share": 0.10544003012762257,
+        "fes_gwh_2024": 10593.412
+      },
+      {
+        "gsp": "Pembroke",
+        "share": 0.10365591047662476,
+        "fes_gwh_2024": 10414.164
+      },
+      {
+        "gsp": "Aberthaw",
+        "share": 0.08638857486594965,
+        "fes_gwh_2024": 8679.339
+      },
+      {
+        "gsp": "Cardiff East",
+        "share": 0.07766994021355808,
+        "fes_gwh_2024": 7803.39
+      },
+      {
+        "gsp": "Margam (Grange 66kV)",
+        "share": 0.043254480370075434,
+        "fes_gwh_2024": 4345.717
+      },
+      {
+        "gsp": "Pyle",
+        "share": 0.04302370179386797,
+        "fes_gwh_2024": 4322.531
+      },
+      {
+        "gsp": "Upper Boat 33kV",
+        "share": 0.022985231664126537,
+        "fes_gwh_2024": 2309.294
+      },
+      {
+        "gsp": "Alpha Steel (Uskmouth)",
+        "share": 0.0,
+        "fes_gwh_2024": 0.0
+      }
+    ],
+    "WPD (South West)": [
+      {
+        "gsp": "Iron Acton",
+        "share": 0.20489642813634062,
+        "fes_gwh_2024": 29957.942
+      },
+      {
+        "gsp": "Indian Queens",
+        "share": 0.1517816215960679,
+        "fes_gwh_2024": 22192.017
+      },
+      {
+        "gsp": "Abham",
+        "share": 0.11237920573679375,
+        "fes_gwh_2024": 16430.983
+      },
+      {
+        "gsp": "Landulph",
+        "share": 0.11032329542707876,
+        "fes_gwh_2024": 16130.387999999999
+      },
+      {
+        "gsp": "Exeter",
+        "share": 0.09286319696005829,
+        "fes_gwh_2024": 13577.544
+      },
+      {
+        "gsp": "Alverdiscott",
+        "share": 0.09073751722280991,
+        "fes_gwh_2024": 13266.748
+      },
+      {
+        "gsp": "Seabank",
+        "share": 0.07562261810347916,
+        "fes_gwh_2024": 11056.796
+      },
+      {
+        "gsp": "Bridgwater",
+        "share": 0.05330238582853182,
+        "fes_gwh_2024": 7793.351
+      },
+      {
+        "gsp": "Taunton",
+        "share": 0.042613259493327185,
+        "fes_gwh_2024": 6230.492
+      },
+      {
+        "gsp": "Sandford",
+        "share": 0.03762683488259627,
+        "fes_gwh_2024": 5501.426
+      },
+      {
+        "gsp": "Axminster",
+        "share": 0.02785363661291637,
+        "fes_gwh_2024": 4072.4849999999997
+      }
+    ]
+  },
+  "qa": {
+    "dno_count": 14,
+    "gsp_count": 374,
+    "share_sum_max_abs_error": 4.440892098500626e-16
+  }
+}
