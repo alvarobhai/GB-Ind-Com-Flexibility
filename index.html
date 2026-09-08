@@ -796,9 +796,9 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 <div id="map"><div class="map-wrap" id="mapWrap"></div></div><div class="status" id="mapStatus"></div></div>
 <div class="charts-area">
 <div class="panel"><div class="panel-head">Flexibility by DNO Area</div><div class="chart" id="dnoChart"></div></div>
-<div class="panel"><div class="panel-head">Flexibility by GSP | Top 10</div><div class="chart" id="gspChart"></div></div>
-<div class="panel"><div class="panel-head">Flexibility by Segment | Top 10</div><div class="chart" id="archChart"></div></div>
-<div class="panel"><div class="panel-head">Flexibility by End-Use | Top 10</div><div class="chart" id="endChart"></div></div>
+<div class="panel"><div class="panel-head">Flexibility by GSP | Top 15</div><div class="chart" id="gspChart"></div></div>
+<div class="panel"><div class="panel-head">Flexibility by Segment | Top 15</div><div class="chart" id="archChart"></div></div>
+<div class="panel"><div class="panel-head">Flexibility by End-Use | Top 15</div><div class="chart" id="endChart"></div></div>
 <div class="panel cost-panel"><div class="panel-head">Flexibility Marginal Cost Curve</div><div class="cost-chart" id="costChart"></div></div>
 </div>
 <div class="panel wide"><div class="panel-head"><span>Selected detail</span><span class="note" id="rowCount"></span></div><div class="detail"><table><thead><tr><th>DNO</th><th>Sector</th><th>Segment</th><th>End-use</th><th>Technical MW</th><th>Hurdle £/MWh</th><th>Economic MW</th></tr></thead><tbody id="detailBody"></tbody></table></div></div>
@@ -909,7 +909,7 @@ function positionChartTooltip(p,x,y){
   p.style.left=Math.max(8,left)+'px';p.style.top=Math.max(8,top)+'px';
 }
 function bars(id,entries,cls,sourceRows){
-  var isDno=(id==="dnoChart"),top=entries.slice(0,isDno?14:10),max=top.length?top[0][1]:1;
+  var isDno=(id==="dnoChart"),top=entries.slice(0,isDno?14:15),max=top.length?top[0][1]:1;
   var body=top.map(function(x){
     var lab=x[0],sector=null,value=x[1];
     if(!isDno){var parts=x[0].split("|");sector=parts[0];lab=(sector==="Industrial"?"Ind | ":"Com | ")+parts.slice(1).join("|");}
@@ -1139,7 +1139,7 @@ function gspDisplayName(key){
 }
 function renderGspChart(rows){
   if(!gspLoaded){$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">Loading NESO GSP allocation data…</div>';return;}
-  var e=gspAgg(rows).slice(0,10);
+  var e=gspAgg(rows).slice(0,15);
   if(!e.length){$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">No GSP allocation available for the current selection.</div>';return;}
   var max=e[0][1]||1;
   $('gspChart').innerHTML=e.map(function(x){var label=gspDisplayName(x[0]);return '<div class="bar-row" data-key="'+esc(x[0])+'"><div title="'+esc(label)+'">'+esc(label)+'</div><div class="bar-bg"><div class="bar-fill gsp" style="width:'+Math.max(0,100*x[1]/max)+'%"></div></div><div>'+Math.round(x[1]).toLocaleString()+' MW</div></div>';}).join('');
@@ -1280,42 +1280,30 @@ function findDnoAtPoint(svg,clientX,clientY){
 }
 function bindDnoMapInteractions(svg){
   if(!svg)return;
-  var wrap=svg.parentElement, active=null;
-  function hit(e){
-    var el=null;
-    try{ el=document.elementFromPoint(e.clientX,e.clientY); }catch(err){}
-    if(el&&el.closest){ el=el.closest('.dno-shape'); if(el&&svg.contains(el))return el; }
-    return findDnoAtPoint(svg,e.clientX,e.clientY);
-  }
-  function enter(el,e){
-    if(!el)return;
-    if(active!==el){active=el;}
-    showRegionPopup(el.getAttribute('data-dno'),filtered(),e.clientX,e.clientY);
-  }
-  function move(e){
-    var el=hit(e);
-    if(el){enter(el,e);}
-    else if(active){
-      var p=$('mapPopup');if(p)p.remove();active=null;
-    }
-  }
-  function leave(){
-    active=null;var p=$('mapPopup');if(p)p.remove();
-  }
-  function select(el,e){
-    var name=el&&el.getAttribute('data-dno');if(!name)return;
-    e.preventDefault();e.stopPropagation();toggleDnoFromMap(name);
-  }
-  Array.prototype.forEach.call(svg.querySelectorAll('.dno-shape'),function(el){
-    el.style.pointerEvents='all';
-    el.addEventListener('click',function(e){select(el,e)},false);
-    el.addEventListener('pointerup',function(e){if(e.button===undefined||e.button===0)select(el,e)},false);
-    el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();select(el,e)}},false);
+  var active=null;
+  Array.prototype.forEach.call(svg.querySelectorAll('.dno-shape'),function(pt){
+    pt.style.pointerEvents='all';
+    pt.addEventListener('mouseenter',function(e){
+      active=pt;
+      var name=pt.getAttribute('data-dno'), vals=dnoValues(filtered()), total=vals[name]||0, rows=filtered(), m={};
+      rows.forEach(function(r){
+        if(r.DNO!==name)return;
+        var k=r.Sector+'|'+r.Archetype,v=selectedMW(r);
+        m[k]=(m[k]||0)+v;
+      });
+      var lines=Object.keys(m).map(function(k){return[k,m[k]]}).sort(function(a,b){return b[1]-a[1]}).slice(0,3).map(function(x){
+        var p=x[0].split('|');
+        return[(p[0]==='Industrial'?'Ind | ':'Com | ')+p.slice(1).join('|'),x[1]];
+      });
+      showChartTooltip(e,name,[['Selected flexibility',total]].concat(lines),'DNO area');
+    });
+    pt.addEventListener('mousemove',function(e){var p=$('chartTooltip');if(p)positionChartTooltip(p,e.clientX,e.clientY);});
+    pt.addEventListener('mouseleave',function(){if(active===pt)active=null;var p=$('chartTooltip');if(p)p.remove();});
+    pt.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();toggleDnoFromMap(pt.getAttribute('data-dno'));
+    },false);
+    pt.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleDnoFromMap(pt.getAttribute('data-dno'));}},false);
   });
-  var target=wrap||svg;
-  target.addEventListener('pointermove',move,true);
-  target.addEventListener('pointerleave',leave,true);
-  target.addEventListener('mousemove',move,true);
 }
 
 
