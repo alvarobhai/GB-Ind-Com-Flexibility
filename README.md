@@ -1,14 +1,16 @@
-# GB Industrial & Commercial Flexibility Explorer — V85
+# GB Industrial & Commercial Flexibility Explorer — V88
 
 Static GitHub Pages dashboard package.
 
-## V85 changes
-- Corrected the Selected Networks KPI so the dynamic count is numeric only; `DNO Areas` is a separate white unit label.
-- Retained the V83 dashboard terminology and controls.
-- GSP polygons continue to use NESO EPSG:27700 boundary data and the same map coordinate system as the DNO map.
-- GSP polygons use the native DNO map coordinate system with a small calibration offset to improve visual registration against the GB/DNO base map.
-- GSP polygons remain clipped to their associated DNO licence-area boundary.
-- Trackpad/mouse-wheel zoom sensitivity is reduced by approximately 50% from V84.
+## V88 update
+- Recalibrated technical flexibility using the aggressive technical potential case documented in `CLF_Technical_Potential_Aggressive_Calibration_V1.xlsx`, targeting the question: can the equipment technically be shut off or partially turned down on request?
+- Technical potential now totals approximately 7.56 GW across GB C&I.
+- Renamed the economic control from **Economic Potential Threshold** to **Flexibility Procurement Cost**.
+- Default procurement-cost slider position is set to the low-screen starting point.
+- Economic screening now applies a 25% uplift to end-user hurdle costs to estimate delivered/procurement cost: `procurement cost = end-user hurdle cost × 1.25`.
+- Added the agreed explanatory text under the procurement-cost control.
+- The selected £/MWh value is used as the economic screen to determine economic flexibility potential.
+- Retained the V87 GSP QA/rendering behaviour and map controls.
 
 ## Package
 - `index.html` — dashboard application
@@ -17,14 +19,5 @@ Static GitHub Pages dashboard package.
 
 NESO GSP GIS boundaries are approximate geographic feeding-area boundaries and are used for regional modelling.
 
-### V86 QA changes
-- GSP allocation loading now performs a strict DNO-by-DNO reconciliation check against the preprocessed FES 2025 shares and does not silently renormalise unmatched GSPs.
-- All 14 DNO areas must pass the allocation QA before the GSP view is marked loaded.
-- GSP polygon geometry is fitted from the NESO EPSG:27700 envelope to the native DNO SVG envelope rather than using hand-tuned positional offsets.
-
-
-## V87 update
-- GSP allocation mapping QA is diagnostic rather than a rendering blocker.
-- Matched FES shares are preserved without silent re-normalisation.
-- Unmatched positive-share GSPs are reported in the browser console.
-- GSP chart/map can still render when a small number of lookup aliases do not resolve.
+## Economic interpretation
+End-user hurdle costs represent the compensation required by the end-user. The dashboard assumes a 25% allowance for aggregator margin and market-access costs on top of these hurdle costs when assessing economic potential.

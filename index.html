@@ -818,9 +818,9 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
       <div class="flow-arrow">↓</div>
       <div class="flow-step"><strong>5</strong><div><b>Technical potential</b><span>Estimate the share of end-use peak demand that can technically be shifted, curtailed or adjusted without significant disruption to productivity.</span></div></div>
       <div class="flow-arrow">↓</div>
-      <div class="flow-step"><strong>6</strong><div><b>Economic potential</b><span>Identify the portion of technical potential that is potentially cost-effective at the selected Economic Potential Threshold.</span></div></div>
+      <div class="flow-step"><strong>6</strong><div><b>Economic potential</b><span>Identify the portion of technical potential that is potentially cost-effective at the selected Flexibility Procurement Cost.</span></div></div>
     </div>
-    <div class="methodology-callout"><strong>£200/MWh</strong><span>Default Economic Potential Threshold — a moderate incentive amount reflective of historical / projected market revenues.</span></div>
+    <div class="methodology-callout"><strong>25% uplift</strong><span>Procurement cost includes an assumed allowance for aggregator margin and market-access costs on top of end-user hurdle costs.</span></div>
     <div class="methodology-item"><h4>Geographic allocation</h4><p>Flexibility is allocated to the 14 DNO licence areas in the underlying screening dataset. GSP ranking is an indicative disaggregation of each DNO result using NESO FES 2025 GSP demand shares; it is not an independently modelled GSP flexibility estimate.</p></div>
     <div class="methodology-item"><h4>Flexibility characteristics</h4><p>End-uses are characterised by operational attributes such as notice time, response time and maximum curtailment duration. These characteristics can be used to assess suitability for different flexibility services.</p></div>
     <h3>Sources &amp; inputs</h3>
@@ -847,11 +847,13 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
   <div class="filter-column"><div class="filter-subhead industrial">Industrial</div><div id="enduseIndustrial" class="filter-box filter-scroll"></div></div>
   <div class="filter-column"><div class="filter-subhead commercial">Commercial</div><div id="enduseCommercial" class="filter-box filter-scroll"></div></div>
 </div>
-<label>Economic Potential Threshold</label>
-<div class="range"><span>£150</span><span id="costValue">£200/MWh</span><span>£1,000</span></div>
-<input id="cost" type="range" min="150" max="1000" step="50" value="200">
+<label>Flexibility Procurement Cost</label>
+<div class="range"><span>£150</span><span id="costValue">£250/MWh</span><span>£1,000</span></div>
+<input id="cost" type="range" min="150" max="1000" step="50" value="250">
+<div style="font-size:9px;color:#65727A;line-height:1.35;margin:4px 1px 7px">The selected £/MWh value is used as the economic screen to determine the economic flexibility potential.</div>
+<div style="font-size:9px;color:#65727A;line-height:1.35;margin:0 1px 10px"><i>We assume the procurement cost includes a 25% allowance for aggregator margin and market-access costs on top of end-user hurdle costs.</i></div>
 <button id="reset">Reset filters</button>
-<input type="hidden" id="sectorValue" value='["Industrial","Commercial"]'><input type="hidden" id="segmentValue" value='[]'><input type="hidden" id="enduseValue" value='[]'><input type="hidden" id="potentialValue" value="Technical"><div class="footer"><b>Scope</b><br>GB → DNO Area → Sector → Segment → End-use → Flexibility potential.<br><br>Economic potential applies the Economic Potential Threshold to the technical potential.</div>
+<input type="hidden" id="sectorValue" value='["Industrial","Commercial"]'><input type="hidden" id="segmentValue" value='[]'><input type="hidden" id="enduseValue" value='[]'><input type="hidden" id="potentialValue" value="Technical"><div class="footer"><b>Scope</b><br>GB → DNO Area → Sector → Segment → End-use → Flexibility potential.<br><br>Economic potential applies the selected Flexibility Procurement Cost as the economic screen to the technical potential, after the assumed 25% market-access uplift.</div>
 </aside>
 <main>
 <div id="error" class="error"></div>
@@ -883,7 +885,7 @@ function uniq(a){var o={};a.forEach(function(x){o[x]=1});return Object.keys(o).s
 function num(v){return Number(v)||0}
 function selectedMW(r){
   if($("potentialValue").value==="Technical") return num(r["Technical Flex MW"]);
-  return num(r["Central Hurdle Cost (£/MWh)"])<=num($("cost").value)?num(r["Technical Flex MW"]):0;
+  return num(r["Central Hurdle Cost (£/MWh)"])*1.25<=num($("cost").value)?num(r["Technical Flex MW"]):0;
 }
 function parseList(id){
   try{var v=JSON.parse($(id).value);return Array.isArray(v)?v:[];}catch(e){return[];}
@@ -1642,7 +1644,7 @@ function init(){
     $('cost').addEventListener('input',function(){$('costValue').textContent='£'+$('cost').value+'/MWh';render()});
     $('reset').addEventListener('click',function(){
   setList('sectorValue',['Industrial','Commercial']);setList('segmentValue',allSegmentKeys());setList('enduseValue',allEnduseKeys());
-  $('potentialValue').value='Technical';$('cost').value=200;$('costValue').textContent='£200/MWh';selectedDnos=[];populate();render();
+  $('potentialValue').value='Technical';$('cost').value=250;$('costValue').textContent='£250/MWh';selectedDnos=[];populate();render();
 });
   }).catch(function(e){$('error').style.display='block';$('error').textContent='Dashboard failed to load its local data: '+e.message+'. Make sure index.html and the data folder are both in the repository root.';});
 }
