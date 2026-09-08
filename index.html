@@ -1014,7 +1014,7 @@ function renderGlobalMap(){
   target.setAttribute('viewBox','0 0 '+width+' '+height);
   target.innerHTML='';
   var sphere={type:'Sphere'};
-  var projection=(d3.geoEqualEarth||d3.geoNaturalEarth1).fitExtent([[18,18],[width-18,height-18]],sphere);
+  var projection=d3.geoEquirectangular().scale(Math.min((width-36)/(2*Math.PI),(height-36)/Math.PI)*0.92).translate([width/2,height/2]);
   var path=d3.geoPath(projection);
   var ns='http://www.w3.org/2000/svg';
   var bg=document.createElementNS(ns,'path');
