@@ -1117,8 +1117,25 @@ function gspAgg(rows){
   return Object.keys(m).map(function(k){return[k,m[k]]}).sort(function(a,b){return b[1]-a[1]});
 }
 function gspDisplayName(key){
-  var hit=GSP_DATA.find(function(g){return g.key===key;});
-  return hit?hit.gsp:key;
+  var g=gspLocations.find(function(x){return x.key===key;});
+  if(!g) return key;
+  var dnoParent={
+    "ENWL":"ENWL",
+    "NPG (Northern Electric)":"NPG",
+    "NPG (Yorkshire Electric)":"NPG",
+    "SPEN (SP Distribution)":"SPEN",
+    "SPEN (SP MANWEB)":"SPEN",
+    "SSE":"SSE",
+    "SSE (Southern)":"SSE",
+    "UKPN (East)":"UKPN",
+    "UKPN (London)":"UKPN",
+    "UKPN (South)":"UKPN",
+    "WPD (East Midlands)":"WPD",
+    "WPD (Midlands)":"WPD",
+    "WPD (South Wales)":"WPD",
+    "WPD (South West)":"WPD"
+  };
+  return (dnoParent[g.dno]||g.dno) + " | " + g.gsp;
 }
 function renderGspChart(rows){
   if(!gspLoaded){$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">Loading NESO GSP allocation data…</div>';return;}
@@ -1163,7 +1180,7 @@ function costCurve(rows){
   for(var y=0;y<=1000;y+=100){grid+='<line x1="'+pL+'" y1="'+Y(y)+'" x2="'+(w-pR)+'" y2="'+Y(y)+'" stroke="#e5e7eb"/><text x="'+(pL-8)+'" y="'+(Y(y)+4)+'" text-anchor="end" font-size="10" fill="#64748b">'+y+'</text>'}
   for(var x=0;x<=maxX+0.001;x+=0.5){grid+='<line x1="'+X(x)+'" y1="'+pT+'" x2="'+X(x)+'" y2="'+(h-pB)+'" stroke="#f1f5f9"/><text x="'+X(x)+'" y="'+(h-pB+18)+'" text-anchor="middle" font-size="10" fill="#64748b">'+x.toFixed(1)+'</text>'}
   var circles=pts.map(function(p){return '<circle cx="'+X(p[0])+'" cy="'+Y(p[1])+'" r="4" fill="#222222"><title>'+p[0].toFixed(2)+' GW at £'+p[1]+'/MWh</title></circle>'}).join('');
-  $('costChart').innerHTML='<svg class="cost-svg" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+grid+'<line x1="'+pL+'" y1="'+(h-pB)+'" x2="'+(w-pR)+'" y2="'+(h-pB)+'" stroke="#94a3b8"/><line x1="'+pL+'" y1="'+pT+'" x2="'+pL+'" y2="'+(h-pB)+'" stroke="#94a3b8"/><path d="'+path+'" fill="none" stroke="#222222" stroke-width="3"/>'+circles+'<text x="'+((pL+w-pR)/2)+'" y="'+(h-5)+'" text-anchor="middle" font-size="11" fill="#64748b">Cumulative flexibility (GW)</text><text x="15" y="'+((pT+h-pB)/2)+'" transform="rotate(-90 15 '+((pT+h-pB)/2)+')" text-anchor="middle" font-size="11" fill="#64748b">Marginal flexibility cost (£/MWh)</text></svg>';
+  $('costChart').innerHTML='<svg style="touch-action:none;user-select:none;-webkit-user-select:none;" class="cost-svg" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+grid+'<line x1="'+pL+'" y1="'+(h-pB)+'" x2="'+(w-pR)+'" y2="'+(h-pB)+'" stroke="#94a3b8"/><line x1="'+pL+'" y1="'+pT+'" x2="'+pL+'" y2="'+(h-pB)+'" stroke="#94a3b8"/><path d="'+path+'" fill="none" stroke="#222222" stroke-width="3"/>'+circles+'<text x="'+((pL+w-pR)/2)+'" y="'+(h-5)+'" text-anchor="middle" font-size="11" fill="#64748b">Cumulative flexibility (GW)</text><text x="15" y="'+((pT+h-pB)/2)+'" transform="rotate(-90 15 '+((pT+h-pB)/2)+')" text-anchor="middle" font-size="11" fill="#64748b">Marginal flexibility cost (£/MWh)</text></svg>';
 }
 function detail(rows){
   var r=rows.slice().sort(function(a,b){return selectedMW(b)-selectedMW(a)}).slice(0,300);
@@ -1311,7 +1328,7 @@ function drawMap(rows){
   html+='</svg><div class="map-zoom-controls"><button type="button" data-z="in">+</button><button type="button" data-z="out">−</button><button type="button" data-z="reset">Reset</button></div><div class="map-legend"><b>Flexibility potential</b><div class="map-gradient"></div><div class="map-gradient-labels"><span>Low</span><span>High</span></div></div>';
   $('mapWrap').innerHTML=html;var svg=$('mapWrap').querySelector('.dno-svg');
   function centerGB(){var rect=$('mapWrap').getBoundingClientRect();mapState.tx=Math.max(0,rect.width*0.16);mapState.ty=0;mapState.scale=1.08;}function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
-  centerGB();applyTransform();bindDnoMapInteractions(svg); setupMapInteractions(svg);
+  centerGB();applyTransform();bindDnoMapInteractions(svg); setupMapInteractions(svg); setupMapInteractions(svg);
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');controls[0].onclick=function(){mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();};controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.50);applyTransform();};controls[2].onclick=function(){centerGB();applyTransform();};
   var drag=false,sx=0,sy=0,otx=0,oty=0;svg.addEventListener('mousedown',function(e){if(e.target.classList.contains('dno-shape'))return;drag=true;sx=e.clientX;sy=e.clientY;otx=mapState.tx;oty=mapState.ty;svg.style.cursor='grabbing';e.preventDefault();});window.addEventListener('mousemove',function(e){if(!drag)return;mapState.tx=otx+(e.clientX-sx)*.60;mapState.ty=oty+(e.clientY-sy)*.60;applyTransform();});window.addEventListener('mouseup',function(){drag=false;if(svg)svg.style.cursor='grab';});
   svg.addEventListener('dblclick',function(e){if(e.target.classList.contains('dno-shape'))return;e.preventDefault();mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();});svg.addEventListener('wheel',function(e){e.preventDefault();var old=mapState.scale,factor=e.deltaY<0?1.025:.975;mapState.scale=Math.max(.45,Math.min(8,old*factor));var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);mapState.tx+=mx*(1-mapState.scale/old)*.35;mapState.ty+=my*(1-mapState.scale/old)*.35;applyTransform();},{passive:false});
