@@ -709,7 +709,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 .map-label{font-weight:700!important;fill:#303030!important;}
 .map-label.selected,.map-label.active{font-weight:700!important;fill:#303030!important;}
 </style>
-
+<style id="v40-gsp-layout">
 /* V40 GSP ranking / cost-curve layout */
 .charts-area{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
 .charts-area .cost-panel{grid-column:1 / -1!important;}
@@ -717,6 +717,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 .dno-filter-box .filter-option.active{background:transparent!important;color:#222!important;border-left-color:transparent!important;}
 .dno-filter-box .filter-option.active::before{color:#8060B0!important;border-color:#8060B0!important;}
 .dno-filter-box .filter-option:hover{background:#F7F3FB!important;}
+</style>
 </head>
 <body>
 <header id="appHeader" class="app-header">
@@ -754,7 +755,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
       <div class="flow-step"><strong>6</strong><div><b>Economic potential</b><span>Identify the portion of technical potential that is potentially cost-effective at the selected Economic Potential Threshold.</span></div></div>
     </div>
     <div class="methodology-callout"><strong>£200/MWh</strong><span>Default Economic Potential Threshold — a moderate incentive amount reflective of historical / projected market revenues.</span></div>
-    <div class="methodology-item"><h4>Geographic allocation</h4><p>Flexibility is allocated to DNO areas based on the geographic distribution of the underlying demand. GSP functionality is reserved for future integration with NESO regional demand pathways.</p></div>
+    <div class="methodology-item"><h4>Geographic allocation</h4><p>Flexibility is allocated to the 14 DNO licence areas in the underlying screening dataset. GSP ranking is an indicative disaggregation of each DNO result using NESO FES 2025 GSP demand shares; it is not an independently modelled GSP flexibility estimate.</p></div>
     <div class="methodology-item"><h4>Flexibility characteristics</h4><p>End-uses are characterised by operational attributes such as notice time, response time and maximum curtailment duration. These characteristics can be used to assess suitability for different flexibility services.</p></div>
     <h3>Sources &amp; inputs</h3>
     <ul class="source-list">
@@ -907,7 +908,7 @@ function positionChartTooltip(p,x,y){
   p.style.left=Math.max(8,left)+'px';p.style.top=Math.max(8,top)+'px';
 }
 function bars(id,entries,cls,sourceRows){
-  var isDno=(id==="dnoChart"),top=entries.slice(0,10),max=top.length?top[0][1]:1;
+  var isDno=(id==="dnoChart"),top=entries.slice(0,isDno?14:10),max=top.length?top[0][1]:1;
   var body=top.map(function(x){
     var lab=x[0],sector=null,value=x[1];
     if(!isDno){var parts=x[0].split("|");sector=parts[0];lab=(sector==="Industrial"?"Ind | ":"Com | ")+parts.slice(1).join("|");}
@@ -958,14 +959,27 @@ function loadGspWeights(){
   return fetch(url).then(function(r){if(!r.ok)throw Error('GSP data returned '+r.status);return r.json();}).then(function(p){
     var rec=(p.result&&p.result.records)||[]; var raw={};
     rec.forEach(function(x){var d=x.dno,g=x.gsp,v=num(x.demand_gwh);if(!d||!g||!v)return;(raw[d]||(raw[d]=[])).push({gsp:g,weight:v});});
+    /* Map the 14 dashboard DNO licence areas to the corresponding NESO FES 2025
+       DNO License Area labels. Do NOT collapse these to the six parent operators: each
+       licence area has its own GSP set, and collapsing them duplicates GSPs across areas. */
     var mapDno=function(d){
-      if(d==='ENWL')return 'Electricity North West';
-      if(d.indexOf('NPG')===0)return 'Northern Powergrid';
-      if(d.indexOf('SPEN')===0)return 'SP Energy Networks';
-      if(d.indexOf('SSE')===0)return 'Scottish and Southern Electricity Networks';
-      if(d.indexOf('UKPN')===0)return 'UK Power Networks';
-      if(d.indexOf('WPD')===0)return 'National Grid Electricity Distribution';
-      return d;
+      var m={
+        'ENWL':'ENWL',
+        'NPG (Northern Electric)':'NPG (Northern Electric)',
+        'NPG (Yorkshire Electric)':'NPG (Yorkshire Electric)',
+        'SPEN (SP Distribution)':'SPEN (SP Distribution)',
+        'SPEN (SP MANWEB)':'SPEN (SP MANWEB)',
+        'SSE':'SSE',
+        'SSE (Southern)':'SSE (Southern)',
+        'UKPN (East)':'UKPN (East)',
+        'UKPN (London)':'UKPN (London)',
+        'UKPN (South)':'UKPN (South)',
+        'WPD (East Midlands)':'WPD (East Midlands)',
+        'WPD (Midlands)':'WPD (Midlands)',
+        'WPD (South Wales)':'WPD (South Wales)',
+        'WPD (South West)':'WPD (South West)'
+      };
+      return m[d]||d;
     };
     dnoOrder.forEach(function(d){var src=raw[mapDno(d)]||[];var tot=src.reduce(function(a,x){return a+x.weight},0);if(tot>0)gspWeights[d]=src.map(function(x){return{gsp:x.gsp,share:x.weight/tot};});});
     gspLoaded=true;
@@ -1083,7 +1097,7 @@ function showRegionPopup(name, rowsForPopup, clientX, clientY){
     if(r.Sector==='Industrial')ind+=vv;else com+=vv;
   });
   var old=$('mapPopup');if(old)old.remove();
-  var p=document.createElement('div');p.id='mapPopup';p.className='map-popup v19-hover-popup';p.style.position='fixed';p.style.zIndex='99999';p.style.pointerEvents='auto';
+  var p=document.createElement('div');p.id='mapPopup';p.className='map-popup v19-hover-popup';p.style.position='fixed';p.style.zIndex='2147483647';p.style.pointerEvents='auto';p.style.display='block';p.style.visibility='visible';p.style.opacity='1';
   p.innerHTML='<button class="map-popup-close" type="button" aria-label="Close">×</button><div class="map-popup-title">'+esc(name)+'</div><div>Total Selected Flexibility: <b>'+Math.round(total).toLocaleString()+' MW</b></div><div>Industrial: <b>'+Math.round(ind).toLocaleString()+' MW</b></div><div>Commercial: <b>'+Math.round(com).toLocaleString()+' MW</b></div>';
   p.querySelector('.map-popup-close').addEventListener('click',function(){p.remove();});
   document.body.appendChild(p);
@@ -1101,6 +1115,47 @@ function renderGlobalMap(){
   var target=$('globalMapSvg');
   if(!target)return;
 }
+
+function toggleDnoFromMap(name,clientX,clientY){
+  if(!name || dnoOrder.indexOf(name)<0)return;
+  var arr=selectedDnos.length?selectedDnos.slice():dnoOrder.slice();
+  var idx=arr.indexOf(name);
+  if(idx>=0)arr.splice(idx,1);else arr.push(name);
+  selectedDnos=(arr.length===dnoOrder.length)?[]:arr;
+  /* Redraw first so the menu and map are guaranteed to reflect exactly the same state. */
+  render();
+  /* Popup is created after redraw, preventing render() from deleting it. */
+  window.setTimeout(function(){showRegionPopup(name,baseFiltered(),clientX,clientY);},20);
+}
+window.toggleDnoFromMap=toggleDnoFromMap;
+
+/* Robust DNO interaction: bind directly to each freshly-created SVG path AND keep a
+   document capture fallback. The direct handler is the authoritative path; the fallback
+   protects against browsers/events that retarget SVG pointer events. */
+function bindDnoMapInteractions(svg){
+  Array.prototype.forEach.call(svg.querySelectorAll('.dno-shape'),function(el){
+    var activate=function(e){
+      if(e){e.preventDefault();e.stopPropagation();}
+      toggleDnoFromMap(el.getAttribute('data-dno'),e&&e.clientX,e&&e.clientY);
+    };
+    el.addEventListener('click',activate,false);
+    el.addEventListener('pointerup',function(e){
+      if(e.pointerType!=='mouse' && (e.button===0 || e.button===-1)) activate(e);
+    },false);
+    el.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key===' '){
+        activate(e);
+      }
+    },false);
+  });
+}
+window.addEventListener('click',function(e){
+  var el=e.target && e.target.closest ? e.target.closest('.dno-shape') : null;
+  if(!el)return;
+  if(e.defaultPrevented)return;
+  e.preventDefault();
+  toggleDnoFromMap(el.getAttribute('data-dno'),e.clientX,e.clientY);
+},true);
 
 function drawMap(rows){
   var vals=dnoValues(rows),max=1;
@@ -1130,43 +1185,8 @@ function drawMap(rows){
   }
   function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
   centerGB(); applyTransform();
-  /* DNO interaction: delegated SVG events are attached to the freshly rendered SVG.
-     This avoids inline SVG handlers being lost/obscured by redraws and guarantees that
-     the same selection state drives both the map and the DNO menu. */
-  function handleDnoSelection(e,el){
-    if(e){e.preventDefault();e.stopPropagation();}
-    var name=el && el.getAttribute ? el.getAttribute('data-dno') : null;
-    if(!name)return false;
-    var idx=selectedDnos.indexOf(name);
-    if(selectedDnos.length===0){
-      selectedDnos=dnoOrder.filter(function(d){return d!==name;});
-    }else if(idx>=0){
-      selectedDnos.splice(idx,1);
-    }else{
-      selectedDnos.push(name);
-    }
-    if(selectedDnos.length===dnoOrder.length)selectedDnos=[];
-    var popupX=e && Number.isFinite(e.clientX)?e.clientX:window.innerWidth*.65;
-    var popupY=e && Number.isFinite(e.clientY)?e.clientY:window.innerHeight*.45;
-    /* render() rebuilds the map and menu from the same selectedDnos state. */
-    render();
-    setTimeout(function(){
-      showRegionPopup(name,baseFiltered(),popupX,popupY);
-    },0);
-    return false;
-  }
-  window.handleDnoMapClick=handleDnoSelection;
-  svg.addEventListener('click',function(e){
-    var el=e.target && e.target.closest ? e.target.closest('.dno-shape') : null;
-    if(el && svg.contains(el))handleDnoSelection(e,el);
-  });
-  Array.prototype.forEach.call(svg.querySelectorAll('.dno-shape'),function(el){
-    el.addEventListener('keydown',function(e){
-      if(e.key==='Enter'||e.key===' '){
-        handleDnoSelection(e,el);
-      }
-    });
-  });
+  /* Bind directly after every redraw so each path has a live interaction handler. */
+  bindDnoMapInteractions(svg);
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');
   controls[0].onclick=function(){mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();};
   controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.50);applyTransform();};
