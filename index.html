@@ -709,6 +709,14 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 .map-label{font-weight:700!important;fill:#303030!important;}
 .map-label.selected,.map-label.active{font-weight:700!important;fill:#303030!important;}
 </style>
+
+/* V40 GSP ranking / cost-curve layout */
+.charts-area{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+.charts-area .cost-panel{grid-column:1 / -1!important;}
+#gspChart .bar-fill{background:#8060B0!important;}
+.dno-filter-box .filter-option.active{background:transparent!important;color:#222!important;border-left-color:transparent!important;}
+.dno-filter-box .filter-option.active::before{color:#8060B0!important;border-color:#8060B0!important;}
+.dno-filter-box .filter-option:hover{background:#F7F3FB!important;}
 </head>
 <body>
 <header id="appHeader" class="app-header">
@@ -786,9 +794,10 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 <div id="map"><div class="map-wrap" id="mapWrap"></div></div><div class="status" id="mapStatus"></div></div>
 <div class="charts-area">
 <div class="panel"><div class="panel-head">Flexibility by DNO Area</div><div class="chart" id="dnoChart"></div></div>
+<div class="panel"><div class="panel-head">Flexibility by GSP | Top 10</div><div class="chart" id="gspChart"></div></div>
 <div class="panel"><div class="panel-head">Flexibility by Segment | Top 10</div><div class="chart" id="archChart"></div></div>
 <div class="panel"><div class="panel-head">Flexibility by End-Use | Top 10</div><div class="chart" id="endChart"></div></div>
-<div class="panel"><div class="panel-head">Flexibility Marginal Cost Curve</div><div class="cost-chart" id="costChart"></div></div>
+<div class="panel cost-panel"><div class="panel-head">Flexibility Marginal Cost Curve</div><div class="cost-chart" id="costChart"></div></div>
 </div>
 <div class="panel wide"><div class="panel-head"><span>Selected detail</span><span class="note" id="rowCount"></span></div><div class="detail"><table><thead><tr><th>DNO</th><th>Sector</th><th>Segment</th><th>End-use</th><th>Technical MW</th><th>Hurdle £/MWh</th><th>Economic MW</th></tr></thead><tbody id="detailBody"></tbody></table></div></div>
 </section>
@@ -798,7 +807,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 <script>
 (function(){
 "use strict";
-var DATA=[], selectedDnos=[];
+var DATA=[], selectedDnos=[], GSP_DATA=[], gspWeights={}, geoMode="DNO", gspLoaded=false;
 var dnoOrder=["ENWL","NPG (Northern Electric)","NPG (Yorkshire Electric)","SPEN (SP Distribution)","SPEN (SP MANWEB)","SSE","SSE (Southern)","UKPN (East)","UKPN (London)","UKPN (South)","WPD (East Midlands)","WPD (Midlands)","WPD (South Wales)","WPD (South West)"];
 
 function $(id){return document.getElementById(id)}
@@ -943,6 +952,37 @@ function bars(id,entries,cls,sourceRows){
   });
 }
 
+function loadGspWeights(){
+  var sql="SELECT \"DNO License Area\" AS dno, \"GSP\" AS gsp, SUM(\"2024\" * CASE WHEN \"Share of GSP\" IS NULL OR trim(\"Share of GSP\")='' THEN 1 ELSE CAST(\"Share of GSP\" AS numeric) END) AS demand_gwh FROM \"73f69d8f-e9cb-4a2d-8538-baf03b5eadef\" WHERE \"Building Block ID Number\" LIKE 'Dem_%' AND \"Unit\"='GWh' GROUP BY \"DNO License Area\",\"GSP\"";
+  var url='https://api.neso.energy/api/3/action/datastore_search_sql?sql='+encodeURIComponent(sql);
+  return fetch(url).then(function(r){if(!r.ok)throw Error('GSP data returned '+r.status);return r.json();}).then(function(p){
+    var rec=(p.result&&p.result.records)||[]; var raw={};
+    rec.forEach(function(x){var d=x.dno,g=x.gsp,v=num(x.demand_gwh);if(!d||!g||!v)return;(raw[d]||(raw[d]=[])).push({gsp:g,weight:v});});
+    var mapDno=function(d){
+      if(d==='ENWL')return 'Electricity North West';
+      if(d.indexOf('NPG')===0)return 'Northern Powergrid';
+      if(d.indexOf('SPEN')===0)return 'SP Energy Networks';
+      if(d.indexOf('SSE')===0)return 'Scottish and Southern Electricity Networks';
+      if(d.indexOf('UKPN')===0)return 'UK Power Networks';
+      if(d.indexOf('WPD')===0)return 'National Grid Electricity Distribution';
+      return d;
+    };
+    dnoOrder.forEach(function(d){var src=raw[mapDno(d)]||[];var tot=src.reduce(function(a,x){return a+x.weight},0);if(tot>0)gspWeights[d]=src.map(function(x){return{gsp:x.gsp,share:x.weight/tot};});});
+    gspLoaded=true;
+  });
+}
+function gspAgg(rows){
+  var m={};
+  rows.forEach(function(r){var shares=gspWeights[r.DNO]||[];shares.forEach(function(x){var v=selectedMW(r)*x.share;m[x.gsp]=(m[x.gsp]||0)+v;});});
+  return Object.keys(m).map(function(k){return[k,m[k]]}).sort(function(a,b){return b[1]-a[1]});
+}
+function renderGspChart(rows){
+  if(!gspLoaded){$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">Loading NESO GSP allocation data…</div>';return;}
+  var e=gspAgg(rows).slice(0,10);
+  if(!e.length){$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">No GSP allocation available for the current selection.</div>';return;}
+  var max=e[0][1]||1;
+  $('gspChart').innerHTML=e.map(function(x){return '<div class="bar-row" data-key="'+esc(x[0])+'"><div title="'+esc(x[0])+'">'+esc(x[0])+'</div><div class="bar-bg"><div class="bar-fill" style="width:'+Math.max(0,100*x[1]/max)+'%"></div></div><div>'+Math.round(x[1]).toLocaleString()+' MW</div></div>';}).join('');
+}
 function cards(rows){
   var t=0,i=0,c=0;rows.forEach(function(r){var v=selectedMW(r);t+=v;if(r.Sector==="Industrial")i+=v;else c+=v});
   $("total").textContent=(t/1000).toFixed(2);$("ind").textContent=(i/1000).toFixed(2);$("com").textContent=(c/1000).toFixed(2);$("dno").textContent=(selectedDnos.length?selectedDnos.length:14)+" DNO Areas";
@@ -1136,7 +1176,7 @@ function baseFiltered(){
 function loadDnoGeo(){ render(); }
 function render(){
   populate();
-  var rows=filtered();cards(rows);bars("dnoChart",agg(rows,"DNO"),"",rows);bars("archChart",agg(rows.map(function(r){var q=Object.assign({},r);q["SegmentKey"]=r.Sector+"|"+r.Archetype;return q}),"SegmentKey"),"",rows);bars("endChart",agg(rows.map(function(r){var q=Object.assign({},r);q["EndUseKey"]=r.Sector+"|"+r["End-use"];return q}),"EndUseKey"),"",rows);costCurve(rows);detail(rows);drawMap(rows);saveState();
+  var rows=filtered();cards(rows);bars("dnoChart",agg(rows,"DNO"),"",rows);renderGspChart(rows);bars("archChart",agg(rows.map(function(r){var q=Object.assign({},r);q["SegmentKey"]=r.Sector+"|"+r.Archetype;return q}),"SegmentKey"),"",rows);bars("endChart",agg(rows.map(function(r){var q=Object.assign({},r);q["EndUseKey"]=r.Sector+"|"+r["End-use"];return q}),"EndUseKey"),"",rows);costCurve(rows);detail(rows);drawMap(rows);saveState();
 }
 function saveState(){
   var q=new URLSearchParams(),s=parseList('sectorValue'),a=parseList('segmentValue'),e=parseList('enduseValue');
@@ -1155,9 +1195,9 @@ function restore(){
 }
 function init(){
   fetch('data/data.json').then(function(r){if(!r.ok)throw Error('Data file returned '+r.status);return r.json()}).then(function(p){
-    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();$('potentialChoice').value=$('potentialValue').value;render();loadDnoGeo();
+    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();$('potentialChoice').value=$('potentialValue').value;render();loadDnoGeo();loadGspWeights().then(function(){render();}).catch(function(){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">GSP allocation data could not be loaded. DNO-level results remain available.</div>';});
     $('potentialChoice').addEventListener('change',function(){ $('potentialValue').value=this.value; populate(); render(); });
-    $('geoChoice').addEventListener('change',function(){ if(this.value==='GSP'){ $('mapStatus').textContent='GSP geography is reserved for the FES/tRESP regional layer; DNO remains the active 2024 geography.'; } else { $('mapStatus').textContent="DNO areas are shown as DNO licence-area shapes; values are allocated to DNO areas within the dashboard dataset."; } });
+    $('geoChoice').addEventListener('change',function(){ geoMode=this.value; if(this.value==='GSP'){ $('mapStatus').textContent='GSP ranking is disaggregated from DNO flexibility using NESO FES 2025 2024 demand shares by GSP. The DNO map remains the geographic map view.'; } else { $('mapStatus').textContent="DNO areas are shown as DNO licence-area shapes; values are allocated to DNO areas within the dashboard dataset."; } render(); });
     $('cost').addEventListener('input',function(){$('costValue').textContent='£'+$('cost').value+'/MWh';render()});
     $('reset').addEventListener('click',function(){
   setList('sectorValue',['Industrial','Commercial']);setList('segmentValue',allSegmentKeys());setList('enduseValue',allEnduseKeys());
