@@ -662,6 +662,28 @@ aside{top:176px!important;height:420px!important;max-height:420px!important;}
 .flow-step span{display:block;font-size:9.5px;color:#65727A;line-height:1.4;}
 .flow-arrow{text-align:center;color:#9AA8AF;font-size:12px;line-height:14px;}
 </style>
+
+<style id="v25-final">
+/* V25: global geographic context, taller navy header, and floating methodology panel */
+.global-map-svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+.global-map-svg .country{fill:#EEF1F3;stroke:#C7CFD5;stroke-width:.65;vector-effect:non-scaling-stroke;}
+.global-map-svg .graticule{fill:none;stroke:#E3E7EA;stroke-width:.45;vector-effect:non-scaling-stroke;}
+.dno-svg{position:relative;z-index:2;}
+.app-header-top{height:142px!important;align-items:start!important;padding-top:12px!important;padding-bottom:10px!important;}
+.header-kpis{padding-top:8px!important;align-self:start!important;}
+.header-controls{height:48px!important;}
+body{padding-top:190px!important;}
+aside{top:202px!important;height:420px!important;max-height:420px!important;}
+.methodology-drawer{position:fixed!important;top:202px!important;right:22px!important;width:min(430px,calc(100vw - 24px))!important;height:420px!important;max-height:calc(100vh - 224px)!important;border-radius:12px!important;z-index:6000!important;box-shadow:0 12px 32px rgba(20,45,60,.20)!important;}
+.methodology-head{height:54px!important;}
+.methodology-body{height:calc(100% - 54px)!important;}
+@media(max-width:1000px){
+ body{padding-top:182px!important;}
+ .app-header-top{height:auto!important;min-height:134px!important;padding:9px 14px!important;}
+ aside{top:auto!important;height:420px!important;max-height:420px!important;}
+ .methodology-drawer{top:14px!important;right:12px!important;height:min(420px,calc(100vh - 28px))!important;}
+}
+</style>
 </head>
 <body>
 <header id="appHeader" class="app-header">
@@ -747,6 +769,8 @@ aside{top:176px!important;height:420px!important;max-height:420px!important;}
 <div class="footer">Map context: Natural Earth country context; analytical DNO geometry: NESO GB DNO licence-area dataset.<br><br>Analytical dataset: GB industrial and commercial flexibility screening dataset. DNO geography: NESO GB DNO licence-area dataset. This dashboard is a static GitHub Pages application; all filtering/calculation is performed in the browser.</div>
 </main>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/d3-geo@3/dist/d3-geo.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script>
 (function(){
 "use strict";
@@ -981,11 +1005,43 @@ function positionMapPopup(p,clientX,clientY){
   y=Math.min(Math.max(8,y),rect.height-p.offsetHeight-8);
   p.style.left=x+'px';p.style.top=y+'px';
 }
+var globalMapPromise=null;
+function renderGlobalMap(){
+  var target=$('globalMapSvg');
+  if(!target || !window.d3 || !window.topojson)return;
+  var wrap=$('mapWrap'),rect=wrap.getBoundingClientRect(),w=Math.max(300,rect.width),h=Math.max(250,rect.height);
+  target.setAttribute('viewBox','0 0 '+w+' '+h);
+  target.innerHTML='<rect width="100%" height="100%" fill="#F7F8F9"/>';
+  if(!globalMapPromise){
+    globalMapPromise=fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json').then(function(r){
+      if(!r.ok)throw Error('World map returned '+r.status);
+      return r.json();
+    });
+  }
+  globalMapPromise.then(function(world){
+    var countries=topojson.feature(world,world.objects.countries);
+    var projection=d3.geoNaturalEarth1().fitExtent([[8,8],[w-8,h-8]],countries);
+    var path=d3.geoPath(projection);
+    var graticule=d3.geoGraticule10();
+    target.innerHTML='';
+    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    var grid=document.createElementNS('http://www.w3.org/2000/svg','path');
+    grid.setAttribute('class','graticule');grid.setAttribute('d',path(graticule));g.appendChild(grid);
+    countries.features.forEach(function(c){
+      var el=document.createElementNS('http://www.w3.org/2000/svg','path');
+      el.setAttribute('class','country');el.setAttribute('d',path(c));
+      g.appendChild(el);
+    });
+    target.appendChild(g);
+  }).catch(function(){
+    target.innerHTML='<rect width="100%" height="100%" fill="#F7F8F9"/>';
+  });
+}
 function drawMap(rows){
   var vals=dnoValues(rows),max=1;
   dnoOrder.forEach(function(d){max=Math.max(max,vals[d]||0)});
-  var html='<svg class="dno-svg" viewBox="140 300 760 950" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GB DNO licence area map">';
-  html+=europeContext();
+  var html='<svg id="globalMapSvg" class="global-map-svg" role="img" aria-label="Global geographic context map"></svg>';
+  html+='<svg class="dno-svg" viewBox="140 300 760 950" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GB DNO licence area map">';
   dnoRegions.forEach(function(r){
     var sel=selectedDnos.indexOf(r.name)>=0;
     html+='<path class="dno-shape '+(sel?'selected':'')+'" data-dno="'+esc(r.name)+'" d="'+r.path+'" fill="'+dnoFill(vals[r.name]||0,max,sel)+'" opacity="1" tabindex="0" role="button" aria-label="'+esc(r.name)+'" title="'+esc(r.name)+' — '+(vals[r.name]||0).toFixed(0)+' MW"/>';
@@ -998,7 +1054,8 @@ function drawMap(rows){
   html+='<div class="map-zoom-controls"><button type="button" data-z="in">+</button><button type="button" data-z="out">−</button><button type="button" data-z="reset">Reset</button></div>';
   html+='<div class="map-legend"><b>Flexibility potential</b><div class="map-gradient"></div><div class="map-gradient-labels"><span>Low</span><span>High</span></div></div>';
   $('mapWrap').innerHTML=html;
-  var svg=$('mapWrap').querySelector('svg');
+  renderGlobalMap();
+  var svg=$('mapWrap').querySelector('.dno-svg');
   function centerGB(){
     var rect=$('mapWrap').getBoundingClientRect();
     // Shift the map right so GB is centred in the visible map area to the right of the floating panel.
