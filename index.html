@@ -877,6 +877,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 (function(){
 "use strict";
 var DATA=[], selectedDnos=[], GSP_DATA=[], GSP_SHAPES=[], gspWeights={}, gspDnoMap={}, gspAliasMap={}, geoMode="DNO", gspLoaded=false, gspShapesLoaded=false;
+var potentialMode="Technical", procurementCost=250;
 var dnoOrder=["ENWL","NPG (Northern Electric)","NPG (Yorkshire Electric)","SPEN (SP Distribution)","SPEN (SP MANWEB)","SSE","SSE (Southern)","UKPN (East)","UKPN (London)","UKPN (South)","WPD (East Midlands)","WPD (Midlands)","WPD (South Wales)","WPD (South West)"];
 
 function $(id){return document.getElementById(id)}
@@ -884,8 +885,11 @@ function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&am
 function uniq(a){var o={};a.forEach(function(x){o[x]=1});return Object.keys(o).sort()}
 function num(v){return Number(v)||0}
 function selectedMW(r){
-  if($("potentialValue").value==="Technical") return num(r["Technical Flex MW"]);
-  return num(r["Central Hurdle Cost (£/MWh)"])*1.25<=num($("cost").value)?num(r["Technical Flex MW"]):0;
+  var tech=num(r["Technical Flex MW"]);
+  if(potentialMode!=="Economic") return tech;
+  var hurdle=num(r["Central Hurdle Cost (£/MWh)"]);
+  var deliveredCost=hurdle*1.25;
+  return deliveredCost<=procurementCost+1e-9?tech:0;
 }
 function parseList(id){
   try{var v=JSON.parse($(id).value);return Array.isArray(v)?v:[];}catch(e){return[];}
@@ -1318,7 +1322,7 @@ function costCurve(rows){
     .sort(function(a,b){return a.cost-b.cost || b.mw-a.mw});
   var totalGW=blocks.reduce(function(a,b){return a+b.mw},0)/1000;
   var w=620,h=250,pL=58,pR=18,pT=12,pB=42;
-  var maxX=totalGW<=0?1:Math.max(0.5,Math.ceil((totalGW*1.10)*2)/2),yMax=Math.max(1000,Math.ceil(Math.max.apply(null,blocks.map(function(b){return b.cost}))/100)*100);
+  var maxX=totalGW<=0?1:Math.max(0.1,Math.ceil((totalGW*1.10)*10)/10),yMax=Math.max(1000,Math.ceil(Math.max.apply(null,blocks.map(function(b){return b.cost}))/100)*100);
   function X(x){return pL+(x/maxX)*(w-pL-pR)} function Y(y){return pT+(1-y/yMax)*(h-pT-pB)}
   var grid='';
   for(var y=0;y<=yMax;y+=100){grid+='<line x1="'+pL+'" y1="'+Y(y)+'" x2="'+(w-pR)+'" y2="'+Y(y)+'" stroke="#e5e7eb"/><text x="'+(pL-8)+'" y="'+(Y(y)+4)+'" text-anchor="end" font-size="10" font-family="Arial, sans-serif" fill="#64748b">'+y+'</text>'}
@@ -1597,14 +1601,14 @@ function restore(){
   setList('sectorValue',q.get('sector')?q.get('sector').split('~'):['Industrial','Commercial']);
   setList('segmentValue',q.get('segment')?q.get('segment').split('~'):[]);
   setList('enduseValue',q.get('enduse')?q.get('enduse').split('~'):[]);
-  $('potentialValue').value=q.get('potential')||'Technical';$('cost').value=q.get('cost')||250;
-  $('costValue').textContent='£'+$('cost').value+'/MWh';selectedDnos=q.get('dno')?q.get('dno').split('~'):[];
+  potentialMode=q.get('potential')||'Technical';$('potentialValue').value=potentialMode;procurementCost=Number(q.get('cost'))||250;$('cost').value=procurementCost;
+  $('costValue').textContent='£'+procurementCost+'/MWh';selectedDnos=q.get('dno')?q.get('dno').split('~'):[];
   populate();
 }
 function setHeaderDropdownValue(id,value){
   var dd=document.querySelector('.header-dropdown[data-select="'+id+'"]');
   if(!dd)return;
-  if(id==='potentialChoice') $('potentialValue').value=value;
+  if(id==='potentialChoice'){ $('potentialValue').value=value; potentialMode=value; }
   if(id==='geoChoice') geoMode=value;
   var btn=dd.querySelector('.header-dropdown-btn');
   var opt=Array.prototype.find.call(dd.querySelectorAll('button[data-value]'),function(b){return b.getAttribute('data-value')===value;});
@@ -1639,12 +1643,12 @@ function syncHeaderDropdowns(){setHeaderDropdownValue('geoChoice',geoMode);setHe
 
 function init(){
   fetch('data/data.json').then(function(r){if(!r.ok)throw Error('Data file returned '+r.status);return r.json()}).then(function(p){
-    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();setHeaderDropdownValue('potentialChoice',$('potentialValue').value);setHeaderDropdownValue('geoChoice',geoMode);render();loadDnoGeo();loadGspWeights().then(function(){render();return loadGspShapes().catch(function(err){gspShapesLoaded=false;GSP_SHAPES=[];console.warn('NESO GSP boundary layer could not be loaded:',err&&err.message?err.message:err);return null;});}).then(function(){render();}).catch(function(err){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">NESO GSP allocation could not be loaded. <span style="color:#a33">'+esc(err&&err.message?err.message:'Request failed')+'</span></div>';if(geoMode==='GSP')$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">NESO GSP data could not be loaded.</div>';});
+    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();$('cost').value=procurementCost;$('costValue').textContent='£'+procurementCost+'/MWh';setHeaderDropdownValue('potentialChoice',potentialMode);setHeaderDropdownValue('geoChoice',geoMode);render();loadDnoGeo();loadGspWeights().then(function(){render();return loadGspShapes().catch(function(err){gspShapesLoaded=false;GSP_SHAPES=[];console.warn('NESO GSP boundary layer could not be loaded:',err&&err.message?err.message:err);return null;});}).then(function(){render();}).catch(function(err){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">NESO GSP allocation could not be loaded. <span style="color:#a33">'+esc(err&&err.message?err.message:'Request failed')+'</span></div>';if(geoMode==='GSP')$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">NESO GSP data could not be loaded.</div>';});
     initHeaderDropdowns();
-    $('cost').addEventListener('input',function(){$('costValue').textContent='£'+$('cost').value+'/MWh';render()});
+    $('cost').addEventListener('input',function(){procurementCost=Number(this.value)||250;$('costValue').textContent='£'+procurementCost+'/MWh';render()});
     $('reset').addEventListener('click',function(){
   setList('sectorValue',['Industrial','Commercial']);setList('segmentValue',allSegmentKeys());setList('enduseValue',allEnduseKeys());
-  $('potentialValue').value='Technical';$('cost').value=250;$('costValue').textContent='£250/MWh';selectedDnos=[];populate();render();
+  potentialMode='Technical';$('potentialValue').value='Technical';procurementCost=250;$('cost').value=250;$('costValue').textContent='£250/MWh';selectedDnos=[];populate();render();
 });
   }).catch(function(e){$('error').style.display='block';$('error').textContent='Dashboard failed to load its local data: '+e.message+'. Make sure index.html and the data folder are both in the repository root.';});
 }
