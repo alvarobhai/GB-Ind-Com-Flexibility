@@ -72,6 +72,20 @@ main{padding:22px 24px 28px;max-width:1580px;width:100%;margin:auto}
 .dno-shape.selected,.dno-shape:hover{stroke:#fff!important;stroke-width:.65!important;}
 .map-label{font-weight:700!important;fill:#303030!important;}
 .map-label.selected,.map-label.active{font-weight:700!important;fill:#303030!important;}
+
+/* V73 top-banner controls: neutral dropdown states; future timeframes disabled */
+.header-control select, .header-control select:focus, .header-control select:active{
+  background:#fff!important; color:#26313A!important; border-color:#CBD5DC!important; outline:none!important; box-shadow:none!important;
+}
+.header-control select option, .header-control select option:checked, .header-control select option:hover, .header-control select option:focus{
+  background:#fff!important; color:#26313A!important;
+}
+.year-choice.disabled, .year-choice:disabled{
+  background:#F1F3F4!important; color:#A1A8AE!important; border-color:#E2E5E7!important; cursor:not-allowed!important; opacity:1!important;
+}
+.year-choice.disabled:hover, .year-choice:disabled:hover{
+  background:#F1F3F4!important; color:#A1A8AE!important;
+}
 </style>
 
 <style id="v13-overrides">
@@ -723,7 +737,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 <body>
 <header id="appHeader" class="app-header">
   <div class="app-header-top">
-    <div class="brand-block"><div class="brand">GB Industrial &amp; Commercial Flexibility Explorer</div><div class="brand-description">Explore the technical and economic flexibility potential of GB industrial and commercial consumers across DNO areas, segments and end-uses. Use the controls below to change geography, potential, scenario and timeframe, and the map to explore where flexibility is concentrated.</div><div class="methodology-link-wrap"><button type="button" id="methodologyBtn" class="methodology-btn" aria-expanded="false">ⓘ Methodology &amp; Sources</button></div></div>
+    <div class="brand-block"><div class="brand">GB Industrial &amp; Commercial Flexibility Explorer</div><div class="brand-description">Explore the technical and economic flexibility potential of GB industrial and commercial consumers across DNO areas, segments and end-uses. Use the controls below to change geography, potential and timeframe, and the map to explore where flexibility is concentrated.</div><div class="methodology-link-wrap"><button type="button" id="methodologyBtn" class="methodology-btn" aria-expanded="false">ⓘ Methodology &amp; Sources</button></div></div>
     <div class="header-kpis">
       <div class="header-kpi"><span>Total selected flex</span><strong id="total">—</strong><em>GW</em></div>
       <div class="header-kpi ind-kpi"><span>Industrial flex</span><strong id="ind">—</strong><em>GW</em></div>
@@ -734,8 +748,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
   <div class="header-controls">
     <div class="header-control"><label>Geography</label><select id="geoChoice"><option value="DNO">DNO Region</option><option value="GSP">GSP</option></select></div>
     <div class="header-control"><label>Potential</label><select id="potentialChoice"><option value="Technical">Technical</option><option value="Economic">Economic</option></select></div>
-    <div class="header-control"><label>Scenario</label><select id="scenarioChoice"><option>FES 2025</option></select></div>
-    <div class="header-control timeframe"><label>Timeframe</label><div id="yearChoices" class="year-choices"><button type="button" data-year="2024" class="year-choice active">2024</button><button type="button" data-year="2030" class="year-choice">2030</button><button type="button" data-year="2035" class="year-choice">2035</button><button type="button" data-year="2040" class="year-choice">2040</button><button type="button" data-year="2045" class="year-choice">2045</button><button type="button" data-year="2050" class="year-choice">2050</button></div></div>
+    <div class="header-control timeframe"><label>Timeframe</label><div id="yearChoices" class="year-choices"><button type="button" data-year="2024" class="year-choice active">2024</button><button type="button" data-year="2030" class="year-choice disabled" disabled aria-disabled="true">2030</button><button type="button" data-year="2035" class="year-choice disabled" disabled aria-disabled="true">2035</button><button type="button" data-year="2040" class="year-choice disabled" disabled aria-disabled="true">2040</button><button type="button" data-year="2045" class="year-choice disabled" disabled aria-disabled="true">2045</button><button type="button" data-year="2050" class="year-choice disabled" disabled aria-disabled="true">2050</button></div></div>
   </div>
 </header>
 <div id="methodologyDrawer" class="methodology-drawer" aria-hidden="true">
@@ -1071,19 +1084,42 @@ function loadGspShapes(){
   return fetch(geoUrl).then(function(r){if(!r.ok)throw Error('NESO GSP GeoJSON returned '+r.status);return r.json();}).then(function(gj){
     var features=(gj&&gj.features)||[],out=[];
     function propValues(props){var a=[];Object.keys(props||{}).forEach(function(k){var v=props[k];if(typeof v==='string'&&v.trim())a.push(v.trim());});return a;}
-    function collectKeys(props){var found=[];propValues(props).forEach(function(v){var bits=v.split(/[;,/|]+/).map(function(x){return x.trim();}).filter(Boolean);bits.push(v);bits.forEach(function(b){var k=resolveFesGsp(b,'');if(k&&found.indexOf(k)<0)found.push(k);var n=normGsp(b);if(gspDnoMap[n]&&found.indexOf(n)<0)found.push(n);});});return found;}
+    function collectKeys(props){
+      var found=[];
+      propValues(props).forEach(function(v){
+        var bits=v.split(/[;,/|]+/).map(function(x){return x.trim();}).filter(Boolean);
+        bits.push(v);
+        bits.forEach(function(b){
+          var k=resolveFesGsp(b,'');
+          if(k&&found.indexOf(k)<0)found.push(k);
+          var n=normGsp(b);
+          if(gspDnoMap[n]&&found.indexOf(n)<0)found.push(n);
+          /* Match common NESO boundary naming variants directly to the canonical
+             GSP lookup name. */
+          GSP_DATA.forEach(function(g){
+            if(normGsp(g.gsp)===n || normGsp(g.region_name)===n || normGsp(g.gnode_name)===n){
+              if(found.indexOf(g.key)<0)found.push(g.key);
+            }
+          });
+        });
+      });
+      return found;
+    }
     function bngToWgs84(E,N){
       /* Convert NESO's 2022 GeoJSON from British National Grid (EPSG:27700)
          to WGS84 so it can share the dashboard's lon/lat map projection. */
       var a=6377563.396,b=6356256.909,F0=0.9996012717,lat0=49*Math.PI/180,lon0=-2*Math.PI/180,N0=-100000,E0=400000;
       var e2=1-(b*b)/(a*a),n=(a-b)/(a+b),lat=lat0,M=0;
+      /* Iterate from the previous latitude estimate; the correction is added to
+         the current estimate rather than resetting to lat0 each pass. */
+      lat=lat0+(N-N0)/(a*F0);
       for(var i=0;i<10;i++){
-        lat=lat0+(N-N0-M)/(a*F0);
         var Ma=(1+n+(5/4)*n*n+(5/4)*n*n*n)*(lat-lat0);
         var Mb=(3*n+3*n*n+(21/8)*n*n*n)*Math.sin(lat-lat0)*Math.cos(lat+lat0);
         var Mc=((15/8)*n*n+(15/8)*n*n*n)*Math.sin(2*(lat-lat0))*Math.cos(2*(lat+lat0));
         var Md=(35/24)*n*n*n*Math.sin(3*(lat-lat0))*Math.cos(3*(lat+lat0));
         M=b*F0*(Ma-Mb+Mc-Md);
+        lat=lat+(N-N0-M)/(a*F0);
       }
       var sinLat=Math.sin(lat),cosLat=Math.cos(lat),nu=a*F0/Math.sqrt(1-e2*sinLat*sinLat),rho=a*F0*(1-e2)/Math.pow(1-e2*sinLat*sinLat,1.5),eta2=nu/rho-1;
       var dE=E-E0,lat1=lat-(Math.tan(lat)/(2*rho*nu))*dE*dE+(Math.tan(lat)/(24*rho*nu*nu*nu))*(5+3*Math.tan(lat)*Math.tan(lat)+eta2-9*Math.tan(lat)*Math.tan(lat)*eta2)*Math.pow(dE,4)-(Math.tan(lat)/(720*rho*Math.pow(nu,5)))*(61+90*Math.tan(lat)*Math.tan(lat)+45*Math.pow(Math.tan(lat),4))*Math.pow(dE,6);
@@ -1100,7 +1136,24 @@ function loadGspShapes(){
     }
     function ringPath(ring){return ring.map(function(c,i){var ll=bngToWgs84(num(c[0]),num(c[1])),p=gspMapProjection(ll[0],ll[1]);return(i?'L':'M')+p[0].toFixed(2)+' '+p[1].toFixed(2);}).join(' ')+' Z';}
     function geomPath(g){if(!g)return '';if(g.type==='Polygon')return(g.coordinates||[]).map(ringPath).join(' ');if(g.type==='MultiPolygon')return(g.coordinates||[]).map(function(poly){return(poly||[]).map(ringPath).join(' ');}).join(' ');return '';}
-    features.forEach(function(f){var keys=collectKeys(f.properties||{}),d=geomPath(f.geometry);if(keys.length&&d)out.push({keys:keys,path:d,props:f.properties||{}});});
+    features.forEach(function(f){
+      var keys=collectKeys(f.properties||{}),d=geomPath(f.geometry);
+      /* Some older NESO boundary features carry only region metadata that does
+         not exactly match the settlement GSP name. Fall back to the nearest
+         canonical GSP centroid so the actual polygon is still rendered. */
+      if(!keys.length && f.geometry){
+        var pts=[];
+        if(f.geometry.type==='Polygon') pts=(f.geometry.coordinates&&f.geometry.coordinates[0])||[];
+        else if(f.geometry.type==='MultiPolygon') pts=(((f.geometry.coordinates||[])[0]||[])[0])||[];
+        if(pts.length){
+          var sx=0,sy=0;pts.forEach(function(c){sx+=num(c[0]);sy+=num(c[1]);});
+          var ll=bngToWgs84(sx/pts.length,sy/pts.length),best=null,bd=1e9;
+          GSP_DATA.forEach(function(g){var dd=Math.pow(ll[0]-g.lon,2)+Math.pow(ll[1]-g.lat,2);if(dd<bd){bd=dd;best=g.key;}});
+          if(best)keys=[best];
+        }
+      }
+      if(keys.length&&d)out.push({keys:keys,path:d,props:f.properties||{}});
+    });
     if(!out.length)throw Error('No GSP boundaries could be matched to the NESO GSP lookup');
     GSP_SHAPES=out;gspShapesLoaded=true;return out;
   });
@@ -1198,10 +1251,25 @@ function costCurve(rows){
     var opacity='0.84';
     var label=esc(b.sector+' | '+b.segment+' | '+b.enduse);
     var tip=esc(b.sector+' | '+b.segment+' | '+b.enduse)+'\n'+(b.mw/1000).toFixed(3)+' GW\n£'+Math.round(b.cost)+'/MWh';
-    rects+='<rect class="cost-block" x="'+x0.toFixed(2)+'" y="'+y1.toFixed(2)+'" width="'+Math.max(0,x1-x0).toFixed(2)+'" height="'+Math.max(0,y0-y1).toFixed(2)+'" fill="'+fill+'" fill-opacity="'+opacity+'" stroke="#ffffff" stroke-width="0.9"><title>'+tip+'</title></rect>';
+    rects+='<rect class="cost-block" x="'+x0.toFixed(2)+'" y="'+y1.toFixed(2)+'" width="'+Math.max(0,x1-x0).toFixed(2)+'" height="'+Math.max(0,y0-y1).toFixed(2)+'" fill="'+fill+'" fill-opacity="'+opacity+'" stroke="#ffffff" stroke-width="0.9" data-sector="'+esc(b.sector)+'" data-segment="'+esc(b.segment)+'" data-enduse="'+esc(b.enduse)+'" data-mw="'+b.mw+'" data-cost="'+b.cost+'"><title>'+tip+'</title></rect>';
     cur+=b.mw/1000;
   });
   $('costChart').innerHTML='<svg style="touch-action:none;user-select:none;-webkit-user-select:none;overflow:visible" class="cost-svg" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+grid+'<line x1="'+pL+'" y1="'+Y(0)+'" x2="'+(w-pR)+'" y2="'+Y(0)+'" stroke="#64748b" stroke-width="1.2"/><line x1="'+pL+'" y1="'+pT+'" x2="'+pL+'" y2="'+Y(0)+'" stroke="#94a3b8"/>'+rects+'<text x="'+((pL+w-pR)/2)+'" y="'+(h-5)+'" text-anchor="middle" font-size="11" fill="#64748b">Cumulative flexibility (GW)</text><text x="15" y="'+((pT+Y(0))/2)+'" transform="rotate(-90 15 '+((pT+Y(0))/2)+')" text-anchor="middle" font-size="11" fill="#64748b">Marginal flexibility cost (£/MWh)</text></svg>';
+  Array.prototype.forEach.call($('costChart').querySelectorAll('.cost-block'),function(pt){
+    pt.addEventListener('mouseenter',function(e){
+      var sector=pt.getAttribute('data-sector')||'',segment=pt.getAttribute('data-segment')||'',enduse=pt.getAttribute('data-enduse')||'';
+      var mw=num(pt.getAttribute('data-mw'))||0,cost=num(pt.getAttribute('data-cost'))||0;
+      var old=$('chartTooltip');if(old)old.remove();
+      var tip=document.createElement('div');tip.id='chartTooltip';tip.className='v19-tooltip';
+      tip.innerHTML='<div class="v19-tooltip-title">'+esc(sector+' | '+segment+' | '+enduse)+'</div>'+
+        '<div class="v19-tooltip-subhead">Marginal cost block</div>'+
+        '<div class="v19-line"><span>Flexibility</span><span class="v19-value">'+(mw/1000).toFixed(3)+' GW</span></div>'+
+        '<div class="v19-line"><span>Hurdle cost</span><span class="v19-value">£'+Math.round(cost)+'/MWh</span></div>';
+      document.body.appendChild(tip);positionChartTooltip(tip,e.clientX,e.clientY);
+    });
+    pt.addEventListener('mousemove',function(e){var p=$('chartTooltip');if(p)positionChartTooltip(p,e.clientX,e.clientY);});
+    pt.addEventListener('mouseleave',function(){var p=$('chartTooltip');if(p)p.remove();});
+  });
 }
 
 function detail(rows){
@@ -1365,8 +1433,6 @@ function drawGspMap(rows){
       html+='<path class="gsp-area" data-gsp="'+esc(keys[0])+'" d="'+shape.path+'" fill="'+fill+'" fill-opacity=".92" stroke="#ffffff" stroke-width=".7" vector-effect="non-scaling-stroke"><title>'+esc(label)+' — '+Math.round(v).toLocaleString()+' MW</title></path>';
     });
     html+='</g>';
-    /* Overlay GSP centroids so individual GSPs remain visible. */
-    visible.forEach(function(g){var p=gspMapProjection(g.lon,g.lat),v=gspFlex[g.key]||0,r=2.8+4.5*Math.sqrt(Math.max(0,v/max));html+='<circle class="gsp-point" cx="'+p[0].toFixed(2)+'" cy="'+p[1].toFixed(2)+'" r="'+r.toFixed(2)+'" data-gsp="'+esc(g.key)+'" fill="'+(isDnoSelected(g.dno)?'#5B3A91':'#B9BDC1')+'" fill-opacity=".95" stroke="#fff" stroke-width=".8" vector-effect="non-scaling-stroke"><title>'+esc(g.gsp)+' — '+Math.round(v).toLocaleString()+' MW</title></circle>';});
   } else {
     visible.forEach(function(g){var p=gspMapProjection(g.lon,g.lat),v=gspFlex[g.key]||0,r=4+7*Math.sqrt(Math.max(0,v/max));html+='<circle class="gsp-point" cx="'+p[0].toFixed(2)+'" cy="'+p[1].toFixed(2)+'" r="'+r.toFixed(2)+'" data-gsp="'+esc(g.key)+'" fill="#8060B0" fill-opacity=".75" stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"><title>'+esc(g.gsp)+' — '+Math.round(v).toLocaleString()+' MW</title></circle>';});
   }
