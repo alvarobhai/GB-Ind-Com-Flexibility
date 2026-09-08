@@ -809,7 +809,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 <script>
 (function(){
 "use strict";
-var DATA=[], selectedDnos=[], GSP_DATA=[], gspWeights={}, gspDnoMap={}, gspAliasMap={}, geoMode="DNO", gspLoaded=false;
+var DATA=[], selectedDnos=[], GSP_DATA=[], GSP_SHAPES=[], gspWeights={}, gspDnoMap={}, gspAliasMap={}, geoMode="DNO", gspLoaded=false, gspShapesLoaded=false;
 var dnoOrder=["ENWL","NPG (Northern Electric)","NPG (Yorkshire Electric)","SPEN (SP Distribution)","SPEN (SP MANWEB)","SSE","SSE (Southern)","UKPN (East)","UKPN (London)","UKPN (South)","WPD (East Midlands)","WPD (Midlands)","WPD (South Wales)","WPD (South West)"];
 
 function $(id){return document.getElementById(id)}
@@ -1359,7 +1359,7 @@ function restore(){
 }
 function init(){
   fetch('data/data.json').then(function(r){if(!r.ok)throw Error('Data file returned '+r.status);return r.json()}).then(function(p){
-    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();$('potentialChoice').value=$('potentialValue').value;render();loadDnoGeo();loadGspWeights().then(function(){return loadGspShapes().catch(function(){gspShapesLoaded=false;return null;});}).then(function(){render();}).catch(function(err){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">NESO GSP allocation could not be loaded. <span style="color:#a33">'+esc(err&&err.message?err.message:'Request failed')+'</span></div>';if(geoMode==='GSP')$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">NESO GSP data could not be loaded.</div>';});
+    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();$('potentialChoice').value=$('potentialValue').value;render();loadDnoGeo();loadGspWeights().then(function(){render();return loadGspShapes().catch(function(err){gspShapesLoaded=false;GSP_SHAPES=[];console.warn('NESO GSP boundary layer could not be loaded:',err&&err.message?err.message:err);return null;});}).then(function(){render();}).catch(function(err){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">NESO GSP allocation could not be loaded. <span style="color:#a33">'+esc(err&&err.message?err.message:'Request failed')+'</span></div>';if(geoMode==='GSP')$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">NESO GSP data could not be loaded.</div>';});
     $('potentialChoice').addEventListener('change',function(){ $('potentialValue').value=this.value; populate(); render(); });
     $('geoChoice').addEventListener('change',function(){ geoMode=this.value; render(); });
     $('cost').addEventListener('input',function(){$('costValue').textContent='£'+$('cost').value+'/MWh';render()});
