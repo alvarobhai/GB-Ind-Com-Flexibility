@@ -1098,36 +1098,47 @@ function loadGspWeights(){
       if(!src)throw Error('Local GSP allocation file is missing DNO allocations');
       gspWeights={};
       var matched=0, total=0;
+      var qaErrors=[];
       Object.keys(src).forEach(function(d){
         if(dnoOrder.indexOf(d)<0)return;
-        var arr=[];
+        var arr=[], sourceTotal=0, unmatched=[];
         (src[d]||[]).forEach(function(x){
+          var sh=num(x.share);
+          if(!isFinite(sh)||sh<=0)return;
+          sourceTotal+=sh;
           var g=resolveFesGsp(x.gsp,d);
-          if(!g)return;
-          arr.push({gsp:g,share:num(x.share)});
+          if(!g){unmatched.push(x.gsp);return;}
+          arr.push({gsp:g,share:sh});
         });
-        /* De-duplicate after resolving FES names to the canonical NESO GSP key. */
+        /* De-duplicate after resolving FES names to the canonical NESO GSP key.
+           IMPORTANT: do not silently renormalise if anything failed to match. */
         var merged={};
-        arr.forEach(function(x){
-          if(!isFinite(x.share)||x.share<=0)return;
-          merged[x.gsp]=(merged[x.gsp]||0)+x.share;
-        });
+        arr.forEach(function(x){merged[x.gsp]=(merged[x.gsp]||0)+x.share;});
         var vals=Object.keys(merged).map(function(g){return{gsp:g,share:merged[g]};});
-        var s=vals.reduce(function(a,x){return a+x.share;},0);
-        if(s>0){
-          vals.forEach(function(x){x.share=x.share/s;});
-          gspWeights[d]=vals;
-          matched++;
-          total+=vals.length;
+        var matchedTotal=vals.reduce(function(a,x){return a+x.share;},0);
+        if(unmatched.length || Math.abs(matchedTotal-sourceTotal)>1e-8){
+          qaErrors.push(d+': '+unmatched.length+' unmatched GSP allocation(s); source share='+sourceTotal.toFixed(8)+', matched share='+matchedTotal.toFixed(8));
+          return;
         }
+        var s=vals.reduce(function(a,x){return a+x.share;},0);
+        if(Math.abs(s-1)>1e-8){
+          qaErrors.push(d+': matched GSP shares do not sum to 1 (sum='+s.toFixed(10)+')');
+          return;
+        }
+        gspWeights[d]=vals; matched++; total+=vals.length;
       });
-      if(!matched)throw Error('No local FES GSP allocation records could be matched to the NESO GSP lookup');
+      if(qaErrors.length){
+        console.error('GSP allocation QA failed:',qaErrors);
+        throw Error('GSP allocation QA failed: '+qaErrors.join(' | '));
+      }
+      if(matched!==dnoOrder.length)throw Error('GSP allocation QA failed: not all 14 DNO areas were mapped');
       gspLoaded=true;
-      console.info('Local FES GSP allocation loaded:',matched,'DNOs /',total,'GSP allocations');
+      console.info('GSP allocation QA passed:',matched,'DNOs /',total,'GSP allocations; no share renormalisation applied');
       return true;
     });
   });
 }
+var gspMapCal={minE:0,maxE:700000,minN:0,maxN:1300000,minX:25,maxX:668,minY:25,maxY:1225};
 function loadGspShapes(){
   /* NESO publishes GSP boundaries directly as GeoJSON for the 2022 release.
      Use the direct GeoJSON resource so GitHub Pages does not need to download
@@ -1135,6 +1146,16 @@ function loadGspShapes(){
   var geoUrl='https://api.neso.energy/dataset/2810092e-d4b2-472f-b955-d8bea01f9ec0/resource/08534dae-5408-4e31-8639-b579c8f1c50b/download/gsp_regions_20220314.geojson';
   return fetch(geoUrl).then(function(r){if(!r.ok)throw Error('NESO GSP GeoJSON returned '+r.status);return r.json();}).then(function(gj){
     var features=(gj&&gj.features)||[],out=[];
+    /* Derive the GSP BNG envelope and fit it to the native DNO SVG envelope. */
+    var minE=Infinity,maxE=-Infinity,minN=Infinity,maxN=-Infinity;
+    function scanCoords(coords){if(!Array.isArray(coords))return;if(coords.length>=2 && typeof coords[0]==='number' && typeof coords[1]==='number'){var E=num(coords[0]),N=num(coords[1]);if(isFinite(E)&&isFinite(N)){minE=Math.min(minE,E);maxE=Math.max(maxE,E);minN=Math.min(minN,N);maxN=Math.max(maxN,N);}return;}coords.forEach(scanCoords);}
+    features.forEach(function(f){scanCoords(f.geometry&&f.geometry.coordinates);});
+    if(isFinite(minE)&&isFinite(maxE)&&isFinite(minN)&&isFinite(maxN)){
+      var dNums=[]; dnoRegions.forEach(function(r){var m=r.path.match(/-?\d+(?:\.\d+)?/g)||[];for(var i=0;i<m.length;i+=2){dNums.push([num(m[i]),num(m[i+1])]);}});
+      var dxs=dNums.map(function(p){return p[0]}), dys=dNums.map(function(p){return p[1]});
+      gspMapCal={minE:minE,maxE:maxE,minN:minN,maxN:maxN,minX:Math.min.apply(null,dxs),maxX:Math.max.apply(null,dxs),minY:Math.min.apply(null,dys),maxY:Math.max.apply(null,dys)};
+      console.info('GSP/DNO map calibration:',gspMapCal);
+    }
     function propValues(props){var a=[];Object.keys(props||{}).forEach(function(k){var v=props[k];if(typeof v==='string'&&v.trim())a.push(v.trim());});return a;}
     function collectKeys(props){
       var found=[];
@@ -1187,12 +1208,12 @@ function loadGspShapes(){
       return [lonW*180/Math.PI,latW*180/Math.PI];
     }
     function bngToMap(E,N){
-      /* Native DNO SVG space is a 1 km-per-SVG-unit rendering of BNG, with
-         northings inverted. Keep GSP geometry in that exact coordinate space.
-         The sub-pixel calibration below compensates for the small registration
-         offset between the NESO GSP boundary release and the native DNO artwork. */
-      var x=num(E)/1000+18.5;
-      var y=1224.0-num(N)/1000;
+      /* Fit the NESO BNG GSP geometry to the exact native DNO SVG extent.
+         This removes the accumulated hand-tuned offsets used in earlier versions
+         and ensures both layers share the same GB frame of reference. */
+      var ex=Math.max(1,gspMapCal.maxE-gspMapCal.minE), ny=Math.max(1,gspMapCal.maxN-gspMapCal.minN);
+      var x=gspMapCal.minX+(E-gspMapCal.minE)/ex*(gspMapCal.maxX-gspMapCal.minX);
+      var y=gspMapCal.maxY-(N-gspMapCal.minN)/ny*(gspMapCal.maxY-gspMapCal.minY);
       return [x,y];
     }
     function ringPath(ring){return ring.map(function(c,i){var p=bngToMap(num(c[0]),num(c[1]));return(i?'L':'M')+p[0].toFixed(2)+' '+p[1].toFixed(2);}).join(' ')+' Z';}

@@ -16,3 +16,8 @@ Static GitHub Pages dashboard package.
 - `data/gsp_allocation.json` — NESO FES-based DNO-to-GSP allocation
 
 NESO GSP GIS boundaries are approximate geographic feeding-area boundaries and are used for regional modelling.
+
+### V86 QA changes
+- GSP allocation loading now performs a strict DNO-by-DNO reconciliation check against the preprocessed FES 2025 shares and does not silently renormalise unmatched GSPs.
+- All 14 DNO areas must pass the allocation QA before the GSP view is marked loaded.
+- GSP polygon geometry is fitted from the NESO EPSG:27700 envelope to the native DNO SVG envelope rather than using hand-tuned positional offsets.
