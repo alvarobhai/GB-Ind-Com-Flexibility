@@ -639,7 +639,7 @@ aside{top:176px!important;height:420px!important;max-height:420px!important;}
 .v17-map-country.uk-context{fill:none!important;}
 .europe-labels text{font-size:12px!important;fill:#78838B!important;}
 #mapPopup{display:block!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;}
-.dno-shape{pointer-events:visiblePainted!important;}
+.dno-shape{pointer-events:all!important;}
 .v19-tooltip-subhead{font-weight:750;font-size:10px;color:#1C2A33;margin:1px 0 5px;}
 @media(max-width:1100px){.charts-area{margin-left:0!important;width:100%!important;grid-template-columns:1fr!important;}}
 </style>
@@ -665,7 +665,8 @@ aside{top:176px!important;height:420px!important;max-height:420px!important;}
 
 <style id="v25-final">
 /* V25: global geographic context, taller navy header, and floating methodology panel */
-.global-map-svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+.global-map-svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;background:#F7F8F9;}
+.global-map-svg image{pointer-events:none;}
 .global-map-svg .country{fill:#EEF1F3;stroke:#C7CFD5;stroke-width:.65;vector-effect:non-scaling-stroke;}
 .global-map-svg .graticule{fill:none;stroke:#E3E7EA;stroke-width:.45;vector-effect:non-scaling-stroke;}
 .dno-svg{position:relative;z-index:2;}
@@ -1005,37 +1006,12 @@ function positionMapPopup(p,clientX,clientY){
   y=Math.min(Math.max(8,y),rect.height-p.offsetHeight-8);
   p.style.left=x+'px';p.style.top=y+'px';
 }
-var globalMapPromise=null;
+var globalMapImageUrl="https://upload.wikimedia.org/wikipedia/commons/3/3b/Blank_world_map_Equal_Earth_projection.svg";
 function renderGlobalMap(){
   var target=$('globalMapSvg');
-  if(!target || !window.d3 || !window.topojson)return;
-  var wrap=$('mapWrap'),rect=wrap.getBoundingClientRect(),w=Math.max(300,rect.width),h=Math.max(250,rect.height);
-  target.setAttribute('viewBox','0 0 '+w+' '+h);
-  target.innerHTML='<rect width="100%" height="100%" fill="#F7F8F9"/>';
-  if(!globalMapPromise){
-    globalMapPromise=fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json').then(function(r){
-      if(!r.ok)throw Error('World map returned '+r.status);
-      return r.json();
-    });
-  }
-  globalMapPromise.then(function(world){
-    var countries=topojson.feature(world,world.objects.countries);
-    var projection=d3.geoNaturalEarth1().fitExtent([[8,8],[w-8,h-8]],countries);
-    var path=d3.geoPath(projection);
-    var graticule=d3.geoGraticule10();
-    target.innerHTML='';
-    var g=document.createElementNS('http://www.w3.org/2000/svg','g');
-    var grid=document.createElementNS('http://www.w3.org/2000/svg','path');
-    grid.setAttribute('class','graticule');grid.setAttribute('d',path(graticule));g.appendChild(grid);
-    countries.features.forEach(function(c){
-      var el=document.createElementNS('http://www.w3.org/2000/svg','path');
-      el.setAttribute('class','country');el.setAttribute('d',path(c));
-      g.appendChild(el);
-    });
-    target.appendChild(g);
-  }).catch(function(){
-    target.innerHTML='<rect width="100%" height="100%" fill="#F7F8F9"/>';
-  });
+  if(!target)return;
+  target.setAttribute('viewBox','0 0 2048 997');
+  target.innerHTML='<image href="'+globalMapImageUrl+'" x="0" y="0" width="2048" height="997" preserveAspectRatio="xMidYMid meet" opacity="0.92"/>';
 }
 function drawMap(rows){
   var vals=dnoValues(rows),max=1;
@@ -1098,6 +1074,24 @@ function drawMap(rows){
     });
   });
 
+  // Delegated hover fallback: ensures DNO hover works across browsers/trackpads even when SVG hit-testing is inconsistent.
+  svg.addEventListener('mouseover',function(e){
+    var el=e.target && e.target.closest ? e.target.closest('.dno-shape') : null;
+    if(!el || !svg.contains(el))return;
+    showRegionPopup(el.getAttribute('data-dno'),baseFiltered(),e.clientX,e.clientY);
+  });
+  svg.addEventListener('mousemove',function(e){
+    var el=e.target && e.target.closest ? e.target.closest('.dno-shape') : null;
+    if(!el || !svg.contains(el))return;
+    var p=$('mapPopup');
+    if(p)positionMapPopup(p,e.clientX,e.clientY);
+  });
+  svg.addEventListener('mouseout',function(e){
+    var from=e.target && e.target.closest ? e.target.closest('.dno-shape') : null;
+    var to=e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('.dno-shape') : null;
+    if(from && from!==to){var p=$('mapPopup');if(p)p.remove();}
+  });
+
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');
   controls[0].onclick=function(){mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();};
   controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.50);applyTransform();};
@@ -1121,7 +1115,7 @@ function drawMap(rows){
   });
   svg.addEventListener('wheel',function(e){
     e.preventDefault();
-    var old=mapState.scale,factor=e.deltaY<0?1.10:0.91;
+    var old=mapState.scale,factor=e.deltaY<0?1.05:0.95;
     mapState.scale=Math.max(.45,Math.min(8,old*factor));
     var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);
     mapState.tx += mx*(1-mapState.scale/old)*0.35;
