@@ -86,6 +86,19 @@ main{padding:22px 24px 28px;max-width:1580px;width:100%;margin:auto}
 .year-choice.disabled:hover, .year-choice:disabled:hover{
   background:#F1F3F4!important; color:#A1A8AE!important;
 }
+
+/* V74: replace native top-banner selects with neutral custom dropdowns. This avoids OS/browser selected-option purple highlighting. */
+.header-dropdown{position:relative;display:inline-block;min-width:104px;}
+.header-dropdown select{display:none!important;}
+.header-dropdown-btn{height:30px!important;min-width:104px;padding:5px 26px 5px 8px!important;border:1px solid #C9D3DA!important;border-radius:4px!important;background:#fff!important;color:#26313A!important;font:inherit!important;text-align:left;position:relative;cursor:pointer;box-shadow:none!important;}
+.header-dropdown-btn::after{content:"";position:absolute;right:9px;top:50%;width:6px;height:6px;border-right:1.5px solid #69757E;border-bottom:1.5px solid #69757E;transform:translateY(-65%) rotate(45deg);}
+.header-dropdown.open .header-dropdown-btn::after{transform:translateY(-25%) rotate(225deg);}
+.header-dropdown-menu{display:none;position:absolute;left:0;top:calc(100% + 3px);min-width:100%;z-index:10050;background:#fff;border:1px solid #CBD5DC;border-radius:4px;box-shadow:0 5px 16px rgba(30,45,60,.14);padding:3px;}
+.header-dropdown.open .header-dropdown-menu{display:block;}
+.header-dropdown-menu button{display:block;width:100%;border:0;border-radius:3px;background:#fff!important;color:#26313A!important;padding:7px 8px;text-align:left;font:inherit!important;font-size:11px!important;cursor:pointer;}
+.header-dropdown-menu button:hover,.header-dropdown-menu button:focus{background:#F3F4F5!important;color:#26313A!important;outline:none;}
+.header-dropdown-menu button[aria-selected="true"]{background:#fff!important;color:#26313A!important;font-weight:600!important;}
+.year-choice.disabled,.year-choice:disabled,.year-choice.disabled:hover,.year-choice:disabled:hover{background:#ECEFF1!important;color:#A3AAB0!important;border-color:#E0E3E5!important;cursor:not-allowed!important;opacity:1!important;}
 </style>
 
 <style id="v13-overrides">
@@ -746,8 +759,8 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
     </div>
   </div>
   <div class="header-controls">
-    <div class="header-control"><label>Geography</label><select id="geoChoice"><option value="DNO">DNO Region</option><option value="GSP">GSP</option></select></div>
-    <div class="header-control"><label>Potential</label><select id="potentialChoice"><option value="Technical">Technical</option><option value="Economic">Economic</option></select></div>
+    <div class="header-control"><label>Geography</label><div class="header-dropdown" data-select="geoChoice"><button type="button" class="header-dropdown-btn" aria-haspopup="listbox" aria-expanded="false">DNO Region</button><div class="header-dropdown-menu" role="listbox"><button type="button" data-value="DNO" role="option">DNO Region</button><button type="button" data-value="GSP" role="option">GSP</button></div><select id="geoChoice" aria-hidden="true" tabindex="-1"><option value="DNO">DNO Region</option><option value="GSP">GSP</option></select></div></div>
+    <div class="header-control"><label>Potential</label><div class="header-dropdown" data-select="potentialChoice"><button type="button" class="header-dropdown-btn" aria-haspopup="listbox" aria-expanded="false">Technical</button><div class="header-dropdown-menu" role="listbox"><button type="button" data-value="Technical" role="option">Technical</button><button type="button" data-value="Economic" role="option">Economic</button></div><select id="potentialChoice" aria-hidden="true" tabindex="-1"><option value="Technical">Technical</option><option value="Economic">Economic</option></select></div></div>
     <div class="header-control timeframe"><label>Timeframe</label><div id="yearChoices" class="year-choices"><button type="button" data-year="2024" class="year-choice active">2024</button><button type="button" data-year="2030" class="year-choice disabled" disabled aria-disabled="true">2030</button><button type="button" data-year="2035" class="year-choice disabled" disabled aria-disabled="true">2035</button><button type="button" data-year="2040" class="year-choice disabled" disabled aria-disabled="true">2040</button><button type="button" data-year="2045" class="year-choice disabled" disabled aria-disabled="true">2045</button><button type="button" data-year="2050" class="year-choice disabled" disabled aria-disabled="true">2050</button></div></div>
   </div>
 </header>
@@ -1517,11 +1530,41 @@ function restore(){
   $('costValue').textContent='£'+$('cost').value+'/MWh';selectedDnos=q.get('dno')?q.get('dno').split('~'):[];
   populate();
 }
+function initHeaderDropdowns(){
+  document.querySelectorAll('.header-dropdown').forEach(function(dd){
+    var select=$(dd.getAttribute('data-select')), btn=dd.querySelector('.header-dropdown-btn'), menu=dd.querySelector('.header-dropdown-menu');
+    if(!select||!btn||!menu)return;
+    menu.querySelectorAll('button[data-value]').forEach(function(opt){
+      opt.addEventListener('click',function(){
+        select.value=this.getAttribute('data-value');
+        select.dispatchEvent(new Event('change',{bubbles:true}));
+        closeHeaderDropdowns();
+      });
+    });
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var was=dd.classList.contains('open'); closeHeaderDropdowns();
+      if(!was){dd.classList.add('open');btn.setAttribute('aria-expanded','true');syncHeaderDropdowns();}
+    });
+  });
+  document.addEventListener('click',function(){closeHeaderDropdowns();});
+  syncHeaderDropdowns();
+}
+function closeHeaderDropdowns(){document.querySelectorAll('.header-dropdown.open').forEach(function(dd){dd.classList.remove('open');var b=dd.querySelector('.header-dropdown-btn');if(b)b.setAttribute('aria-expanded','false');});}
+function syncHeaderDropdowns(){
+  document.querySelectorAll('.header-dropdown').forEach(function(dd){
+    var select=$(dd.getAttribute('data-select')),btn=dd.querySelector('.header-dropdown-btn'); if(!select||!btn)return;
+    var opt=select.options[select.selectedIndex]; if(opt)btn.textContent=opt.textContent;
+    dd.querySelectorAll('button[data-value]').forEach(function(b){b.setAttribute('aria-selected',b.getAttribute('data-value')===select.value?'true':'false');});
+  });
+}
+
 function init(){
   fetch('data/data.json').then(function(r){if(!r.ok)throw Error('Data file returned '+r.status);return r.json()}).then(function(p){
     DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();$('potentialChoice').value=$('potentialValue').value;render();loadDnoGeo();loadGspWeights().then(function(){render();return loadGspShapes().catch(function(err){gspShapesLoaded=false;GSP_SHAPES=[];console.warn('NESO GSP boundary layer could not be loaded:',err&&err.message?err.message:err);return null;});}).then(function(){render();}).catch(function(err){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">NESO GSP allocation could not be loaded. <span style="color:#a33">'+esc(err&&err.message?err.message:'Request failed')+'</span></div>';if(geoMode==='GSP')$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">NESO GSP data could not be loaded.</div>';});
-    $('potentialChoice').addEventListener('change',function(){ $('potentialValue').value=this.value; populate(); render(); });
-    $('geoChoice').addEventListener('change',function(){ geoMode=this.value; render(); });
+    $('potentialChoice').addEventListener('change',function(){ $('potentialValue').value=this.value; syncHeaderDropdowns(); populate(); render(); });
+    $('geoChoice').addEventListener('change',function(){ geoMode=this.value; syncHeaderDropdowns(); render(); });
+    initHeaderDropdowns();
     $('cost').addEventListener('input',function(){$('costValue').textContent='£'+$('cost').value+'/MWh';render()});
     $('reset').addEventListener('click',function(){
   setList('sectorValue',['Industrial','Commercial']);setList('segmentValue',allSegmentKeys());setList('enduseValue',allEnduseKeys());
