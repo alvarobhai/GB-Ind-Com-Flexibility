@@ -639,7 +639,7 @@ aside{top:176px!important;height:420px!important;max-height:420px!important;}
 .v17-map-country.uk-context{fill:none!important;}
 .europe-labels text{font-size:12px!important;fill:#78838B!important;}
 #mapPopup{display:block!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;}
-.dno-shape{pointer-events:all!important;}
+.dno-shape{pointer-events:visiblePainted!important;}
 .v19-tooltip-subhead{font-weight:750;font-size:10px;color:#1C2A33;margin:1px 0 5px;}
 @media(max-width:1100px){.charts-area{margin-left:0!important;width:100%!important;grid-template-columns:1fr!important;}}
 </style>
@@ -995,7 +995,7 @@ function showRegionPopup(name, rowsForPopup, clientX, clientY){
     if(r.Sector==='Industrial')ind+=vv;else com+=vv;
   });
   var old=$('mapPopup');if(old)old.remove();
-  var p=document.createElement('div');p.id='mapPopup';p.className='map-popup v19-hover-popup';
+  var p=document.createElement('div');p.id='mapPopup';p.className='map-popup v19-hover-popup';p.style.position='fixed';p.style.zIndex='99999';p.style.pointerEvents='none';
   p.innerHTML='<div class="map-popup-title">'+esc(name)+'</div><div>Total Selected Flexibility: <b>'+Math.round(total).toLocaleString()+' MW</b></div><div>Industrial: <b>'+Math.round(ind).toLocaleString()+' MW</b></div><div>Commercial: <b>'+Math.round(com).toLocaleString()+' MW</b></div>';
   document.body.appendChild(p);
   positionMapPopup(p,clientX,clientY);
@@ -1014,7 +1014,7 @@ function renderGlobalMap(){
   target.setAttribute('viewBox','0 0 '+width+' '+height);
   target.innerHTML='';
   var sphere={type:'Sphere'};
-  var projection=d3.geoNaturalEarth1().fitExtent([[18,18],[width-18,height-18]],sphere);
+  var projection=(d3.geoEqualEarth||d3.geoNaturalEarth1).fitExtent([[18,18],[width-18,height-18]],sphere);
   var path=d3.geoPath(projection);
   var ns='http://www.w3.org/2000/svg';
   var bg=document.createElementNS(ns,'path');
@@ -1095,19 +1095,24 @@ function drawMap(rows){
   });
 
   // Delegated hover fallback: ensures DNO hover works across browsers/trackpads even when SVG hit-testing is inconsistent.
+  function dnoFromEvent(e){
+    var t=e.target;
+    if(t && t.closest){var c=t.closest('.dno-shape');if(c && svg.contains(c))return c;}
+    if(e.composedPath){var path=e.composedPath();for(var j=0;j<path.length;j++){var n=path[j];if(n && n.classList && n.classList.contains('dno-shape') && svg.contains(n))return n;}}
+    return null;
+  }
   svg.addEventListener('mouseover',function(e){
-    var el=e.target && e.target.closest ? e.target.closest('.dno-shape') : null;
-    if(!el || !svg.contains(el))return;
+    var el=dnoFromEvent(e); if(!el)return;
     showRegionPopup(el.getAttribute('data-dno'),baseFiltered(),e.clientX,e.clientY);
   });
   svg.addEventListener('mousemove',function(e){
-    var el=e.target && e.target.closest ? e.target.closest('.dno-shape') : null;
-    if(!el || !svg.contains(el))return;
+    var el=dnoFromEvent(e); if(!el)return;
     var p=$('mapPopup');
-    if(p)positionMapPopup(p,e.clientX,e.clientY);
+    if(!p)showRegionPopup(el.getAttribute('data-dno'),baseFiltered(),e.clientX,e.clientY);
+    else positionMapPopup(p,e.clientX,e.clientY);
   });
   svg.addEventListener('mouseout',function(e){
-    var from=e.target && e.target.closest ? e.target.closest('.dno-shape') : null;
+    var from=dnoFromEvent(e);
     var to=e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('.dno-shape') : null;
     if(from && from!==to){var p=$('mapPopup');if(p)p.remove();}
   });
