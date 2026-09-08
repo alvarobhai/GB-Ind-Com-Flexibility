@@ -485,16 +485,111 @@ label{margin:10px 0 4px!important;font-size:9px!important;}
 .map-popup{position:absolute;right:18px;top:58px;z-index:60;background:#fff;border:1px solid #D6DDE2;border-radius:7px;box-shadow:0 8px 24px rgba(25,45,60,.16);padding:12px 30px 11px 12px;font-size:11px;line-height:1.55;color:#36434C;min-width:220px;}
 .map-popup-title{font-size:13px;font-weight:700;color:#1D2A33;margin-bottom:5px;}.map-popup b{font-weight:700;color:#1D2A33;}.map-popup-close{position:absolute!important;right:5px!important;top:3px!important;width:22px!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important;color:#71808A!important;font-size:18px!important;font-weight:400!important;line-height:20px!important;}
 @media(max-width:1000px){aside{position:relative!important;left:auto!important;top:auto!important;width:auto!important;max-height:450px!important;height:450px!important;margin:12px!important;z-index:1!important}.brand-block{min-width:280px}.header-kpis{gap:10px!important}.app-header-top{height:86px!important}.header-controls{height:48px!important}body{padding-top:134px!important}}
-</style></head>
+</style>
+<style id="v19-final">
+:root{
+ --ind:#2F86B8; --com:#38A66B;
+ --ind-bg:#EAF4FA; --com-bg:#EAF7EF;
+ --purple-low:#F1ECF8; --purple-mid:#C9B8E2; --purple-high:#7657AA;
+ --navy:#103B52;
+}
+.app-header-top{
+ height:106px!important;background:var(--navy)!important;color:#fff!important;
+ display:grid!important;grid-template-columns:minmax(520px,1fr) auto;
+ grid-template-rows:auto auto;column-gap:28px!important;row-gap:2px!important;
+ align-items:center!important;padding:8px 28px 7px!important;
+}
+.brand-block{min-width:0!important;align-self:center!important;}
+.brand{font-size:17px!important;color:#fff!important;}
+.brand-description{
+ color:#fff!important;font-size:11px!important;line-height:1.35!important;
+ max-width:680px!important;margin-top:5px!important;
+}
+.header-kpis{
+ grid-column:1 / -1!important;grid-row:2!important;
+ justify-content:flex-start!important;align-items:baseline!important;
+ gap:30px!important;padding-top:3px!important;
+}
+.header-kpi span,.header-kpi em,.header-kpi strong{color:#fff!important;}
+.header-kpi.ind-kpi strong,.header-kpi.com-kpi strong{color:#fff!important;}
+.header-controls{
+ height:48px!important;font-size:12px!important;padding:0 28px!important;
+ gap:22px!important;align-items:center!important;
+}
+.header-control label{font-size:12px!important;color:#52606B!important;}
+.header-control select{font-size:12px!important;height:30px!important;}
+.year-choice{font-size:12px!important;padding:5px 9px!important;}
+.header-control.timeframe,.year-choices{align-items:center!important;}
+
+body{padding-top:154px!important;}
+aside{
+ top:166px!important;height:420px!important;max-height:420px!important;
+ overflow-y:auto!important;width:455px!important;padding:14px 15px!important;
+}
+aside label{font-weight:750!important;font-size:11px!important;color:#25323B!important;margin:7px 0 3px!important;}
+.filter-subhead{font-weight:750!important;font-size:11px!important;}
+.filter-option{
+ font-size:10px!important;line-height:1.05!important;padding:2px 5px!important;
+ margin:0!important;min-height:16px!important;gap:6px!important;
+}
+.filter-scroll{max-height:145px!important;padding:2px 0!important;}
+#map{height:420px!important;} #mapWrap{height:100%!important;}
+
+#sectorBox .sector-industrial::before,#segmentIndustrial .filter-option::before,#enduseIndustrial .filter-option::before{
+ border-color:var(--ind)!important;
+}
+#sectorBox .sector-commercial::before,#segmentCommercial .filter-option::before,#enduseCommercial .filter-option::before{
+ border-color:var(--com)!important;
+}
+#sectorBox .sector-industrial.active::before,#segmentIndustrial .filter-option.active::before,#enduseIndustrial .filter-option.active::before{
+ color:var(--ind)!important;border-color:var(--ind)!important;
+}
+#sectorBox .sector-commercial.active::before,#segmentCommercial .filter-option.active::before,#enduseCommercial .filter-option.active::before{
+ color:var(--com)!important;border-color:var(--com)!important;
+}
+.filter-option,.filter-option.active,.filter-option span{font-weight:400!important;color:#26313A!important;background:transparent!important;}
+
+.v17-map-country{
+ fill:#E9ECEF!important;stroke:#AEB7BE!important;stroke-width:1.8!important;
+ vector-effect:non-scaling-stroke!important;
+}
+.v17-map-country.uk-context{fill:#E1E7EA!important;}
+.europe-labels text{
+ fill:#68747C!important;font-size:13px!important;font-weight:600!important;
+ paint-order:stroke!important;stroke:#F7F8F9!important;stroke-width:3px!important;
+ stroke-linejoin:round!important;
+}
+.dno-shape{stroke:#fff!important;stroke-width:.32!important;vector-effect:non-scaling-stroke!important;}
+.dno-shape:hover,.dno-shape.selected{stroke:#5E4A7A!important;stroke-width:.48!important;}
+.map-gradient{background:linear-gradient(90deg,var(--purple-low),var(--purple-mid),var(--purple-high))!important;}
+.map-legend{left:auto!important;right:14px!important;bottom:14px!important;}
+.bar-fill.dno{background:var(--purple-high)!important;}
+.sector-chart-legend{font-size:10px!important;}
+.sector-chart-legend i.ind{background:var(--ind)!important;}
+.sector-chart-legend i.com{background:var(--com)!important;}
+
+.v19-tooltip{
+ position:fixed;z-index:10000;pointer-events:none;background:#fff;
+ border:1px solid #D4DCE1;border-radius:6px;box-shadow:0 7px 22px rgba(20,40,55,.16);
+ padding:9px 11px;font-size:10px;line-height:1.5;color:#34414A;
+ min-width:185px;max-width:280px;
+}
+.v19-tooltip-title{font-size:11px;font-weight:750;color:#1C2A33;margin-bottom:4px;}
+.v19-tooltip .v19-line{display:flex;justify-content:space-between;gap:18px;}
+.v19-tooltip .v19-value{font-weight:750;color:#1C2A33;white-space:nowrap;}
+.map-popup.v19-hover-popup{right:auto!important;top:auto!important;min-width:220px!important;}
+</style>
+
+</head>
 <body>
 <header id="appHeader" class="app-header">
   <div class="app-header-top">
-    <div class="brand-block"><div class="brand">GB Industrial &amp; Commercial Flexibility Explorer</div><div class="brand-description">Explore flexibility potential across GB industrial and commercial consumers by geography, segment and end-use.</div></div>
+    <div class="brand-block"><div class="brand">GB Industrial &amp; Commercial Flexibility Explorer</div><div class="brand-description">Explore the technical and economic flexibility potential of GB industrial and commercial consumers across DNO areas, segments and end-uses. Use the controls below to change geography, potential, scenario and timeframe, and the map to explore where flexibility is concentrated.</div></div>
     <div class="header-kpis">
       <div class="header-kpi"><span>Total selected flex</span><strong id="total">—</strong><em>GW</em></div>
       <div class="header-kpi ind-kpi"><span>Industrial flex</span><strong id="ind">—</strong><em>GW</em></div>
       <div class="header-kpi com-kpi"><span>Commercial flex</span><strong id="com">—</strong><em>GW</em></div>
-      <div class="header-kpi"><span>Selected geography</span><strong id="dno">GB</strong></div>
+      <div class="header-kpi"><span>Selected geography</span><strong id="dno">0 DNO Areas</strong></div>
     </div>
   </div>
   <div class="header-controls">
@@ -526,7 +621,7 @@ label{margin:10px 0 4px!important;font-size:9px!important;}
 
 <section class="grid">
 <div class="panel wide">
-<div id="map"><div class="map-wrap" id="mapWrap"></div></div><div class="status" id="mapStatus">DNO areas are shown as DNO licence-area shapes; values are allocated using the CLF model's DNO shares.</div></div>
+<div id="map"><div class="map-wrap" id="mapWrap"></div></div><div class="status" id="mapStatus"></div></div>
 <div class="panel"><div class="panel-head">Flexibility by DNO Area</div><div class="chart" id="dnoChart"></div></div>
 <div class="panel"><div class="panel-head">Flexibility by Segment | Top 10</div><div class="chart" id="archChart"></div></div>
 <div class="panel"><div class="panel-head">Flexibility by End-Use | Top 10</div><div class="chart" id="endChart"></div></div>
@@ -614,26 +709,70 @@ function populate(){
   optionBox('enduseIndustrial',indEnd,ends,function(v){toggleList('enduseValue',v);selectedDnos=[];populate();render();});
   optionBox('enduseCommercial',comEnd,ends,function(v){toggleList('enduseValue',v);selectedDnos=[];populate();render();});
 }
-function bars(id,entries,cls){
-  var isDno=(id==="dnoChart"), top=entries.slice(0,10), max=top.length?top[0][1]:1;
+function chartTooltipHtml(title,lines){
+  var h='<div class="v19-tooltip-title">'+esc(title)+'</div>';
+  lines.forEach(function(x){h+='<div class="v19-line"><span>'+esc(x[0])+'</span><span class="v19-value">'+Math.round(x[1]).toLocaleString()+' MW</span></div>';});
+  return h;
+}
+function showChartTooltip(e,title,lines){
+  var old=$('chartTooltip');if(old)old.remove();
+  var p=document.createElement('div');p.id='chartTooltip';p.className='v19-tooltip';p.innerHTML=chartTooltipHtml(title,lines);
+  document.body.appendChild(p);positionChartTooltip(p,e.clientX,e.clientY);
+}
+function positionChartTooltip(p,x,y){
+  var pad=12,left=x+pad,top=y+pad,w=window.innerWidth,h=window.innerHeight;
+  if(left+p.offsetWidth>w-10)left=x-p.offsetWidth-pad;
+  if(top+p.offsetHeight>h-10)top=y-p.offsetHeight-pad;
+  p.style.left=Math.max(8,left)+'px';p.style.top=Math.max(8,top)+'px';
+}
+function bars(id,entries,cls,sourceRows){
+  var isDno=(id==="dnoChart"),top=entries.slice(0,10),max=top.length?top[0][1]:1;
   var body=top.map(function(x){
-    var lab=x[0], sector=null, value=x[1];
-    if(!isDno){
-      var parts=x[0].split("|"); sector=parts[0]; lab=(sector==="Industrial"?"Ind | ":"Com | ")+parts.slice(1).join("|");
-    }
+    var lab=x[0],sector=null,value=x[1];
+    if(!isDno){var parts=x[0].split("|");sector=parts[0];lab=(sector==="Industrial"?"Ind | ":"Com | ")+parts.slice(1).join("|");}
     var colour=isDno?"dno":(sector==="Industrial"?"ind":"com");
-    return '<div class="bar-row"><div title="'+esc(lab)+'">'+esc(lab)+'</div><div class="bar-bg"><div class="bar-fill '+colour+'" style="width:'+Math.max(0,100*value/max)+'%"></div></div><div>'+Math.round(value).toLocaleString()+' MW</div></div>';
+    return '<div class="bar-row" data-key="'+esc(x[0])+'"><div title="'+esc(lab)+'">'+esc(lab)+'</div><div class="bar-bg"><div class="bar-fill '+colour+'" style="width:'+Math.max(0,100*value/max)+'%"></div></div><div>'+Math.round(value).toLocaleString()+' MW</div></div>';
   }).join("")||'<div style="color:#777">No flexibility in current selection.</div>';
-  var legend='';
-  if(id==="archChart" || id==="endChart"){
-    legend='<div class="sector-chart-legend"><span><i class="ind"></i>Industrial</span><span><i class="com"></i>Commercial</span></div>';
-  }
-  $(''+id).innerHTML=body+legend;
+  var legend=(id==="archChart"||id==="endChart")?'<div class="sector-chart-legend"><span><i class="ind"></i>Industrial</span><span><i class="com"></i>Commercial</span></div>':'';
+  $(id).innerHTML=body+legend;
+  Array.prototype.forEach.call($(id).querySelectorAll('.bar-row'),function(row){
+    row.addEventListener('mouseenter',function(e){
+      var key=row.getAttribute('data-key'),lines=[];
+      if(isDno){
+        (sourceRows||[]).filter(function(r){return r.DNO===key;}).forEach(function(r){
+          var k=r.Sector+'|'+r.Archetype,vv=selectedMW(r),found=lines.find(function(x){return x[0]===k;});
+          if(found)found[1]+=vv;else lines.push([k,vv]);
+        });
+        lines.sort(function(a,b){return b[1]-a[1]}).slice(0,3);
+        lines=lines.slice(0,3).map(function(x){return[(x[0].split("|")[0]==="Industrial"?"Ind | ":"Com | ")+x[0].split("|").slice(1).join("|"),x[1]];});
+        showChartTooltip(e,'Key I&C Segments',lines);
+      }else{
+        var parts=key.split("|"),sector=parts[0],label=parts.slice(1).join("|");
+        if(id==="archChart"){
+          (sourceRows||[]).filter(function(r){return r.Sector===sector&&r.Archetype===label;}).forEach(function(r){
+            var k=r['End-use'],vv=selectedMW(r),found=lines.find(function(x){return x[0]===k;});
+            if(found)found[1]+=vv;else lines.push([k,vv]);
+          });
+          lines.sort(function(a,b){return b[1]-a[1]});lines=lines.slice(0,3);
+          showChartTooltip(e,'Key I&C End-Uses',lines);
+        }else{
+          (sourceRows||[]).filter(function(r){return r.Sector===sector&&r['End-use']===label;}).forEach(function(r){
+            var k=r.Archetype,vv=selectedMW(r),found=lines.find(function(x){return x[0]===k;});
+            if(found)found[1]+=vv;else lines.push([k,vv]);
+          });
+          lines.sort(function(a,b){return b[1]-a[1]});lines=lines.slice(0,3).map(function(x){return[(sector==="Industrial"?"Ind | ":"Com | ")+x[0],x[1]];});
+          showChartTooltip(e,'Key I&C Segments',lines);
+        }
+      }
+    });
+    row.addEventListener('mousemove',function(e){var p=$('chartTooltip');if(p)positionChartTooltip(p,e.clientX,e.clientY);});
+    row.addEventListener('mouseleave',function(){var p=$('chartTooltip');if(p)p.remove();});
+  });
 }
 
 function cards(rows){
   var t=0,i=0,c=0;rows.forEach(function(r){var v=selectedMW(r);t+=v;if(r.Sector==="Industrial")i+=v;else c+=v});
-  $("total").textContent=(t/1000).toFixed(2);$("ind").textContent=(i/1000).toFixed(2);$("com").textContent=(c/1000).toFixed(2);$("dno").textContent=selectedDnos.length?selectedDnos.length+" DNO"+(selectedDnos.length===1?"":"s"):"GB";
+  $("total").textContent=(t/1000).toFixed(2);$("ind").textContent=(i/1000).toFixed(2);$("com").textContent=(c/1000).toFixed(2);$("dno").textContent=selectedDnos.length+" DNO Areas";
 }
 function costCurve(rows){
   var thresholds=[150,200,250,300,400,500,750,1000], pts=[];
@@ -682,14 +821,15 @@ var europeCountries=[{"name":"Russia","path":"M388.9,-5266.9 L345.0,-5220.0 L342
 function europeContext(){
   var out='<g class="europe-context-full" pointer-events="none">';
   europeCountries.forEach(function(c){out+='<path class="v17-map-country '+(c.name==='United Kingdom'?'uk-context':'')+'" d="'+c.path+'"><title>'+esc(c.name)+'</title></path>';});
-  var labels=[
-    ['Iceland',-210,-430],['Norway',1080,-40],['Sweden',1325,230],['Finland',1665,180],['Denmark',1180,430],
-    ['Ireland',35,840],['United Kingdom',360,760],['Portugal',-35,2360],['Spain',370,2290],['France',760,1760],
+  var labels=[['Iceland',-120,390],['Norway',1080,120],['Sweden',1370,270],['Finland',1660,210],['Denmark',1190,455],
+    ['Ireland',35,840],['United Kingdom',360,760],['Portugal',-20,2380],['Spain',380,2290],['France',760,1760],
     ['Belgium',855,1140],['Netherlands',900,930],['Germany',1280,1030],['Poland',1840,760],['Czechia',1650,1110],
     ['Switzerland',1180,1530],['Austria',1540,1350],['Italy',1620,2020],['Croatia',1860,1640],['Hungary',2000,1300],
     ['Romania',2490,1300],['Bulgaria',2610,1645],['Greece',2650,2140],['Ukraine',2800,800],['Belarus',2360,430],
-    ['Lithuania',2000,340],['Latvia',2010,160],['Estonia',1970,-30],['Turkey',3650,1680]
-  ];
+    ['Lithuania',2000,340],['Latvia',2010,160],['Estonia',1970,-30],['Turkey',3650,1680],
+    ['Slovakia',1890,1040],['Slovenia',1660,1510],['Bosnia & Herzegovina',1820,1645],
+    ['Serbia',2180,1510],['Kosovo',2270,1700],['Moldova',2660,1120],['Cyprus',3100,2380],['North Macedonia',2310,1820],
+    ['Luxembourg',1020,1280],['Albania',2220,1930],['Montenegro',2050,1760]];
   out+='<g class="europe-labels">';
   labels.forEach(function(l){out+='<text x="'+l[1]+'" y="'+l[2]+'">'+esc(l[0])+'</text>';});
   out+='</g></g>';
@@ -702,19 +842,31 @@ function dnoFill(v,max,selected){
   var c=low.map(function(a,i){return Math.round(a+(high[i]-a)*t)});
   return 'rgb('+c[0]+','+c[1]+','+c[2]+')';
 }
-function showRegionPopup(name, rowsForPopup){
-  var vals=dnoValues(rowsForPopup), total=vals[name]||0;
-  var ind=0,com=0;
-  rowsForPopup.forEach(function(r){if(r.DNO!==name)return;var v=selectedMW(r);if(r.Sector==='Industrial')ind+=v;else com+=v;});
+function showRegionPopup(name, rowsForPopup, clientX, clientY){
+  var vals=dnoValues(rowsForPopup), total=vals[name]||0, ind=0,com=0;
+  rowsForPopup.forEach(function(r){
+    if(r.DNO!==name)return;
+    var vv=selectedMW(r);
+    if(r.Sector==='Industrial')ind+=vv;else com+=vv;
+  });
   var old=$('mapPopup');if(old)old.remove();
-  var p=document.createElement('div');p.id='mapPopup';p.className='map-popup';
-  p.innerHTML='<button class="map-popup-close" aria-label="Close">×</button><div class="map-popup-title">'+esc(name)+'</div><div>Total Selected Flexibility: <b>'+Math.round(total).toLocaleString()+' MW</b></div><div>Industrial: <b>'+Math.round(ind).toLocaleString()+' MW</b></div><div>Commercial: <b>'+Math.round(com).toLocaleString()+' MW</b></div>';
-  $('mapWrap').appendChild(p);p.querySelector('.map-popup-close').onclick=function(){p.remove();};
+  var p=document.createElement('div');p.id='mapPopup';p.className='map-popup v19-hover-popup';
+  p.innerHTML='<div class="map-popup-title">'+esc(name)+'</div><div>Total Selected Flexibility: <b>'+Math.round(total).toLocaleString()+' MW</b></div><div>Industrial: <b>'+Math.round(ind).toLocaleString()+' MW</b></div><div>Commercial: <b>'+Math.round(com).toLocaleString()+' MW</b></div>';
+  $('mapWrap').appendChild(p);
+  positionMapPopup(p,clientX,clientY);
+}
+function positionMapPopup(p,clientX,clientY){
+  var wrap=$('mapWrap'),rect=wrap.getBoundingClientRect();
+  var x=(clientX||rect.left+rect.width*.65)-rect.left+14;
+  var y=(clientY||rect.top+rect.height*.35)-rect.top-8;
+  x=Math.min(Math.max(8,x),rect.width-p.offsetWidth-8);
+  y=Math.min(Math.max(8,y),rect.height-p.offsetHeight-8);
+  p.style.left=x+'px';p.style.top=y+'px';
 }
 function drawMap(rows){
   var vals=dnoValues(rows),max=1;
   dnoOrder.forEach(function(d){max=Math.max(max,vals[d]||0)});
-  var html='<svg class="dno-svg" viewBox="-450 -700 '+dnoViewBox.w+' '+dnoViewBox.h+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GB DNO licence area map">';
+  var html='<svg class="dno-svg" viewBox="140 300 760 950" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GB DNO licence area map">';
   html+=europeContext();
   dnoRegions.forEach(function(r){
     var sel=selectedDnos.indexOf(r.name)>=0;
@@ -732,21 +884,58 @@ function drawMap(rows){
   function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
   applyTransform();
   Array.prototype.forEach.call(document.querySelectorAll('.dno-shape'),function(el){
-    function choose(e){if(e && e.defaultPrevented)return;var n=el.getAttribute('data-dno'),i=selectedDnos.indexOf(n);if(i>=0)selectedDnos.splice(i,1);else selectedDnos.push(n);render(); setTimeout(function(){showRegionPopup(n,baseFiltered())},0);}
+    var hoverTimer=null;
+    function choose(e){
+      if(e && e.defaultPrevented)return;
+      var n=el.getAttribute('data-dno'),i=selectedDnos.indexOf(n);
+      if(i>=0)selectedDnos.splice(i,1);else selectedDnos.push(n);
+      render();
+    }
     el.addEventListener('click',choose);
-    el.addEventListener('dblclick',function(e){e.preventDefault();mapState.scale=Math.min(3.2,mapState.scale*1.12);applyTransform();});
+    el.addEventListener('mouseenter',function(e){
+      var n=el.getAttribute('data-dno');
+      hoverTimer=setTimeout(function(){showRegionPopup(n,baseFiltered(),e.clientX,e.clientY);},40);
+    });
+    el.addEventListener('mousemove',function(e){
+      var p=$('mapPopup');if(p)positionMapPopup(p,e.clientX,e.clientY);
+    });
+    el.addEventListener('mouseleave',function(){
+      if(hoverTimer)clearTimeout(hoverTimer);
+      var p=$('mapPopup');if(p)p.remove();
+    });
+    el.addEventListener('dblclick',function(e){e.preventDefault();mapState.scale=Math.min(8,mapState.scale*1.18);applyTransform();});
     el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();choose(e);}});
   });
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');
-  controls[0].onclick=function(){mapState.scale=Math.min(4,mapState.scale*1.12);applyTransform();};
-  controls[1].onclick=function(){mapState.scale=Math.max(.75,mapState.scale/1.12);applyTransform();};
+  controls[0].onclick=function(){mapState.scale=Math.min(8,mapState.scale*1.18);applyTransform();};
+  controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.18);applyTransform();};
   controls[2].onclick=function(){mapState.scale=1;mapState.tx=0;mapState.ty=0;applyTransform();};
   var drag=false,sx=0,sy=0,otx=0,oty=0;
-  svg.addEventListener('mousedown',function(e){if(e.target.classList.contains('dno-shape'))return;drag=true;sx=e.clientX;sy=e.clientY;otx=mapState.tx;oty=mapState.ty;svg.style.cursor='grabbing';e.preventDefault();});
-  window.addEventListener('mousemove',function(e){if(!drag)return;mapState.tx=otx+(e.clientX-sx)*0.20;mapState.ty=oty+(e.clientY-sy)*0.20;applyTransform();});
+  svg.addEventListener('mousedown',function(e){
+    if(e.target.classList.contains('dno-shape'))return;
+    drag=true;sx=e.clientX;sy=e.clientY;otx=mapState.tx;oty=mapState.ty;
+    svg.style.cursor='grabbing';e.preventDefault();
+  });
+  window.addEventListener('mousemove',function(e){
+    if(!drag)return;
+    mapState.tx=otx+(e.clientX-sx)*0.30;
+    mapState.ty=oty+(e.clientY-sy)*0.30;
+    applyTransform();
+  });
   window.addEventListener('mouseup',function(){drag=false;if(svg)svg.style.cursor='grab';});
-  svg.addEventListener('dblclick',function(e){if(e.target.classList.contains('dno-shape'))return;e.preventDefault();mapState.scale=Math.min(3.2,mapState.scale*1.12);applyTransform();});
-  svg.addEventListener('wheel',function(e){e.preventDefault();var old=mapState.scale;var factor=e.deltaY<0?1.022:0.978;mapState.scale=Math.max(.75,Math.min(3.2,old*factor));var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);mapState.tx += mx*(1-mapState.scale/old)*0.35;mapState.ty += my*(1-mapState.scale/old)*0.35;applyTransform();},{passive:false});
+  svg.addEventListener('dblclick',function(e){
+    if(e.target.classList.contains('dno-shape'))return;
+    e.preventDefault();mapState.scale=Math.min(8,mapState.scale*1.18);applyTransform();
+  });
+  svg.addEventListener('wheel',function(e){
+    e.preventDefault();
+    var old=mapState.scale,factor=e.deltaY<0?1.033:0.967;
+    mapState.scale=Math.max(.45,Math.min(8,old*factor));
+    var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);
+    mapState.tx += mx*(1-mapState.scale/old)*0.35;
+    mapState.ty += my*(1-mapState.scale/old)*0.35;
+    applyTransform();
+  },{passive:false});
 }
 function baseFiltered(){
   var secs=parseList('sectorValue'),segs=parseList('segmentValue'),ends=parseList('enduseValue');
@@ -754,7 +943,7 @@ function baseFiltered(){
 }
 function loadDnoGeo(){ render(); }
 function render(){
-  var rows=filtered();cards(rows);bars("dnoChart",agg(rows,"DNO"),"");bars("archChart",agg(rows.map(function(r){var q=Object.assign({},r);q["SegmentKey"]=r.Sector+"|"+r.Archetype;return q}),"SegmentKey"),"");bars("endChart",agg(rows.map(function(r){var q=Object.assign({},r);q["EndUseKey"]=r.Sector+"|"+r["End-use"];return q}),"EndUseKey"),"");costCurve(rows);detail(rows);drawMap(rows);saveState();
+  var rows=filtered();cards(rows);bars("dnoChart",agg(rows,"DNO"),"",rows);bars("archChart",agg(rows.map(function(r){var q=Object.assign({},r);q["SegmentKey"]=r.Sector+"|"+r.Archetype;return q}),"SegmentKey"),"",rows);bars("endChart",agg(rows.map(function(r){var q=Object.assign({},r);q["EndUseKey"]=r.Sector+"|"+r["End-use"];return q}),"EndUseKey"),"",rows);costCurve(rows);detail(rows);drawMap(rows);saveState();
 }
 function saveState(){
   var q=new URLSearchParams(),s=parseList('sectorValue'),a=parseList('segmentValue'),e=parseList('enduseValue');
