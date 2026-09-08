@@ -772,8 +772,8 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
     </div>
   </div>
   <div class="header-controls">
-    <div class="header-control"><label>Geography</label><div class="header-dropdown" data-select="geoChoice"><button type="button" class="header-dropdown-btn" aria-haspopup="listbox" aria-expanded="false">DNO Region</button><div class="header-dropdown-menu" role="listbox"><button type="button" data-value="DNO" role="option">DNO Region</button><button type="button" data-value="GSP" role="option">GSP</button></div><select id="geoChoice" aria-hidden="true" tabindex="-1"><option value="DNO">DNO Region</option><option value="GSP">GSP</option></select></div></div>
-    <div class="header-control"><label>Potential</label><div class="header-dropdown" data-select="potentialChoice"><button type="button" class="header-dropdown-btn" aria-haspopup="listbox" aria-expanded="false">Technical</button><div class="header-dropdown-menu" role="listbox"><button type="button" data-value="Technical" role="option">Technical</button><button type="button" data-value="Economic" role="option">Economic</button></div><select id="potentialChoice" aria-hidden="true" tabindex="-1"><option value="Technical">Technical</option><option value="Economic">Economic</option></select></div></div>
+    <div class="header-control"><label>Geography</label><div class="header-dropdown" data-select="geoChoice"><button type="button" class="header-dropdown-btn" aria-haspopup="listbox" aria-expanded="false">DNO Region</button><div class="header-dropdown-menu" role="listbox"><button type="button" data-value="DNO" role="option">DNO Region</button><button type="button" data-value="GSP" role="option">GSP</button></div></div></div>
+    <div class="header-control"><label>Potential</label><div class="header-dropdown" data-select="potentialChoice"><button type="button" class="header-dropdown-btn" aria-haspopup="listbox" aria-expanded="false">Technical</button><div class="header-dropdown-menu" role="listbox"><button type="button" data-value="Technical" role="option">Technical</button><button type="button" data-value="Economic" role="option">Economic</button></div></div></div>
     <div class="header-control timeframe"><label>Timeframe</label><div id="yearChoices" class="year-choices"><button type="button" data-year="2024" class="year-choice active">2024</button><button type="button" data-year="2030" class="year-choice disabled" disabled aria-disabled="true">2030</button><button type="button" data-year="2035" class="year-choice disabled" disabled aria-disabled="true">2035</button><button type="button" data-year="2040" class="year-choice disabled" disabled aria-disabled="true">2040</button><button type="button" data-year="2045" class="year-choice disabled" disabled aria-disabled="true">2045</button><button type="button" data-year="2050" class="year-choice disabled" disabled aria-disabled="true">2050</button></div></div>
   </div>
 </header>
@@ -1281,21 +1281,20 @@ function costCurve(rows){
     cur+=b.mw/1000;
   });
   $('costChart').innerHTML='<svg style="touch-action:none;user-select:none;-webkit-user-select:none;overflow:visible" class="cost-svg" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'+grid+'<line x1="'+pL+'" y1="'+Y(0)+'" x2="'+(w-pR)+'" y2="'+Y(0)+'" stroke="#64748b" stroke-width="1.2"/><line x1="'+pL+'" y1="'+pT+'" x2="'+pL+'" y2="'+Y(0)+'" stroke="#94a3b8"/>'+rects+'<text x="'+((pL+w-pR)/2)+'" y="'+(h-5)+'" text-anchor="middle" font-size="11" fill="#64748b">Cumulative flexibility (GW)</text><text x="15" y="'+((pT+Y(0))/2)+'" transform="rotate(-90 15 '+((pT+Y(0))/2)+')" text-anchor="middle" font-size="11" fill="#64748b">Marginal flexibility cost (£/MWh)</text></svg>';
-  Array.prototype.forEach.call($('costChart').querySelectorAll('.cost-block'),function(pt){
-    pt.addEventListener('mouseenter',function(e){
-      var sector=pt.getAttribute('data-sector')||'',segment=pt.getAttribute('data-segment')||'',enduse=pt.getAttribute('data-enduse')||'';
-      var mw=num(pt.getAttribute('data-mw'))||0,cost=num(pt.getAttribute('data-cost'))||0;
-      var old=$('chartTooltip');if(old)old.remove();
-      var tip=document.createElement('div');tip.id='chartTooltip';tip.className='v19-tooltip';
-      tip.innerHTML='<div class="v19-tooltip-title">'+esc(sector+' | '+segment+' | '+enduse)+'</div>'+
-        '<div class="v19-tooltip-subhead">Marginal cost block</div>'+
-        '<div class="v19-line"><span>Flexibility</span><span class="v19-value">'+(mw/1000).toFixed(3)+' GW</span></div>'+
-        '<div class="v19-line"><span>Hurdle cost</span><span class="v19-value">£'+Math.round(cost)+'/MWh</span></div>';
-      document.body.appendChild(tip);positionChartTooltip(tip,e.clientX,e.clientY);
-    });
-    pt.addEventListener('mousemove',function(e){var p=$('chartTooltip');if(p)positionChartTooltip(p,e.clientX,e.clientY);});
-    pt.addEventListener('mouseleave',function(){var p=$('chartTooltip');if(p)p.remove();});
-  });
+  var costHost=$('costChart');
+  costHost.onpointerover=function(e){
+    var pt=e.target&&e.target.closest?e.target.closest('.cost-block'):null;
+    if(!pt||!costHost.contains(pt))return;
+    var sector=pt.getAttribute('data-sector')||'',segment=pt.getAttribute('data-segment')||'',enduse=pt.getAttribute('data-enduse')||'';
+    var mw=num(pt.getAttribute('data-mw'))||0,cost=num(pt.getAttribute('data-cost'))||0;
+    var old=$('chartTooltip');if(old)old.remove();
+    var tip=document.createElement('div');tip.id='chartTooltip';tip.className='v19-tooltip';
+    tip.style.position='fixed';tip.style.zIndex='2147483647';tip.style.pointerEvents='none';
+    tip.innerHTML='<div class="v19-tooltip-title">'+esc(sector+' | '+segment+' | '+enduse)+'</div><div class="v19-tooltip-subhead">Marginal cost block</div><div class="v19-line"><span>Flexibility</span><span class="v19-value">'+(mw/1000).toFixed(3)+' GW</span></div><div class="v19-line"><span>Hurdle cost</span><span class="v19-value">£'+Math.round(cost)+'/MWh</span></div>';
+    document.body.appendChild(tip);positionChartTooltip(tip,e.clientX,e.clientY);
+  };
+  costHost.onpointermove=function(e){var p=$('chartTooltip');if(p)positionChartTooltip(p,e.clientX,e.clientY);};
+  costHost.onpointerout=function(e){var pt=e.target&&e.target.closest?e.target.closest('.cost-block'):null;if(pt){var rel=e.relatedTarget;if(!rel||!pt.contains(rel)){var p=$('chartTooltip');if(p)p.remove();}}};
 }
 
 function detail(rows){
@@ -1544,58 +1543,44 @@ function restore(){
   populate();
 }
 function setHeaderDropdownValue(id,value){
-  var select=$(id);
   var dd=document.querySelector('.header-dropdown[data-select="'+id+'"]');
-  if(!dd||!select)return;
-  select.value=value;
+  if(!dd)return;
   if(id==='potentialChoice') $('potentialValue').value=value;
   if(id==='geoChoice') geoMode=value;
   var btn=dd.querySelector('.header-dropdown-btn');
-  var opt=dd.querySelector('button[data-value="'+CSS.escape(value)+'"]');
+  var opt=Array.prototype.find.call(dd.querySelectorAll('button[data-value]'),function(b){return b.getAttribute('data-value')===value;});
   if(btn)btn.textContent=opt?opt.textContent:value;
   dd.querySelectorAll('button[data-value]').forEach(function(b){b.setAttribute('aria-selected',b.getAttribute('data-value')===value?'true':'false');});
 }
 function initHeaderDropdowns(){
-  document.querySelectorAll('.header-dropdown').forEach(function(dd){
-    var select=$(dd.getAttribute('data-select')),btn=dd.querySelector('.header-dropdown-btn'),menu=dd.querySelector('.header-dropdown-menu');
-    if(!select||!btn||!menu)return;
-    btn.addEventListener('click',function(e){
+  if(window._headerDropdownV77)return;
+  window._headerDropdownV77=true;
+  document.addEventListener('click',function(e){
+    var option=e.target.closest('.header-dropdown-menu button[data-value]');
+    if(option){
       e.preventDefault();e.stopPropagation();
-      var was=dd.classList.contains('open');
-      closeHeaderDropdowns();
-      if(!was){dd.classList.add('open');btn.setAttribute('aria-expanded','true');syncHeaderDropdowns();}
-    });
-    menu.addEventListener('click',function(e){
-      var opt=e.target.closest('button[data-value]');
-      if(!opt)return;
+      var dd=option.closest('.header-dropdown'),id=dd.getAttribute('data-select');
+      setHeaderDropdownValue(id,option.getAttribute('data-value'));closeHeaderDropdowns();render();return;
+    }
+    var btn=e.target.closest('.header-dropdown-btn');
+    if(btn){
       e.preventDefault();e.stopPropagation();
-      setHeaderDropdownValue(select.id,opt.getAttribute('data-value'));
+      var box=btn.closest('.header-dropdown'),was=box.classList.contains('open');
       closeHeaderDropdowns();
-      render();
-      syncHeaderDropdowns();
-    });
-  });
-  if(!window._headerDropdownDocBound){
-    document.addEventListener('click',function(e){if(!e.target.closest('.header-dropdown'))closeHeaderDropdowns();});
-    window._headerDropdownDocBound=true;
-  }
+      if(!was){box.classList.add('open');btn.setAttribute('aria-expanded','true');}
+      return;
+    }
+    closeHeaderDropdowns();
+  },true);
   syncHeaderDropdowns();
 }
-
 function closeHeaderDropdowns(){document.querySelectorAll('.header-dropdown.open').forEach(function(dd){dd.classList.remove('open');var b=dd.querySelector('.header-dropdown-btn');if(b)b.setAttribute('aria-expanded','false');});}
-function syncHeaderDropdowns(){
-  document.querySelectorAll('.header-dropdown').forEach(function(dd){
-    var select=$(dd.getAttribute('data-select')),btn=dd.querySelector('.header-dropdown-btn');if(!select||!btn)return;
-    var value=select.value,opt=Array.prototype.find.call(select.options,function(o){return o.value===value;});
-    btn.textContent=opt?opt.textContent:value;
-    dd.querySelectorAll('button[data-value]').forEach(function(b){b.setAttribute('aria-selected',b.getAttribute('data-value')===value?'true':'false');});
-  });
-}
+function syncHeaderDropdowns(){setHeaderDropdownValue('geoChoice',geoMode);setHeaderDropdownValue('potentialChoice',$('potentialValue').value);}
 
 
 function init(){
   fetch('data/data.json').then(function(r){if(!r.ok)throw Error('Data file returned '+r.status);return r.json()}).then(function(p){
-    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();$('potentialChoice').value=$('potentialValue').value;setHeaderDropdownValue('potentialChoice',$('potentialValue').value);setHeaderDropdownValue('geoChoice',geoMode);render();loadDnoGeo();loadGspWeights().then(function(){render();return loadGspShapes().catch(function(err){gspShapesLoaded=false;GSP_SHAPES=[];console.warn('NESO GSP boundary layer could not be loaded:',err&&err.message?err.message:err);return null;});}).then(function(){render();}).catch(function(err){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">NESO GSP allocation could not be loaded. <span style="color:#a33">'+esc(err&&err.message?err.message:'Request failed')+'</span></div>';if(geoMode==='GSP')$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">NESO GSP data could not be loaded.</div>';});
+    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();setHeaderDropdownValue('potentialChoice',$('potentialValue').value);setHeaderDropdownValue('geoChoice',geoMode);render();loadDnoGeo();loadGspWeights().then(function(){render();return loadGspShapes().catch(function(err){gspShapesLoaded=false;GSP_SHAPES=[];console.warn('NESO GSP boundary layer could not be loaded:',err&&err.message?err.message:err);return null;});}).then(function(){render();}).catch(function(err){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">NESO GSP allocation could not be loaded. <span style="color:#a33">'+esc(err&&err.message?err.message:'Request failed')+'</span></div>';if(geoMode==='GSP')$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">NESO GSP data could not be loaded.</div>';});
     initHeaderDropdowns();
     $('cost').addEventListener('input',function(){$('costValue').textContent='£'+$('cost').value+'/MWh';render()});
     $('reset').addEventListener('click',function(){
@@ -1615,3 +1600,7 @@ init();
 
 
 </body></html>
+
+<style id="v77-final">
+.header-dropdown{position:relative!important;display:inline-block!important;min-width:112px!important;z-index:30000!important;overflow:visible!important}.header-dropdown-btn{display:block!important;width:112px!important;height:30px!important;box-sizing:border-box!important;padding:5px 28px 5px 8px!important;border:1px solid #C9D3DA!important;border-radius:4px!important;background:#fff!important;color:#26313A!important;font:inherit!important;font-size:10px!important;text-align:left!important;cursor:pointer!important;pointer-events:auto!important}.header-dropdown-menu{display:none!important;position:absolute!important;left:0!important;top:calc(100% + 3px)!important;width:112px!important;min-width:112px!important;z-index:30010!important;background:#fff!important;border:1px solid #CBD5DC!important;border-radius:4px!important;box-shadow:0 5px 16px rgba(30,45,60,.14)!important;padding:3px!important}.header-dropdown.open .header-dropdown-menu{display:block!important}.header-dropdown-menu button{display:block!important;width:100%!important;box-sizing:border-box!important;border:0!important;border-radius:3px!important;background:#fff!important;color:#26313A!important;padding:7px 8px!important;text-align:left!important;font:inherit!important;font-size:11px!important;cursor:pointer!important}.header-dropdown-menu button[aria-selected="true"]{background:#EEE8F6!important;color:#26313A!important;font-weight:600!important}.header-dropdown-menu button:hover{background:#F5F2FA!important}.header-controls,.header-control,.app-header,.app-header-top{overflow:visible!important}.cost-block{pointer-events:all!important;cursor:crosshair!important}.year-choice.disabled,.year-choice:disabled{background:#F1F3F4!important;color:#A1A8AE!important;border-color:#E2E5E7!important;opacity:1!important;cursor:not-allowed!important}
+</style>
