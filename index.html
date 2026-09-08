@@ -1307,7 +1307,7 @@ function costCurve(rows){
   // aggregated across DNOs. Blocks are ordered by hurdle cost and sit on the x-axis.
   var m={};
   rows.forEach(function(r){
-    var mw=num(r['Technical Flex MW']);
+    var mw=selectedMW(r);
     if(mw<=0)return;
     var cost=num(r['Central Hurdle Cost (£/MWh)']);
     var key=r.Sector+'|'+r.Archetype+'|'+r['End-use'];
@@ -1318,7 +1318,7 @@ function costCurve(rows){
     .sort(function(a,b){return a.cost-b.cost || b.mw-a.mw});
   var totalGW=blocks.reduce(function(a,b){return a+b.mw},0)/1000;
   var w=620,h=250,pL=58,pR=18,pT=12,pB=42;
-  var maxX=Math.max(4.5,Math.ceil((totalGW+0.25)*2)/2),yMax=Math.max(1000,Math.ceil(Math.max.apply(null,blocks.map(function(b){return b.cost}))/100)*100);
+  var maxX=totalGW<=0?1:Math.max(0.5,Math.ceil((totalGW*1.10)*2)/2),yMax=Math.max(1000,Math.ceil(Math.max.apply(null,blocks.map(function(b){return b.cost}))/100)*100);
   function X(x){return pL+(x/maxX)*(w-pL-pR)} function Y(y){return pT+(1-y/yMax)*(h-pT-pB)}
   var grid='';
   for(var y=0;y<=yMax;y+=100){grid+='<line x1="'+pL+'" y1="'+Y(y)+'" x2="'+(w-pR)+'" y2="'+Y(y)+'" stroke="#e5e7eb"/><text x="'+(pL-8)+'" y="'+(Y(y)+4)+'" text-anchor="end" font-size="10" font-family="Arial, sans-serif" fill="#64748b">'+y+'</text>'}
@@ -1597,7 +1597,7 @@ function restore(){
   setList('sectorValue',q.get('sector')?q.get('sector').split('~'):['Industrial','Commercial']);
   setList('segmentValue',q.get('segment')?q.get('segment').split('~'):[]);
   setList('enduseValue',q.get('enduse')?q.get('enduse').split('~'):[]);
-  $('potentialValue').value=q.get('potential')||'Technical';$('cost').value=q.get('cost')||200;
+  $('potentialValue').value=q.get('potential')||'Technical';$('cost').value=q.get('cost')||250;
   $('costValue').textContent='£'+$('cost').value+'/MWh';selectedDnos=q.get('dno')?q.get('dno').split('~'):[];
   populate();
 }
