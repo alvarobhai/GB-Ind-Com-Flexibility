@@ -772,8 +772,6 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 <div class="footer">Map context: Natural Earth country context; analytical DNO geometry: NESO GB DNO licence-area dataset.<br><br>Analytical dataset: GB industrial and commercial flexibility screening dataset. DNO geography: NESO GB DNO licence-area dataset. This dashboard is a static GitHub Pages application; all filtering/calculation is performed in the browser.</div>
 </main>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/d3-geo@3/dist/d3-geo.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script>
 (function(){
 "use strict";
@@ -1008,35 +1006,15 @@ function positionMapPopup(p,clientX,clientY){
   p.style.left=x+'px';p.style.top=y+'px';
 }
 function renderGlobalMap(){
+  /* Global map is a local SVG asset so the dashboard has no dependency on D3 geo/topojson/CDN map rendering. */
   var target=$('globalMapSvg');
-  if(!target || typeof d3==='undefined' || typeof topojson==='undefined')return;
-  var width=2048,height=997;
-  target.setAttribute('viewBox','0 0 '+width+' '+height);
-  target.innerHTML='';
-  var sphere={type:'Sphere'};
-  var projection=d3.geoEquirectangular().scale(Math.min((width-36)/(2*Math.PI),(height-36)/Math.PI)*0.92).translate([width/2,height/2]);
-  var path=d3.geoPath(projection);
-  var ns='http://www.w3.org/2000/svg';
-  var bg=document.createElementNS(ns,'path');
-  bg.setAttribute('d',path(sphere)); bg.setAttribute('fill','#F7F8F9'); bg.setAttribute('stroke','#D8DEE2'); bg.setAttribute('stroke-width','1'); bg.setAttribute('vector-effect','non-scaling-stroke');
-  target.appendChild(bg);
-  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json').then(function(world){
-    var countries=topojson.feature(world,world.objects.countries);
-    var land=document.createElementNS(ns,'path');
-    land.setAttribute('class','world-country'); land.setAttribute('d',path(countries));
-    target.appendChild(land);
-    var mesh=document.createElementNS(ns,'path');
-    mesh.setAttribute('class','world-boundary');
-    mesh.setAttribute('d',path(topojson.mesh(world,world.objects.countries,function(a,b){return a!==b;})));
-    target.appendChild(mesh);
-  }).catch(function(){
-    // If the external topology is unavailable, leave the analytical DNO layer intact.
-  });
+  if(!target)return;
 }
+
 function drawMap(rows){
   var vals=dnoValues(rows),max=1;
   dnoOrder.forEach(function(d){max=Math.max(max,vals[d]||0)});
-  var html='<svg id="globalMapSvg" class="global-map-svg" role="img" aria-label="Global geographic context map"></svg>';
+  var html='<img id="globalMapSvg" class="global-map-svg" src="data/world-map.svg" alt="Global geographic context map" draggable="false">';
   html+='<svg class="dno-svg" viewBox="140 300 760 950" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GB DNO licence area map">';
   dnoRegions.forEach(function(r){
     var sel=selectedDnos.indexOf(r.name)>=0;
@@ -1140,7 +1118,7 @@ function drawMap(rows){
   });
   svg.addEventListener('wheel',function(e){
     e.preventDefault();
-    var old=mapState.scale,factor=e.deltaY<0?1.025:0.975;
+    var old=mapState.scale,factor=e.deltaY<0?1.05:0.95;
     mapState.scale=Math.max(.45,Math.min(8,old*factor));
     var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);
     mapState.tx += mx*(1-mapState.scale/old)*0.35;
