@@ -35,7 +35,7 @@ main{padding:22px 24px 28px;max-width:1580px;width:100%;margin:auto}
 .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:12px}.wide{grid-column:1/-1}
 .panel-head{padding:12px 15px;border-bottom:1px solid var(--line);font-weight:700;font-size:12px;display:flex;justify-content:space-between;align-items:center;letter-spacing:.01em}.note{font-weight:400;color:#888;font-size:10px}
 #map{height:520px;padding:9px}.map-wrap{height:100%;background:#f5f5f3;border-radius:2px;position:relative;overflow:hidden}
-.dno-svg{width:100%;height:100%;display:block}.dno-shape{stroke:#fff;stroke-width:1.35;cursor:pointer;vector-effect:non-scaling-stroke;transition:opacity .15s,fill .15s,stroke-width .15s}.dno-shape:hover{stroke:#222;stroke-width:2.2}.dno-shape.selected{stroke:#111;stroke-width:2.8}
+.dno-svg{width:100%;height:100%;display:block;touch-action:none}.dno-shape{stroke:#fff;stroke-width:1.35;cursor:pointer;vector-effect:non-scaling-stroke;transition:opacity .15s,fill .15s,stroke-width .15s}.dno-shape:hover{stroke:#222;stroke-width:2.2}.dno-shape.selected{stroke:#111;stroke-width:2.8}
 .map-label{font-size:9px;fill:#303030;font-weight:700;pointer-events:none;text-anchor:middle}.map-label.small{font-size:8px}.legend{position:absolute;right:14px;bottom:14px;background:#fff;border:1px solid #d3d3d3;padding:8px;border-radius:2px;font-size:10px;box-shadow:0 1px 4px rgba(0,0,0,.08)}.legend-row{display:flex;align-items:center;gap:5px}.sw{width:14px;height:9px;border:1px solid #ccc}
 .chart{padding:13px 15px;min-height:285px}.bar-row{display:grid;grid-template-columns:160px 1fr 62px;gap:9px;align-items:center;margin:8px 0;font-size:10px}.bar-bg{height:12px;background:#ececea;border-radius:1px;overflow:hidden}.bar-fill{height:100%;background:#222;border-radius:1px}.bar-fill.teal,.bar-fill.light{background:#666}
 .cost-chart{height:300px;position:relative;padding:14px 18px 34px 52px}.cost-svg{width:100%;height:100%}
@@ -57,7 +57,7 @@ main{padding:22px 24px 28px;max-width:1580px;width:100%;margin:auto}
 }
 
 .filter-option{font-size:11px!important;line-height:1.1!important;padding:2px 6px!important;margin:1px 0!important;display:flex;align-items:center;gap:5px}
-.dno-image-map{position:relative;width:100%;height:100%;min-height:420px;background:#f7f7f6;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.dno-image-map{position:relative;width:100%;height:100%;min-height:420px;background:#E3E6E8;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .dno-image-map>img{width:100%;height:100%;object-fit:contain;display:block}
 .dno-hotspot-layer{position:absolute;inset:0}
 .dno-hotspot{position:absolute!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;width:auto;color:transparent;box-shadow:none;cursor:pointer;z-index:3}
@@ -393,7 +393,7 @@ label{font-size:10px!important;font-weight:700!important;color:#52616B!important
 .grid>.panel:first-child{position:relative!important}
 .panel-head{padding:12px 15px!important;background:#fff!important;border-bottom:1px solid #EDF1F3!important;color:#30414B!important;font-size:11px!important;font-weight:650!important}
 .panel-head .note{color:#7A858D!important;font-weight:400!important}
-.map-wrap{position:relative!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#EEF1F3!important}
+.map-wrap{position:relative!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#E3E6E8!important}
 .dno-svg{width:100%!important;height:100%!important;cursor:grab!important;transform-origin:center center!important;user-select:none!important}
 .europe-context path{fill:#E1E5E8!important;stroke:#CDD4D9!important;stroke-width:2!important}
 .europe-boundaries path{fill:none!important;stroke:#CBD2D7!important;stroke-width:1.5!important}
@@ -756,12 +756,12 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
       <div class="flow-step"><strong>6</strong><div><b>Economic potential</b><span>Identify the portion of technical potential that is potentially cost-effective at the selected Economic Potential Threshold.</span></div></div>
     </div>
     <div class="methodology-callout"><strong>£200/MWh</strong><span>Default Economic Potential Threshold — a moderate incentive amount reflective of historical / projected market revenues.</span></div>
-    <div class="methodology-item"><h4>Geographic allocation</h4><p>Flexibility is allocated to the 14 DNO licence areas in the underlying screening dataset. GSP ranking is an indicative disaggregation of each DNO result using NESO FES 2025 GSP demand shares; it is not an independently modelled GSP flexibility estimate.</p></div>
+    <div class="methodology-item"><h4>Geographic allocation &amp; GSP regionalisation</h4><p>The flexibility model is first calculated at the 14 DNO licence-area level. The resulting DNO flexibility potential is then regionalised to individual GSPs using NESO FES 2025 demand pathway data. For each DNO, 2024 electricity demand is summed across the FES pathways for each GSP and normalised to produce a set of GSP demand shares that sum to 100% within the DNO. Each DNO-level flexibility result is then multiplied by these shares to estimate the corresponding GSP flexibility potential.</p><p style="margin-top:7px">This means the GSP results preserve the underlying DNO modelled total while providing a geographically finer view of where that potential is concentrated. GSP results are therefore an indicative regionalisation of DNO-level flexibility, rather than independently modelled GSP flexibility estimates.</p></div>
     <div class="methodology-item"><h4>Flexibility characteristics</h4><p>End-uses are characterised by operational attributes such as notice time, response time and maximum curtailment duration. These characteristics can be used to assess suitability for different flexibility services.</p></div>
     <h3>Sources &amp; inputs</h3>
     <ul class="source-list">
       <li><b>NESO</b> — GB DNO licence-area GIS boundaries</li>
-      <li><b>NESO</b> — Future Energy Scenarios (FES) and regional / GSP demand pathway data</li>
+      <li><b>NESO</b> — Future Energy Scenarios (FES) 2025 GSP demand pathway data used to regionalise DNO-level flexibility to GSPs</li>
       <li><b>Electricity consumption data</b> — sectoral consumption inputs used to estimate segment and end-use demand</li>
       <li><b>Peak-demand evidence</b> — demand-shape and peak contribution inputs used to translate annual consumption into peak demand</li>
       <li><b>Sector and end-use evidence</b> — process, operational and load-characteristic evidence informing technical flexibility assumptions</li>
@@ -1078,7 +1078,7 @@ function loadGspShapes(){
       var a=6377563.396,b=6356256.909,F0=0.9996012717,lat0=49*Math.PI/180,lon0=-2*Math.PI/180,N0=-100000,E0=400000;
       var e2=1-(b*b)/(a*a),n=(a-b)/(a+b),lat=lat0,M=0;
       for(var i=0;i<10;i++){
-        lat=(N-N0-M)/(a*F0)+lat;
+        lat=lat0+(N-N0-M)/(a*F0);
         var Ma=(1+n+(5/4)*n*n+(5/4)*n*n*n)*(lat-lat0);
         var Mb=(3*n+3*n*n+(21/8)*n*n*n)*Math.sin(lat-lat0)*Math.cos(lat+lat0);
         var Mc=((15/8)*n*n+(15/8)*n*n*n)*Math.sin(2*(lat-lat0))*Math.cos(2*(lat+lat0));
@@ -1231,8 +1231,8 @@ function europeContext(){
   return out;
 }
 function dnoFill(v,max,selected){
+  if(!selected)return '#F1F3F4';
   var t=Math.max(0,Math.min(1,v/Math.max(max,1)));
-  // Purple/lavender intensity is the map data encoding; selection is outline only.
   var low=[238,233,248], high=[118,87,170];
   var c=low.map(function(a,i){return Math.round(a+(high[i]-a)*t)});
   return 'rgb('+c[0]+','+c[1]+','+c[2]+')';
@@ -1327,7 +1327,7 @@ function drawGspMap(rows){
   if(!gspLoaded||!GSP_DATA.length){$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">Loading NESO GSP data…</div>';return;}
   var gspFlex={};gspAgg(rows).forEach(function(x){gspFlex[x[0]]=x[1];});
   var max=1;Object.keys(gspFlex).forEach(function(k){max=Math.max(max,gspFlex[k]);});
-  var visible=GSP_DATA.filter(function(g){return !selectedDnos.length||selectedDnos.indexOf(g.dno)>=0;});
+  var visible=GSP_DATA;
   var visibleKeys={};visible.forEach(function(g){visibleKeys[g.key]=1;});
   var html='<svg class="dno-svg gsp-svg" viewBox="140 300 760 950" preserveAspectRatio="xMidYMid meet" role="img" aria-label="NESO GSP geographic area map">';
   dnoRegions.forEach(function(r){html+='<path d="'+r.path+'" fill="none" stroke="#bfc4c8" stroke-width="1.1" vector-effect="non-scaling-stroke" pointer-events="none"/>';});
@@ -1336,8 +1336,10 @@ function drawGspMap(rows){
     GSP_SHAPES.forEach(function(shape){
       var keys=shape.keys.filter(function(k){return visibleKeys[k];});if(!keys.length)return;
       var v=keys.reduce(function(a,k){return a+(gspFlex[k]||0);},0);
+      var selectedShape=keys.some(function(k){var gg=GSP_DATA.find(function(x){return x.key===k;});return !selectedDnos.length || (gg&&selectedDnos.indexOf(gg.dno)>=0);});
       var label=keys.map(gspDisplayName).join(' / ');
-      html+='<path class="gsp-area" data-gsp="'+esc(keys[0])+'" d="'+shape.path+'" fill="'+gspFill(v,max)+'" fill-opacity=".92" stroke="#ffffff" stroke-width=".7" vector-effect="non-scaling-stroke"><title>'+esc(label)+' — '+Math.round(v).toLocaleString()+' MW</title></path>';
+      var fill=selectedShape?gspFill(v,max):'#F1F3F4';
+      html+='<path class="gsp-area" data-gsp="'+esc(keys[0])+'" d="'+shape.path+'" fill="'+fill+'" fill-opacity=".92" stroke="#ffffff" stroke-width=".7" vector-effect="non-scaling-stroke"><title>'+esc(label)+' — '+Math.round(v).toLocaleString()+' MW</title></path>';
     });
   } else {
     visible.forEach(function(g){var p=gspMapProjection(g.lon,g.lat),v=gspFlex[g.key]||0,r=4+7*Math.sqrt(Math.max(0,v/max));html+='<circle class="gsp-point" cx="'+p[0].toFixed(2)+'" cy="'+p[1].toFixed(2)+'" r="'+r.toFixed(2)+'" data-gsp="'+esc(g.key)+'" fill="#8060B0" fill-opacity=".75" stroke="#fff" stroke-width="1" vector-effect="non-scaling-stroke"><title>'+esc(g.gsp)+' — '+Math.round(v).toLocaleString()+' MW</title></circle>';});
@@ -1392,7 +1394,7 @@ function bindMapGestures(svg,applyTransform){
   svg.addEventListener('wheel',function(e){
     e.preventDefault();e.stopPropagation();
     var old=mapState.scale;
-    var factor=e.deltaY<0?1.075:(1/1.075);
+    var step=e.ctrlKey?1.02:1.035; var factor=e.deltaY<0?step:(1/step);
     mapState.scale=Math.max(.45,Math.min(8,old*factor));
     var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);
     mapState.tx+=mx*(1-mapState.scale/old)*.35;mapState.ty+=my*(1-mapState.scale/old)*.35;applyTransform();
