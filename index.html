@@ -988,7 +988,7 @@ function showRegionPopup(name, rowsForPopup, clientX, clientY){
     if(r.Sector==='Industrial')ind+=vv;else com+=vv;
   });
   var old=$('mapPopup');if(old)old.remove();
-  var p=document.createElement('div');p.id='mapPopup';p.className='map-popup v19-hover-popup';p.style.position='fixed';p.style.zIndex='99999';p.style.pointerEvents='none';
+  var p=document.createElement('div');p.id='mapPopup';p.className='map-popup v19-hover-popup';p.style.position='fixed';p.style.zIndex='99999';p.style.pointerEvents='auto';
   p.innerHTML='<button class="map-popup-close" type="button" aria-label="Close">×</button><div class="map-popup-title">'+esc(name)+'</div><div>Total Selected Flexibility: <b>'+Math.round(total).toLocaleString()+' MW</b></div><div>Industrial: <b>'+Math.round(ind).toLocaleString()+' MW</b></div><div>Commercial: <b>'+Math.round(com).toLocaleString()+' MW</b></div>';
   p.querySelector('.map-popup-close').addEventListener('click',function(){p.remove();});
   document.body.appendChild(p);
@@ -1035,6 +1035,18 @@ function drawMap(rows){
   }
   function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
   centerGB(); applyTransform();
+  /* Robust delegated DNO click handling: the SVG itself catches clicks even if
+     individual path listeners are lost during a re-render. */
+  svg.addEventListener('click',function(e){
+    var target=e.target;
+    if(!target || !target.classList || !target.classList.contains('dno-shape')) return;
+    e.stopPropagation();
+    var name=target.getAttribute('data-dno');
+    var idx=selectedDnos.indexOf(name);
+    if(idx>=0) selectedDnos.splice(idx,1); else selectedDnos.push(name);
+    render();
+    setTimeout(function(){ showRegionPopup(name,baseFiltered(),e.clientX,e.clientY); },0);
+  },true);
   Array.prototype.forEach.call(document.querySelectorAll('.dno-shape'),function(el){
     function choose(e){
       if(e && e.defaultPrevented)return;
@@ -1042,14 +1054,7 @@ function drawMap(rows){
       if(i>=0)selectedDnos.splice(i,1);else selectedDnos.push(n);
       render();
     }
-    el.addEventListener('click',function(e){
-      choose(e);
-      /* Click popup is deliberately used instead of hover: it is more reliable
-         across browsers, trackpads and SVG hit-testing. */
-      setTimeout(function(){
-        showRegionPopup(el.getAttribute('data-dno'),baseFiltered(),e.clientX,e.clientY);
-      },0);
-    });
+    /* Click handling is delegated to the SVG above. */
 
     el.addEventListener('dblclick',function(e){
       e.preventDefault();
@@ -1087,7 +1092,7 @@ function drawMap(rows){
   });
   svg.addEventListener('wheel',function(e){
     e.preventDefault();
-    var old=mapState.scale,factor=e.deltaY<0?1.05:0.95;
+    var old=mapState.scale,factor=e.deltaY<0?1.025:0.975;
     mapState.scale=Math.max(.45,Math.min(8,old*factor));
     var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);
     mapState.tx += mx*(1-mapState.scale/old)*0.35;
