@@ -638,8 +638,8 @@ aside{top:176px!important;height:420px!important;max-height:420px!important;}
 .v17-map-country{fill:none!important;stroke:#9CA7AE!important;stroke-width:1.25!important;vector-effect:non-scaling-stroke!important;}
 .v17-map-country.uk-context{fill:none!important;}
 .europe-labels text{font-size:12px!important;fill:#78838B!important;}
-#mapPopup{display:block!important;visibility:visible!important;opacity:1!important;pointer-events:none!important;}
-.dno-shape{pointer-events:visiblePainted!important;}
+#mapPopup{display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;}
+.dno-shape{pointer-events:all!important;}
 .v19-tooltip-subhead{font-weight:750;font-size:10px;color:#1C2A33;margin:1px 0 5px;}
 .map-popup-close{position:absolute;right:7px;top:5px;border:0;background:transparent;font-size:17px;line-height:1;color:#68747c;cursor:pointer;padding:1px 4px}.map-popup-close:hover{color:#1C2A33}
 @media(max-width:1100px){.charts-area{margin-left:0!important;width:100%!important;grid-template-columns:1fr!important;}}
@@ -1037,15 +1037,27 @@ function drawMap(rows){
   centerGB(); applyTransform();
   /* Robust delegated DNO click handling: the SVG itself catches clicks even if
      individual path listeners are lost during a re-render. */
-  svg.addEventListener('click',function(e){
-    var target=e.target;
-    if(!target || !target.classList || !target.classList.contains('dno-shape')) return;
-    e.stopPropagation();
+  function handleDnoActivation(e){
+    var target=null;
+    if(e.composedPath){
+      var path=e.composedPath();
+      for(var j=0;j<path.length;j++){
+        if(path[j] && path[j].classList && path[j].classList.contains('dno-shape')){target=path[j];break;}
+      }
+    }
+    if(!target && e.target && e.target.closest) target=e.target.closest('.dno-shape');
+    if(!target || !svg.contains(target)) return;
+    e.preventDefault(); e.stopPropagation();
     var name=target.getAttribute('data-dno');
     var idx=selectedDnos.indexOf(name);
     if(idx>=0) selectedDnos.splice(idx,1); else selectedDnos.push(name);
+    /* Re-render the analytical selection, then place the popup outside the map DOM. */
     render();
-    setTimeout(function(){ showRegionPopup(name,baseFiltered(),e.clientX,e.clientY); },0);
+    setTimeout(function(){ showRegionPopup(name,baseFiltered(),e.clientX,e.clientY); },20);
+  }
+  svg.addEventListener('click',handleDnoActivation,true);
+  svg.addEventListener('pointerup',function(e){
+    if(e.pointerType==='mouse' || e.pointerType==='pen') handleDnoActivation(e);
   },true);
   Array.prototype.forEach.call(document.querySelectorAll('.dno-shape'),function(el){
     function choose(e){
@@ -1092,7 +1104,7 @@ function drawMap(rows){
   });
   svg.addEventListener('wheel',function(e){
     e.preventDefault();
-    var old=mapState.scale,factor=e.deltaY<0?1.025:0.975;
+    var old=mapState.scale,factor=e.deltaY<0?1.0125:0.9875;
     mapState.scale=Math.max(.45,Math.min(8,old*factor));
     var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);
     mapState.tx += mx*(1-mapState.scale/old)*0.35;
