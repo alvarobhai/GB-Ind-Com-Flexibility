@@ -21,3 +21,10 @@ NESO GSP GIS boundaries are approximate geographic feeding-area boundaries and a
 - GSP allocation loading now performs a strict DNO-by-DNO reconciliation check against the preprocessed FES 2025 shares and does not silently renormalise unmatched GSPs.
 - All 14 DNO areas must pass the allocation QA before the GSP view is marked loaded.
 - GSP polygon geometry is fitted from the NESO EPSG:27700 envelope to the native DNO SVG envelope rather than using hand-tuned positional offsets.
+
+
+## V87 update
+- GSP allocation mapping QA is diagnostic rather than a rendering blocker.
+- Matched FES shares are preserved without silent re-normalisation.
+- Unmatched positive-share GSPs are reported in the browser console.
+- GSP chart/map can still render when a small number of lookup aliases do not resolve.

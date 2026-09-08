@@ -1086,9 +1086,11 @@ function loadGspLocations(){
   });
 }
 function loadGspWeights(){
-  /* V55: FES GSP allocation is pre-processed locally from the supplied
-     FES 2025 Building Blocks CSV. This removes the heavy live 48k-row
-     NESO request from the GitHub Pages runtime. */
+  /* V87: load the local FES allocation and treat mapping QA as diagnostic,
+     not as a rendering blocker. Positive FES shares that cannot be matched
+     are reported in the console, while matched shares are preserved exactly
+     as supplied (no silent re-normalisation). This keeps the GSP map/chart
+     available while still exposing mapping issues for QA. */
   return loadGspLocations().then(function(){
     return fetch('data/gsp_allocation.json').then(function(r){
       if(!r.ok)throw Error('Local GSP allocation file returned '+r.status);
@@ -1097,11 +1099,10 @@ function loadGspWeights(){
       var src=payload&&payload.dnos;
       if(!src)throw Error('Local GSP allocation file is missing DNO allocations');
       gspWeights={};
-      var matched=0, total=0;
-      var qaErrors=[];
+      var matched=0,total=0,qa=[];
       Object.keys(src).forEach(function(d){
         if(dnoOrder.indexOf(d)<0)return;
-        var arr=[], sourceTotal=0, unmatched=[];
+        var arr=[],sourceTotal=0,unmatched=[];
         (src[d]||[]).forEach(function(x){
           var sh=num(x.share);
           if(!isFinite(sh)||sh<=0)return;
@@ -1110,34 +1111,29 @@ function loadGspWeights(){
           if(!g){unmatched.push(x.gsp);return;}
           arr.push({gsp:g,share:sh});
         });
-        /* De-duplicate after resolving FES names to the canonical NESO GSP key.
-           IMPORTANT: do not silently renormalise if anything failed to match. */
         var merged={};
         arr.forEach(function(x){merged[x.gsp]=(merged[x.gsp]||0)+x.share;});
         var vals=Object.keys(merged).map(function(g){return{gsp:g,share:merged[g]};});
         var matchedTotal=vals.reduce(function(a,x){return a+x.share;},0);
-        if(unmatched.length || Math.abs(matchedTotal-sourceTotal)>1e-8){
-          qaErrors.push(d+': '+unmatched.length+' unmatched GSP allocation(s); source share='+sourceTotal.toFixed(8)+', matched share='+matchedTotal.toFixed(8));
-          return;
+        var shareDiff=sourceTotal-matchedTotal;
+        /* Preserve the matched FES shares; do not renormalise after a failed match. */
+        if(vals.length){
+          gspWeights[d]=vals;matched++;total+=vals.length;
         }
-        var s=vals.reduce(function(a,x){return a+x.share;},0);
-        if(Math.abs(s-1)>1e-8){
-          qaErrors.push(d+': matched GSP shares do not sum to 1 (sum='+s.toFixed(10)+')');
-          return;
+        if(unmatched.length || Math.abs(shareDiff)>1e-8 || Math.abs(matchedTotal-1)>1e-8){
+          qa.push({dno:d,unmatched:unmatched,sourceShare:sourceTotal,matchedShare:matchedTotal});
         }
-        gspWeights[d]=vals; matched++; total+=vals.length;
       });
-      if(qaErrors.length){
-        console.error('GSP allocation QA failed:',qaErrors);
-        throw Error('GSP allocation QA failed: '+qaErrors.join(' | '));
-      }
-      if(matched!==dnoOrder.length)throw Error('GSP allocation QA failed: not all 14 DNO areas were mapped');
+      if(!matched)throw Error('No local FES GSP allocation records could be matched to the NESO GSP lookup');
       gspLoaded=true;
-      console.info('GSP allocation QA passed:',matched,'DNOs /',total,'GSP allocations; no share renormalisation applied');
+      if(qa.length)console.warn('GSP allocation mapping QA — review unmatched/partial mappings:',qa);
+      else console.info('GSP allocation mapping QA passed:',matched,'DNOs /',total,'GSP allocations');
+      console.info('GSP allocation totals are preserved; unmatched positive FES shares are not silently redistributed.');
       return true;
     });
   });
 }
+
 var gspMapCal={minE:0,maxE:700000,minN:0,maxN:1300000,minX:25,maxX:668,minY:25,maxY:1225};
 function loadGspShapes(){
   /* NESO publishes GSP boundaries directly as GeoJSON for the 2022 release.
