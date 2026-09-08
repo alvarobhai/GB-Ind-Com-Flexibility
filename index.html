@@ -756,12 +756,12 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
       <div class="flow-step"><strong>6</strong><div><b>Economic potential</b><span>Identify the portion of technical potential that is potentially cost-effective at the selected Economic Potential Threshold.</span></div></div>
     </div>
     <div class="methodology-callout"><strong>£200/MWh</strong><span>Default Economic Potential Threshold — a moderate incentive amount reflective of historical / projected market revenues.</span></div>
-    <div class="methodology-item"><h4>Geographic allocation &amp; GSP regionalisation</h4><p>The flexibility model is first calculated at the 14 DNO licence-area level. The resulting DNO flexibility potential is then regionalised to individual GSPs using NESO FES 2025 demand pathway data. For each DNO, 2024 electricity demand is summed across the FES pathways for each GSP and normalised to produce a set of GSP demand shares that sum to 100% within the DNO. Each DNO-level flexibility result is then multiplied by these shares to estimate the corresponding GSP flexibility potential.</p><p style="margin-top:7px">This means the GSP results preserve the underlying DNO modelled total while providing a geographically finer view of where that potential is concentrated. GSP results are therefore an indicative regionalisation of DNO-level flexibility, rather than independently modelled GSP flexibility estimates.</p></div>
+    <div class="methodology-item"><h4>Geographic allocation</h4><p>Flexibility is allocated to the 14 DNO licence areas in the underlying screening dataset. GSP ranking is an indicative disaggregation of each DNO result using NESO FES 2025 GSP demand shares; it is not an independently modelled GSP flexibility estimate.</p></div>
     <div class="methodology-item"><h4>Flexibility characteristics</h4><p>End-uses are characterised by operational attributes such as notice time, response time and maximum curtailment duration. These characteristics can be used to assess suitability for different flexibility services.</p></div>
     <h3>Sources &amp; inputs</h3>
     <ul class="source-list">
       <li><b>NESO</b> — GB DNO licence-area GIS boundaries</li>
-      <li><b>NESO</b> — Future Energy Scenarios (FES) 2025 GSP demand pathway data used to regionalise DNO-level flexibility to GSPs</li>
+      <li><b>NESO</b> — Future Energy Scenarios (FES) and regional / GSP demand pathway data</li>
       <li><b>Electricity consumption data</b> — sectoral consumption inputs used to estimate segment and end-use demand</li>
       <li><b>Peak-demand evidence</b> — demand-shape and peak contribution inputs used to translate annual consumption into peak demand</li>
       <li><b>Sector and end-use evidence</b> — process, operational and load-characteristic evidence informing technical flexibility assumptions</li>
