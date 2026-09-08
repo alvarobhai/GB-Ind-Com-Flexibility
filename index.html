@@ -600,8 +600,8 @@ aside{top:176px!important;height:420px!important;max-height:420px!important;}
 <style id="v20-map-hover-fix">
 #mapWrap{position:relative!important;}
 #mapPopup{
-  position:absolute!important;
-  z-index:999!important;
+  position:fixed!important;
+  z-index:20000!important;
   pointer-events:none!important;
   background:#fff!important;
   border:1px solid #CCD5DA!important;
@@ -669,6 +669,8 @@ aside{top:176px!important;height:420px!important;max-height:420px!important;}
 .global-map-svg image{pointer-events:none;}
 .global-map-svg .country{fill:#EEF1F3;stroke:#C7CFD5;stroke-width:.65;vector-effect:non-scaling-stroke;}
 .global-map-svg .graticule{fill:none;stroke:#E3E7EA;stroke-width:.45;vector-effect:non-scaling-stroke;}
+.global-map-svg .world-country{fill:#EEF1F3;stroke:none;vector-effect:non-scaling-stroke;}
+.global-map-svg .world-boundary{fill:none;stroke:#C7CFD5;stroke-width:.55;vector-effect:non-scaling-stroke;}
 .dno-svg{position:relative;z-index:2;}
 .app-header-top{height:142px!important;align-items:start!important;padding-top:12px!important;padding-bottom:10px!important;}
 .header-kpis{padding-top:8px!important;align-self:start!important;}
@@ -995,23 +997,41 @@ function showRegionPopup(name, rowsForPopup, clientX, clientY){
   var old=$('mapPopup');if(old)old.remove();
   var p=document.createElement('div');p.id='mapPopup';p.className='map-popup v19-hover-popup';
   p.innerHTML='<div class="map-popup-title">'+esc(name)+'</div><div>Total Selected Flexibility: <b>'+Math.round(total).toLocaleString()+' MW</b></div><div>Industrial: <b>'+Math.round(ind).toLocaleString()+' MW</b></div><div>Commercial: <b>'+Math.round(com).toLocaleString()+' MW</b></div>';
-  $('mapWrap').appendChild(p);
+  document.body.appendChild(p);
   positionMapPopup(p,clientX,clientY);
 }
 function positionMapPopup(p,clientX,clientY){
-  var wrap=$('mapWrap'),rect=wrap.getBoundingClientRect();
-  var x=(clientX||rect.left+rect.width*.65)-rect.left+14;
-  var y=(clientY||rect.top+rect.height*.35)-rect.top-8;
-  x=Math.min(Math.max(8,x),rect.width-p.offsetWidth-8);
-  y=Math.min(Math.max(8,y),rect.height-p.offsetHeight-8);
+  var x=(clientX||window.innerWidth*.65)+14;
+  var y=(clientY||window.innerHeight*.45)-8;
+  x=Math.min(Math.max(8,x),window.innerWidth-p.offsetWidth-8);
+  y=Math.min(Math.max(8,y),window.innerHeight-p.offsetHeight-8);
   p.style.left=x+'px';p.style.top=y+'px';
 }
-var globalMapImageUrl="https://upload.wikimedia.org/wikipedia/commons/3/3b/Blank_world_map_Equal_Earth_projection.svg";
 function renderGlobalMap(){
   var target=$('globalMapSvg');
-  if(!target)return;
-  target.setAttribute('viewBox','0 0 2048 997');
-  target.innerHTML='<image href="'+globalMapImageUrl+'" x="0" y="0" width="2048" height="997" preserveAspectRatio="xMidYMid meet" opacity="0.92"/>';
+  if(!target || typeof d3==='undefined' || typeof topojson==='undefined')return;
+  var width=2048,height=997;
+  target.setAttribute('viewBox','0 0 '+width+' '+height);
+  target.innerHTML='';
+  var sphere={type:'Sphere'};
+  var projection=d3.geoNaturalEarth1().fitExtent([[18,18],[width-18,height-18]],sphere);
+  var path=d3.geoPath(projection);
+  var ns='http://www.w3.org/2000/svg';
+  var bg=document.createElementNS(ns,'path');
+  bg.setAttribute('d',path(sphere)); bg.setAttribute('fill','#F7F8F9'); bg.setAttribute('stroke','#D8DEE2'); bg.setAttribute('stroke-width','1'); bg.setAttribute('vector-effect','non-scaling-stroke');
+  target.appendChild(bg);
+  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json').then(function(world){
+    var countries=topojson.feature(world,world.objects.countries);
+    var land=document.createElementNS(ns,'path');
+    land.setAttribute('class','world-country'); land.setAttribute('d',path(countries));
+    target.appendChild(land);
+    var mesh=document.createElementNS(ns,'path');
+    mesh.setAttribute('class','world-boundary');
+    mesh.setAttribute('d',path(topojson.mesh(world,world.objects.countries,function(a,b){return a!==b;})));
+    target.appendChild(mesh);
+  }).catch(function(){
+    // If the external topology is unavailable, leave the analytical DNO layer intact.
+  });
 }
 function drawMap(rows){
   var vals=dnoValues(rows),max=1;
@@ -1115,7 +1135,7 @@ function drawMap(rows){
   });
   svg.addEventListener('wheel',function(e){
     e.preventDefault();
-    var old=mapState.scale,factor=e.deltaY<0?1.05:0.95;
+    var old=mapState.scale,factor=e.deltaY<0?1.025:0.975;
     mapState.scale=Math.max(.45,Math.min(8,old*factor));
     var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);
     mapState.tx += mx*(1-mapState.scale/old)*0.35;
