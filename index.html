@@ -953,47 +953,73 @@ function bars(id,entries,cls,sourceRows){
   });
 }
 
-function loadGspLocations(){
+function jsonpRequest(url, timeoutMs){
   return new Promise(function(resolve,reject){
-    var cb='__gspLocations_'+Date.now();
-    var script=document.createElement('script');
-    var url='https://api.neso.energy/api/3/action/datastore_search?resource_id=bbe2cc72-a6c6-46e6-8f4e-48b879467368&limit=500&callback='+cb;
-    var pesToDno={10:'UKPN (East)',11:'WPD (East Midlands)',12:'UKPN (London)',13:'SPEN (SP MANWEB)',14:'WPD (Midlands)',15:'NPG (Northern Electric)',16:'ENWL',17:'SSE',18:'SPEN (SP Distribution)',19:'UKPN (South)',20:'SSE (Southern)',21:'WPD (South Wales)',22:'WPD (South West)',23:'NPG (Yorkshire Electric)'};
-    window[cb]=function(payload){
-      try{
-        var records=(payload&&payload.result&&payload.result.records)||[], seen={};
-        GSP_DATA=[];
-        records.forEach(function(r){
-          var name=r.gsp_name, lat=num(r.gsp_lat), lon=num(r.gsp_lon), dno=pesToDno[String(r.pes_id)];
-          if(!name||!isFinite(lat)||!isFinite(lon)||!dno)return;
-          if(seen[name])return;
-          seen[name]=1; GSP_DATA.push({gsp:name,lat:lat,lon:lon,dno:dno,pes_id:num(r.pes_id)});
-        });
-        delete window[cb];script.remove();
-        if(!GSP_DATA.length){reject(Error('No GSP locations returned'));return;}
-        resolve(GSP_DATA);
-      }catch(e){delete window[cb];script.remove();reject(e);}
-    };
-    script.onerror=function(){delete window[cb];script.remove();reject(Error('GSP location query failed'));};
-    script.src=url; document.head.appendChild(script);
+    var cb='__nesoJsonp_'+Date.now()+'_'+Math.floor(Math.random()*100000);
+    var script=document.createElement('script'), done=false;
+    function cleanup(){if(done)return;done=true;delete window[cb];if(script.parentNode)script.parentNode.removeChild(script);}
+    var timer=setTimeout(function(){cleanup();reject(Error('NESO request timed out'));},timeoutMs||15000);
+    window[cb]=function(payload){clearTimeout(timer);cleanup();resolve(payload);};
+    script.onerror=function(){clearTimeout(timer);cleanup();reject(Error('NESO request failed'));};
+    script.src=url+(url.indexOf('?')>=0?'&':'?')+'callback='+cb;
+    document.head.appendChild(script);
+  });
+}
+function loadGspLocations(){
+  var url='https://api.neso.energy/api/3/action/datastore_search?resource_id=bbe2cc72-a6c6-46e6-8f4e-48b879467368&limit=500';
+  var pesToDno={10:'UKPN (East)',11:'WPD (East Midlands)',12:'UKPN (London)',13:'SPEN (SP MANWEB)',14:'WPD (Midlands)',15:'NPG (Northern Electric)',16:'ENWL',17:'SSE',18:'SPEN (SP Distribution)',19:'UKPN (South)',20:'SSE (Southern)',21:'WPD (South Wales)',22:'WPD (South West)',23:'NPG (Yorkshire Electric)'};
+  return jsonpRequest(url,15000).then(function(payload){
+    var records=(payload&&payload.result&&payload.result.records)||[],seen={},out=[];
+    records.forEach(function(r){var name=r.gsp_name,lat=num(r.gsp_lat),lon=num(r.gsp_lon),dno=pesToDno[String(r.pes_id)];if(!name||!isFinite(lat)||!isFinite(lon)||!dno)return;if(seen[name])return;seen[name]=1;out.push({gsp:name,lat:lat,lon:lon,dno:dno,pes_id:num(r.pes_id)});});
+    if(!out.length)throw Error('No GSP locations returned');
+    GSP_DATA=out;return out;
   });
 }
 function loadGspWeights(){
-  return new Promise(function(resolve,reject){
-    var cb='__gspWeights_'+Date.now();
-    var script=document.createElement('script');
-    var sql="SELECT \"DNO License Area\" AS dno, \"GSP\" AS gsp, SUM(\"2024\" * CASE WHEN \"Share of GSP\" IS NULL OR trim(\"Share of GSP\")='' THEN 1 ELSE CAST(\"Share of GSP\" AS numeric) END) AS demand_gwh FROM \"73f69d8f-e9cb-4a2d-8538-baf03b5eadef\" WHERE \"Building Block ID Number\" LIKE 'Dem_%' AND \"Unit\"='GWh' GROUP BY \"DNO License Area\",\"GSP\"";
-    window[cb]=function(p){
-      try{
-        var rec=(p.result&&p.result.records)||[];var raw={};
-        rec.forEach(function(x){var d=x.dno,g=x.gsp,v=num(x.demand_gwh);if(!d||!g||!v)return;(raw[d]||(raw[d]=[])).push({gsp:g,weight:v});});
-        dnoOrder.forEach(function(d){var src=raw[d]||[];var tot=src.reduce(function(a,x){return a+x.weight},0);if(tot>0)gspWeights[d]=src.map(function(x){return{gsp:x.gsp,share:x.weight/tot};});});
-        delete window[cb];script.remove();gspLoaded=true;loadGspLocations().then(resolve).catch(reject);
-      }catch(e){delete window[cb];script.remove();reject(e);}
+  /* Use the documented datastore_search JSONP endpoint rather than datastore_search_sql.
+     The NESO page documents JSONP for datastore_search; SQL JSONP was leaving the dashboard in a permanent loading state. */
+  var url='https://api.neso.energy/api/3/action/datastore_search?resource_id=73f69d8f-e9cb-4a2d-8538-baf03b5eadef&limit=50000';
+  return jsonpRequest(url,30000).then(function(payload){
+    var records=(payload&&payload.result&&payload.result.records)||[],raw={};
+    records.forEach(function(x){
+      var id=String(x['Building Block ID Number']||'');
+      var unit=String(x['Unit']||'');
+      if(id.indexOf('Dem_')!==0||unit!=='GWh')return;
+      var d=x['DNO License Area'],g=x['GSP'],v=num(x['2024']),shareRaw=x['Share of GSP'];
+      if(!d||!g||!isFinite(v))return;
+      var sh=(shareRaw===null||shareRaw===undefined||String(shareRaw).trim()==='')?1:num(shareRaw);
+      if(!isFinite(sh))sh=1;
+      var k=String(d)+'|||'+String(g);raw[k]=(raw[k]||0)+v*sh;
+    });
+    gspWeights={};
+    /* Match NESO's FES DNO licence-area names to the dashboard's 14 licence-area names. */
+    var aliases={
+      'Electricity North West':'ENWL',
+      'Northern Powergrid':'__NPG_PARENT__',
+      'Northern Powergrid - North East':'NPG (Northern Electric)',
+      'Northern Powergrid - Yorkshire':'NPG (Yorkshire Electric)',
+      'SP Energy Networks':'__SPEN_PARENT__',
+      'SP Energy Networks - Manweb':'SPEN (SP MANWEB)',
+      'SP Energy Networks - Distribution':'SPEN (SP Distribution)',
+      'Scottish and Southern Electricity Networks':'__SSE_PARENT__',
+      'Scottish and Southern Electricity Networks - Southern':'SSE (Southern)',
+      'Scottish and Southern Electricity Networks - North':'SSE',
+      'UK Power Networks':'__UKPN_PARENT__',
+      'UK Power Networks - Eastern':'UKPN (East)',
+      'UK Power Networks - London':'UKPN (London)',
+      'UK Power Networks - South Eastern':'UKPN (South)',
+      'National Grid Electricity Distribution':'__NGED_PARENT__',
+      'National Grid Electricity Distribution - East Midlands':'WPD (East Midlands)',
+      'National Grid Electricity Distribution - Midlands':'WPD (Midlands)',
+      'National Grid Electricity Distribution - South Wales':'WPD (South Wales)',
+      'National Grid Electricity Distribution - South West':'WPD (South West)'
     };
-    script.onerror=function(){delete window[cb];script.remove();reject(Error('GSP demand allocation query failed'));};
-    script.src='https://api.neso.energy/api/3/action/datastore_search_sql?sql='+encodeURIComponent(sql)+'&callback='+cb;
-    document.head.appendChild(script);
+    /* Also accept exact dashboard labels if returned by the API. */
+    dnoOrder.forEach(function(d){aliases[d]=d;});
+    var grouped={};
+    Object.keys(raw).forEach(function(k){var parts=k.split('|||'),d=aliases[parts[0]]||parts[0],g=parts.slice(1).join('|||');if(d.indexOf('__')===0)return;if(dnoOrder.indexOf(d)<0)return;(grouped[d]||(grouped[d]=[])).push({gsp:g,weight:raw[k]});});
+    dnoOrder.forEach(function(d){var src=grouped[d]||[],tot=src.reduce(function(a,x){return a+x.weight},0);if(tot>0)gspWeights[d]=src.map(function(x){return{gsp:x.gsp,share:x.weight/tot};});});
+    return loadGspLocations().then(function(){gspLoaded=true;return true;});
   });
 }
 function gspAgg(rows){
@@ -1102,16 +1128,10 @@ function dnoFill(v,max,selected){
 }
 function showRegionPopup(name, rowsForPopup, clientX, clientY){
   var vals=dnoValues(rowsForPopup), total=vals[name]||0, ind=0,com=0;
-  rowsForPopup.forEach(function(r){
-    if(r.DNO!==name)return;
-    var vv=selectedMW(r);
-    if(r.Sector==='Industrial')ind+=vv;else com+=vv;
-  });
-  var old=$('mapPopup');if(old)old.remove();
-  var p=document.createElement('div');p.id='mapPopup';p.className='map-popup v19-hover-popup';p.style.position='fixed';p.style.zIndex='2147483647';p.style.pointerEvents='auto';p.style.display='block';p.style.visibility='visible';p.style.opacity='1';
-  p.innerHTML='<button class="map-popup-close" type="button" aria-label="Close">×</button><div class="map-popup-title">'+esc(name)+'</div><div>Total Selected Flexibility: <b>'+Math.round(total).toLocaleString()+' MW</b></div><div>Industrial: <b>'+Math.round(ind).toLocaleString()+' MW</b></div><div>Commercial: <b>'+Math.round(com).toLocaleString()+' MW</b></div>';
-  p.querySelector('.map-popup-close').addEventListener('click',function(){p.remove();});
-  document.body.appendChild(p);
+  rowsForPopup.forEach(function(r){if(r.DNO!==name)return;var vv=selectedMW(r);if(r.Sector==='Industrial')ind+=vv;else com+=vv;});
+  var p=$('mapPopup');if(!p){p=document.createElement('div');p.id='mapPopup';p.className='map-popup v19-hover-popup';document.body.appendChild(p);}
+  p.style.position='fixed';p.style.zIndex='2147483647';p.style.pointerEvents='none';p.style.display='block';p.style.visibility='visible';p.style.opacity='1';
+  p.innerHTML='<div class="map-popup-title">'+esc(name)+'</div><div>Total Selected Flexibility: <b>'+Math.round(total).toLocaleString()+' MW</b></div><div>Industrial: <b>'+Math.round(ind).toLocaleString()+' MW</b></div><div>Commercial: <b>'+Math.round(com).toLocaleString()+' MW</b></div>';
   positionMapPopup(p,clientX,clientY);
 }
 function positionMapPopup(p,clientX,clientY){
@@ -1149,32 +1169,16 @@ function findDnoAtPoint(svg,clientX,clientY){
 }
 function bindDnoMapInteractions(svg){
   if(!svg)return;
-  Array.prototype.forEach.call(svg.querySelectorAll('.dno-shape'),function(el){
-    el.style.pointerEvents='all';
-    el.addEventListener('mouseenter',function(e){
-      var name=el.getAttribute('data-dno');
-      showRegionPopup(name,baseFiltered(),e.clientX,e.clientY);
-    },false);
-    el.addEventListener('mousemove',function(e){
-      var p=$('mapPopup');
-      if(p)positionMapPopup(p,e.clientX,e.clientY);
-    },false);
-    el.addEventListener('mouseleave',function(){
-      var p=$('mapPopup');
-      if(p)p.remove();
-    },false);
-    el.addEventListener('pointerup',function(e){
-      if(e.button!==undefined && e.button!==0)return;
-      e.preventDefault();e.stopPropagation();
-      toggleDnoFromMap(el.getAttribute('data-dno'));
-    },false);
-    el.addEventListener('click',function(e){
-      e.preventDefault();e.stopPropagation();
-    },false);
-    el.addEventListener('keydown',function(e){
-      if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleDnoFromMap(el.getAttribute('data-dno'));}
-    },false);
-  });
+  var active=null;
+  function enter(el,e){active=el;showRegionPopup(el.getAttribute('data-dno'),baseFiltered(),e.clientX,e.clientY);}
+  function move(el,e){if(active===el){var p=$('mapPopup');if(p)positionMapPopup(p,e.clientX,e.clientY);}}
+  function leave(el){if(active===el){active=null;var p=$('mapPopup');if(p)p.remove();}}
+  function select(el,e){var name=el&&el.getAttribute('data-dno');if(!name)return;e.preventDefault();e.stopPropagation();toggleDnoFromMap(name);}
+  Array.prototype.forEach.call(svg.querySelectorAll('.dno-shape'),function(el){el.style.pointerEvents='all';el.addEventListener('mouseenter',function(e){enter(el,e)},false);el.addEventListener('mousemove',function(e){move(el,e)},false);el.addEventListener('mouseleave',function(){leave(el)},false);el.addEventListener('pointerup',function(e){if(e.button===undefined||e.button===0)select(el,e)},false);el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();select(el,e)}},false);});
+  svg.addEventListener('mouseover',function(e){var el=e.target&&e.target.closest?e.target.closest('.dno-shape'):null;if(el&&svg.contains(el))enter(el,e)},true);
+  svg.addEventListener('mousemove',function(e){var el=e.target&&e.target.closest?e.target.closest('.dno-shape'):null;if(el&&svg.contains(el))move(el,e)},true);
+  svg.addEventListener('mouseout',function(e){var el=e.target&&e.target.closest?e.target.closest('.dno-shape'):null;if(el&&svg.contains(el)&&(!e.relatedTarget||!el.contains(e.relatedTarget)))leave(el)},true);
+  svg.addEventListener('click',function(e){var el=e.target&&e.target.closest?e.target.closest('.dno-shape'):null;if(el&&svg.contains(el))select(el,e)},true);
 }
 
 function drawMap(rows){
@@ -1230,7 +1234,7 @@ function restore(){
 }
 function init(){
   fetch('data/data.json').then(function(r){if(!r.ok)throw Error('Data file returned '+r.status);return r.json()}).then(function(p){
-    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();$('potentialChoice').value=$('potentialValue').value;render();loadDnoGeo();loadGspWeights().then(function(){render();}).catch(function(){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">GSP allocation data could not be loaded. DNO-level results remain available.</div>';});
+    DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();$('potentialChoice').value=$('potentialValue').value;render();loadDnoGeo();loadGspWeights().then(function(){render();}).catch(function(err){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">NESO GSP allocation could not be loaded. <span style="color:#a33">'+esc(err&&err.message?err.message:'Request failed')+'</span></div>';if(geoMode==='GSP')$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">NESO GSP data could not be loaded.</div>';});
     $('potentialChoice').addEventListener('change',function(){ $('potentialValue').value=this.value; populate(); render(); });
     $('geoChoice').addEventListener('change',function(){ geoMode=this.value; render(); });
     $('cost').addEventListener('input',function(){$('costValue').textContent='£'+$('cost').value+'/MWh';render()});
