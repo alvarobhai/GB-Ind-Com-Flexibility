@@ -718,7 +718,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 .dno-filter-box .filter-option.active::before{color:#8060B0!important;border-color:#8060B0!important;}
 .dno-filter-box .filter-option:hover{background:#F7F3FB!important;}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
 </head>
 <body>
 <header id="appHeader" class="app-header">
@@ -1021,88 +1021,44 @@ function loadGspLocations(){
   });
 }
 function loadGspWeights(){
-  /* Build the DNO-to-GSP allocation from the FES 2025 Building Blocks.
-     The FES DNO field is a parent licence-area label (e.g. SPEN); the GSP
-     lookup is the authoritative bridge to the dashboard's 14 PES areas. */
-  var url='https://api.neso.energy/api/3/action/datastore_search?resource_id=73f69d8f-e9cb-4a2d-8538-baf03b5eadef&limit=50000';
+  /* Build a compact DNO-to-GSP allocation from the FES 2025 Building Blocks.
+     Use CKAN SQL aggregation rather than downloading ~48k records into the browser. */
+  var sql='SELECT "DNO License Area" AS dno, "GSP" AS gsp, SUM("2024" * COALESCE("Share of GSP",1)) AS gwh FROM "73f69d8f-e9cb-4a2d-8538-baf03b5eadef" WHERE "Building Block ID Number" LIKE \'Dem_%\' AND "Unit"=\'GWh\' GROUP BY "DNO License Area","GSP"';
+  var url='https://api.neso.energy/api/3/action/datastore_search_sql?sql='+encodeURIComponent(sql);
   return loadGspLocations().then(function(){
     return jsonpRequest(url,30000).then(function(payload){
       var records=(payload&&payload.result&&payload.result.records)||[],raw={};
       records.forEach(function(x){
-        var id=String(x['Building Block ID Number']||'');
-        var unit=String(x['Unit']||'');
-        if(id.indexOf('Dem_')!==0||unit!=='GWh')return;
-        var gRaw=x['GSP'],v=num(x['2024']),shareRaw=x['Share of GSP'];
-        if(!gRaw||!isFinite(v))return;
-        var dnoLabel=String(x['DNO License Area']||'').trim();
-        var g=resolveFesGsp(gRaw,dnoLabel);
-        if(!g)return;
-        var d=gspDnoMap[g];
-        if(!d)return;
-        var sh=(shareRaw===null||shareRaw===undefined||String(shareRaw).trim()==='')?1:num(shareRaw);
-        if(!isFinite(sh))sh=1;
-        var k=d+'|||'+g;
-        raw[k]=(raw[k]||0)+v*sh;
+        var gRaw=x.gsp,v=num(x.gwh);if(!gRaw||!isFinite(v))return;
+        var dnoLabel=String(x.dno||'').trim();
+        var g=resolveFesGsp(gRaw,dnoLabel);if(!g)return;
+        var d=gspDnoMap[g];if(!d)return;
+        var k=d+'|||'+g;raw[k]=(raw[k]||0)+v;
       });
-      gspWeights={};
-      var grouped={};
-      Object.keys(raw).forEach(function(k){
-        var parts=k.split('|||'),d=parts[0],g=parts.slice(1).join('|||');
-        if(dnoOrder.indexOf(d)<0)return;
-        (grouped[d]||(grouped[d]=[])).push({gsp:g,weight:raw[k]});
-      });
-      dnoOrder.forEach(function(d){
-        var src=grouped[d]||[],tot=src.reduce(function(a,x){return a+x.weight},0);
-        if(tot>0)gspWeights[d]=src.map(function(x){return{gsp:x.gsp,share:x.weight/tot};});
-      });
+      gspWeights={};var grouped={};
+      Object.keys(raw).forEach(function(k){var parts=k.split('|||'),d=parts[0],g=parts.slice(1).join('|||');if(dnoOrder.indexOf(d)<0)return;(grouped[d]||(grouped[d]=[])).push({gsp:g,weight:raw[k]});});
+      dnoOrder.forEach(function(d){var src=grouped[d]||[],tot=src.reduce(function(a,x){return a+x.weight},0);if(tot>0)gspWeights[d]=src.map(function(x){return{gsp:x.gsp,share:x.weight/tot};});});
+      var covered=dnoOrder.filter(function(d){return (gspWeights[d]||[]).length;}).length;
+      if(!covered)throw Error('No GSP allocation records could be matched to the NESO GSP lookup');
       gspLoaded=true;return true;
     });
   });
 }
 function loadGspShapes(){
-  /* Load the latest NESO GSP Regions package. The 2026-02-09 release contains
-     GeoJSON in both EPSG:4326 and EPSG:27700. We use the WGS84 GeoJSON so it
-     can be projected directly into the existing dashboard SVG. */
-  var zipUrl='https://api.neso.energy/dataset/2810092e-d4b2-472f-b955-d8bea01f9ec0/resource/5dfab3dd-f192-40ab-b97f-b365a594293c/download/gsp_regions_20260209.zip';
-  if(typeof JSZip==='undefined')return Promise.reject(Error('GeoJSON loader is unavailable'));
-  return fetch(zipUrl).then(function(r){if(!r.ok)throw Error('NESO GSP boundary package returned '+r.status);return r.arrayBuffer();})
-    .then(function(buf){return JSZip.loadAsync(buf);})
-    .then(function(zip){
-      var names=Object.keys(zip.files).filter(function(n){return /\.geojson$/i.test(n)&&!zip.files[n].dir;});
-      var preferred=names.find(function(n){return /4326|wgs.?84/i.test(n);})||names[0];
-      if(!preferred)throw Error('No GeoJSON boundary file found in NESO package');
-      return zip.files[preferred].async('string');
-    })
-    .then(function(txt){
-      var gj=JSON.parse(txt),features=(gj&&gj.features)||[],out=[];
-      function propValues(props){
-        var a=[];Object.keys(props||{}).forEach(function(k){var v=props[k];if(typeof v==='string'&&v.trim())a.push(v.trim());});return a;
-      }
-      function collectKeys(props){
-        var found=[];
-        propValues(props).forEach(function(v){
-          var bits=v.split(/[;,/|]+/).map(function(x){return x.trim();}).filter(Boolean);
-          bits.push(v);
-          bits.forEach(function(b){
-            var k=resolveFesGsp(b,'');
-            if(k&&found.indexOf(k)<0)found.push(k);
-            var n=normGsp(b);
-            if(gspDnoMap[n]&&found.indexOf(n)<0)found.push(n);
-          });
-        });
-        return found;
-      }
-      function ringPath(ring){return ring.map(function(c,i){var p=gspMapProjection(num(c[0]),num(c[1]));return (i?'L':'M')+p[0].toFixed(2)+' '+p[1].toFixed(2);}).join(' ')+' Z';}
-      function geomPath(g){
-        if(!g)return '';
-        if(g.type==='Polygon')return (g.coordinates||[]).map(ringPath).join(' ');
-        if(g.type==='MultiPolygon')return (g.coordinates||[]).map(function(poly){return (poly||[]).map(ringPath).join(' ');}).join(' ');
-        return '';
-      }
-      features.forEach(function(f){var keys=collectKeys(f.properties||{}),d=geomPath(f.geometry);if(keys.length&&d)out.push({keys:keys,path:d,props:f.properties||{}});});
-      if(!out.length)throw Error('No GSP boundaries could be matched to the NESO GSP lookup');
-      GSP_SHAPES=out;gspShapesLoaded=true;return out;
-    });
+  /* NESO publishes GSP boundaries directly as GeoJSON for the 2022 release.
+     Use the direct GeoJSON resource so GitHub Pages does not need to download
+     and unpack a redirected ZIP object at runtime. */
+  var geoUrl='https://api.neso.energy/dataset/2810092e-d4b2-472f-b955-d8bea01f9ec0/resource/08534dae-5408-4e31-8639-b579c8f1c50b/download/gsp_regions_20220314.geojson';
+  return fetch(geoUrl).then(function(r){if(!r.ok)throw Error('NESO GSP GeoJSON returned '+r.status);return r.json();}).then(function(gj){
+    var features=(gj&&gj.features)||[],out=[];
+    function propValues(props){var a=[];Object.keys(props||{}).forEach(function(k){var v=props[k];if(typeof v==='string'&&v.trim())a.push(v.trim());});return a;}
+    function collectKeys(props){var found=[];propValues(props).forEach(function(v){var bits=v.split(/[;,/|]+/).map(function(x){return x.trim();}).filter(Boolean);bits.push(v);bits.forEach(function(b){var k=resolveFesGsp(b,'');if(k&&found.indexOf(k)<0)found.push(k);var n=normGsp(b);if(gspDnoMap[n]&&found.indexOf(n)<0)found.push(n);});});return found;}
+    function ringPath(ring){return ring.map(function(c,i){var p=gspMapProjection(num(c[0]),num(c[1]));return(i?'L':'M')+p[0].toFixed(2)+' '+p[1].toFixed(2);}).join(' ')+' Z';}
+    function geomPath(g){if(!g)return '';if(g.type==='Polygon')return(g.coordinates||[]).map(ringPath).join(' ');if(g.type==='MultiPolygon')return(g.coordinates||[]).map(function(poly){return(poly||[]).map(ringPath).join(' ');}).join(' ');return '';}
+    features.forEach(function(f){var keys=collectKeys(f.properties||{}),d=geomPath(f.geometry);if(keys.length&&d)out.push({keys:keys,path:d,props:f.properties||{}});});
+    if(!out.length)throw Error('No GSP boundaries could be matched to the NESO GSP lookup');
+    GSP_SHAPES=out;gspShapesLoaded=true;return out;
+  });
 }
 function gspShapeFlex(shape,gspFlex){return (shape.keys||[]).reduce(function(a,k){return a+(gspFlex[k]||0);},0);}
 function gspFill(v,max){if(v<=0)return '#f0f0ed';var t=Math.min(1,v/Math.max(1,max)),l=93-55*t;return 'hsl(268,55%,'+l+'%)';}
