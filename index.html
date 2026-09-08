@@ -808,7 +808,7 @@ aside{top:202px!important;height:420px!important;max-height:420px!important;}
 <script>
 (function(){
 "use strict";
-var DATA=[], selectedDnos=[], GSP_DATA=[], gspWeights={}, gspDnoMap={}, geoMode="DNO", gspLoaded=false;
+var DATA=[], selectedDnos=[], GSP_DATA=[], gspWeights={}, gspDnoMap={}, gspAliasMap={}, geoMode="DNO", gspLoaded=false;
 var dnoOrder=["ENWL","NPG (Northern Electric)","NPG (Yorkshire Electric)","SPEN (SP Distribution)","SPEN (SP MANWEB)","SSE","SSE (Southern)","UKPN (East)","UKPN (London)","UKPN (South)","WPD (East Midlands)","WPD (Midlands)","WPD (South Wales)","WPD (South West)"];
 
 function $(id){return document.getElementById(id)}
@@ -973,19 +973,47 @@ function normGsp(s){
     .replace(/^_|_$/g,'')
     .replace(/_\d+$/,'');
 }
+function addGspAlias(alias,key){
+  var a=normGsp(alias);if(!a||!key)return;
+  if(!gspAliasMap[a])gspAliasMap[a]=[];
+  if(gspAliasMap[a].indexOf(key)<0)gspAliasMap[a].push(key);
+}
+function resolveFesGsp(name,dnoLabel){
+  var n=normGsp(name),base=normGsp(String(name||'').replace(/\s*\([^)]*\)\s*$/,''));
+  var candidates=(gspAliasMap[n]||[]).concat(base&&base!==n?(gspAliasMap[base]||[]):[]);
+  candidates=candidates.filter(function(k,i,a){return a.indexOf(k)===i;});
+  if(candidates.length===1)return candidates[0];
+  var parentMap={
+    'Electricity North West':['ENWL'],
+    'SPEN':['SPEN (SP Distribution)','SPEN (SP MANWEB)'],
+    'SP Energy Networks':['SPEN (SP Distribution)','SPEN (SP MANWEB)'],
+    'SSE':['SSE','SSE (Southern)'],
+    'Scottish and Southern Electricity Networks':['SSE','SSE (Southern)'],
+    'UKPN':['UKPN (East)','UKPN (London)','UKPN (South)'],
+    'UK Power Networks':['UKPN (East)','UKPN (London)','UKPN (South)'],
+    'NGED':['WPD (East Midlands)','WPD (Midlands)','WPD (South Wales)','WPD (South West)'],
+    'National Grid Electricity Distribution':['WPD (East Midlands)','WPD (Midlands)','WPD (South Wales)','WPD (South West)'],
+    'NPG':['NPG (Northern Electric)','NPG (Yorkshire Electric)'],
+    'Northern Powergrid':['NPG (Northern Electric)','NPG (Yorkshire Electric)']
+  };
+  var allowed=parentMap[String(dnoLabel||'').trim()]||[];
+  var byDno=candidates.filter(function(k){return allowed.indexOf(gspDnoMap[k])>=0;});
+  return byDno.length===1?byDno[0]:(byDno.length?byDno[0]:null);
+}
 function loadGspLocations(){
   var url='https://api.neso.energy/api/3/action/datastore_search?resource_id=bbe2cc72-a6c6-46e6-8f4e-48b879467368&limit=500';
   var pesToDno={10:'UKPN (East)',11:'WPD (East Midlands)',12:'UKPN (London)',13:'SPEN (SP MANWEB)',14:'WPD (Midlands)',15:'NPG (Northern Electric)',16:'ENWL',17:'SSE',18:'SPEN (SP Distribution)',19:'UKPN (South)',20:'SSE (Southern)',21:'WPD (South Wales)',22:'WPD (South West)',23:'NPG (Yorkshire Electric)'};
   return jsonpRequest(url,15000).then(function(payload){
-    var records=(payload&&payload.result&&payload.result.records)||[],seen={},out=[];
+    var records=(payload&&payload.result&&payload.result.records)||[],seen={};var out=[];gspDnoMap={};gspAliasMap={};
     records.forEach(function(r){
       var name=r.gsp_name,lat=num(r.gsp_lat),lon=num(r.gsp_lon),dno=pesToDno[String(r.pes_id)];
       if(!name||!isFinite(lat)||!isFinite(lon)||!dno)return;
-      var key=normGsp(name);
-      if(!key||seen[key])return;
-      seen[key]=1;
-      out.push({gsp:name,key:key,lat:lat,lon:lon,dno:dno,pes_id:num(r.pes_id)});
-      gspDnoMap[key]=dno;
+      var key=normGsp(name);if(!key)return;
+      if(!seen[key]){
+        seen[key]=1;out.push({gsp:name,key:key,lat:lat,lon:lon,dno:dno,pes_id:num(r.pes_id),region_name:r.region_name||'',gnode_name:r.gnode_name||''});
+        gspDnoMap[key]=dno;
+      }
+      addGspAlias(name,key);addGspAlias(r.region_name,key);addGspAlias(r.gnode_name,key);
     });
     if(!out.length)throw Error('No GSP locations returned');
     GSP_DATA=out;return out;
@@ -1003,8 +1031,11 @@ function loadGspWeights(){
         var id=String(x['Building Block ID Number']||'');
         var unit=String(x['Unit']||'');
         if(id.indexOf('Dem_')!==0||unit!=='GWh')return;
-        var gRaw=x['GSP'],g=normGsp(gRaw),v=num(x['2024']),shareRaw=x['Share of GSP'];
-        if(!g||!isFinite(v))return;
+        var gRaw=x['GSP'],v=num(x['2024']),shareRaw=x['Share of GSP'];
+        if(!gRaw||!isFinite(v))return;
+        var dnoLabel=String(x['DNO License Area']||'').trim();
+        var g=resolveFesGsp(gRaw,dnoLabel);
+        if(!g)return;
         var d=gspDnoMap[g];
         if(!d)return;
         var sh=(shareRaw===null||shareRaw===undefined||String(shareRaw).trim()==='')?1:num(shareRaw);
