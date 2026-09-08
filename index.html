@@ -87,18 +87,17 @@ main{padding:22px 24px 28px;max-width:1580px;width:100%;margin:auto}
   background:#F1F3F4!important; color:#A1A8AE!important;
 }
 
-/* V74: replace native top-banner selects with neutral custom dropdowns. This avoids OS/browser selected-option purple highlighting. */
-.header-dropdown{position:relative;display:inline-block;min-width:104px;}
+/* V75: functional custom header dropdowns */
+.header-dropdown{position:relative;display:inline-block;min-width:104px;z-index:10060;}
 .header-dropdown select{display:none!important;}
-.header-dropdown-btn{height:30px!important;min-width:104px;padding:5px 26px 5px 8px!important;border:1px solid #C9D3DA!important;border-radius:4px!important;background:#fff!important;color:#26313A!important;font:inherit!important;text-align:left;position:relative;cursor:pointer;box-shadow:none!important;}
+.header-dropdown-btn{height:30px!important;min-width:104px;padding:5px 28px 5px 8px!important;border:1px solid #C9D3DA!important;border-radius:4px!important;background:#EEE8F6!important;color:#26313A!important;font:inherit!important;text-align:left;position:relative;cursor:pointer;box-shadow:none!important;}
 .header-dropdown-btn::after{content:"";position:absolute;right:9px;top:50%;width:6px;height:6px;border-right:1.5px solid #69757E;border-bottom:1.5px solid #69757E;transform:translateY(-65%) rotate(45deg);}
 .header-dropdown.open .header-dropdown-btn::after{transform:translateY(-25%) rotate(225deg);}
-.header-dropdown-menu{display:none;position:absolute;left:0;top:calc(100% + 3px);min-width:100%;z-index:10050;background:#fff;border:1px solid #CBD5DC;border-radius:4px;box-shadow:0 5px 16px rgba(30,45,60,.14);padding:3px;}
+.header-dropdown-menu{display:none;position:absolute;left:0;top:calc(100% + 3px);min-width:100%;z-index:10070;background:#fff;border:1px solid #CBD5DC;border-radius:4px;box-shadow:0 5px 16px rgba(30,45,60,.14);padding:3px;}
 .header-dropdown.open .header-dropdown-menu{display:block;}
 .header-dropdown-menu button{display:block;width:100%;border:0;border-radius:3px;background:#fff!important;color:#26313A!important;padding:7px 8px;text-align:left;font:inherit!important;font-size:11px!important;cursor:pointer;}
 .header-dropdown-menu button:hover,.header-dropdown-menu button:focus{background:#F3F4F5!important;color:#26313A!important;outline:none;}
-.header-dropdown-menu button[aria-selected="true"]{background:#fff!important;color:#26313A!important;font-weight:600!important;}
-.year-choice.disabled,.year-choice:disabled,.year-choice.disabled:hover,.year-choice:disabled:hover{background:#ECEFF1!important;color:#A3AAB0!important;border-color:#E0E3E5!important;cursor:not-allowed!important;opacity:1!important;}
+.header-dropdown-menu button[aria-selected="true"]{background:#EEE8F6!important;color:#26313A!important;font-weight:600!important;}
 </style>
 
 <style id="v13-overrides">
@@ -1535,15 +1534,21 @@ function initHeaderDropdowns(){
     var select=$(dd.getAttribute('data-select')), btn=dd.querySelector('.header-dropdown-btn'), menu=dd.querySelector('.header-dropdown-menu');
     if(!select||!btn||!menu)return;
     menu.querySelectorAll('button[data-value]').forEach(function(opt){
-      opt.addEventListener('click',function(){
-        select.value=this.getAttribute('data-value');
-        select.dispatchEvent(new Event('change',{bubbles:true}));
+      opt.addEventListener('click',function(e){
+        e.preventDefault();e.stopPropagation();
+        var value=this.getAttribute('data-value');
+        select.value=value;
+        if(select.id==='potentialChoice'){$('potentialValue').value=value;}
+        if(select.id==='geoChoice'){geoMode=value;}
+        syncHeaderDropdowns();
         closeHeaderDropdowns();
+        render();
       });
     });
     btn.addEventListener('click',function(e){
-      e.stopPropagation();
-      var was=dd.classList.contains('open'); closeHeaderDropdowns();
+      e.preventDefault();e.stopPropagation();
+      var was=dd.classList.contains('open');
+      closeHeaderDropdowns();
       if(!was){dd.classList.add('open');btn.setAttribute('aria-expanded','true');syncHeaderDropdowns();}
     });
   });
@@ -1562,8 +1567,6 @@ function syncHeaderDropdowns(){
 function init(){
   fetch('data/data.json').then(function(r){if(!r.ok)throw Error('Data file returned '+r.status);return r.json()}).then(function(p){
     DATA=p.rows||[];if(!DATA.length)throw Error('No dashboard rows were found.');restore();$('potentialChoice').value=$('potentialValue').value;render();loadDnoGeo();loadGspWeights().then(function(){render();return loadGspShapes().catch(function(err){gspShapesLoaded=false;GSP_SHAPES=[];console.warn('NESO GSP boundary layer could not be loaded:',err&&err.message?err.message:err);return null;});}).then(function(){render();}).catch(function(err){gspLoaded=false;$('gspChart').innerHTML='<div style="color:#777;font-size:11px;padding:12px 0">NESO GSP allocation could not be loaded. <span style="color:#a33">'+esc(err&&err.message?err.message:'Request failed')+'</span></div>';if(geoMode==='GSP')$('mapWrap').innerHTML='<div style="padding:24px;color:#777;font-size:11px">NESO GSP data could not be loaded.</div>';});
-    $('potentialChoice').addEventListener('change',function(){ $('potentialValue').value=this.value; syncHeaderDropdowns(); populate(); render(); });
-    $('geoChoice').addEventListener('change',function(){ geoMode=this.value; syncHeaderDropdowns(); render(); });
     initHeaderDropdowns();
     $('cost').addEventListener('input',function(){$('costValue').textContent='£'+$('cost').value+'/MWh';render()});
     $('reset').addEventListener('click',function(){
