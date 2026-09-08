@@ -1330,8 +1330,7 @@ function drawMap(rows){
   function centerGB(){var rect=$('mapWrap').getBoundingClientRect();mapState.tx=Math.max(0,rect.width*0.16);mapState.ty=0;mapState.scale=1.08;}function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
   centerGB();applyTransform();bindDnoMapInteractions(svg);
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');controls[0].onclick=function(){mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();};controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.50);applyTransform();};controls[2].onclick=function(){centerGB();applyTransform();};
-  var drag=false,sx=0,sy=0,otx=0,oty=0;svg.addEventListener('mousedown',function(e){if(e.target.classList.contains('dno-shape'))return;drag=true;sx=e.clientX;sy=e.clientY;otx=mapState.tx;oty=mapState.ty;svg.style.cursor='grabbing';e.preventDefault();});window.addEventListener('mousemove',function(e){if(!drag)return;mapState.tx=otx+(e.clientX-sx)*.60;mapState.ty=oty+(e.clientY-sy)*.60;applyTransform();});window.addEventListener('mouseup',function(){drag=false;if(svg)svg.style.cursor='grab';});
-  svg.addEventListener('dblclick',function(e){if(e.target.classList.contains('dno-shape'))return;e.preventDefault();mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();});svg.addEventListener('wheel',function(e){e.preventDefault();var old=mapState.scale,factor=e.deltaY<0?1.025:.975;mapState.scale=Math.max(.45,Math.min(8,old*factor));var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);mapState.tx+=mx*(1-mapState.scale/old)*.35;mapState.ty+=my*(1-mapState.scale/old)*.35;applyTransform();},{passive:false});
+  bindMapGestures(svg,applyTransform);
 }
 function gspMapProjection(lon,lat){return[140+((lon+8.5)/11.5)*528,300+((59.5-lat)/9.8)*950];}
 function drawGspMap(rows){
@@ -1371,7 +1370,43 @@ function drawGspMap(rows){
     pt.addEventListener('mousemove',function(e){var p=$('chartTooltip');if(p)positionChartTooltip(p,e.clientX,e.clientY);});
     pt.addEventListener('mouseleave',function(){var p=$('chartTooltip');if(p)p.remove();});
   });
-  svg.addEventListener('wheel',function(e){e.preventDefault();var old=mapState.scale,factor=e.deltaY<0?1.025:.975;mapState.scale=Math.max(.45,Math.min(8,old*factor));var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);mapState.tx+=mx*(1-mapState.scale/old)*.35;mapState.ty+=my*(1-mapState.scale/old)*.35;applyTransform();},{passive:false});
+  bindMapGestures(svg,applyTransform);
+}
+
+function bindMapGestures(svg,applyTransform){
+  if(!svg)return;
+  svg.style.cursor='grab';
+  var dragging=false,startX=0,startY=0,startTx=0,startTy=0,moved=false;
+  svg.addEventListener('pointerdown',function(e){
+    if(e.button!==0)return;
+    if(e.target.closest && (e.target.closest('.map-zoom-controls')||e.target.closest('.dno-shape')||e.target.closest('.gsp-area')||e.target.closest('.gsp-point')))return;
+    dragging=true;moved=false;startX=e.clientX;startY=e.clientY;startTx=mapState.tx;startTy=mapState.ty;
+    try{svg.setPointerCapture(e.pointerId);}catch(_){ }
+    svg.style.cursor='grabbing';e.preventDefault();e.stopPropagation();
+  },true);
+  svg.addEventListener('pointermove',function(e){
+    if(!dragging)return;
+    var dx=e.clientX-startX,dy=e.clientY-startY;
+    if(Math.abs(dx)+Math.abs(dy)>3)moved=true;
+    mapState.tx=startTx+dx;mapState.ty=startTy+dy;applyTransform();e.preventDefault();
+  },true);
+  function end(e){if(!dragging)return;dragging=false;svg.style.cursor='grab';try{svg.releasePointerCapture(e.pointerId);}catch(_){ }}
+  svg.addEventListener('pointerup',end,true);svg.addEventListener('pointercancel',end,true);
+  svg.addEventListener('dblclick',function(e){
+    if(e.target.closest && (e.target.closest('.map-zoom-controls')))return;
+    e.preventDefault();e.stopPropagation();
+    var old=mapState.scale;mapState.scale=Math.min(12,old*1.5);
+    var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);
+    mapState.tx+=mx*(1-mapState.scale/old);mapState.ty+=my*(1-mapState.scale/old);applyTransform();
+  },true);
+  svg.addEventListener('wheel',function(e){
+    e.preventDefault();e.stopPropagation();
+    var old=mapState.scale;
+    var factor=e.deltaY<0?1.075:(1/1.075);
+    mapState.scale=Math.max(.45,Math.min(8,old*factor));
+    var rect=svg.getBoundingClientRect(),mx=e.clientX-(rect.left+rect.width/2),my=e.clientY-(rect.top+rect.height/2);
+    mapState.tx+=mx*(1-mapState.scale/old)*.35;mapState.ty+=my*(1-mapState.scale/old)*.35;applyTransform();
+  },{passive:false,capture:true});
 }
 
 function baseFiltered(){
