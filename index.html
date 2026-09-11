@@ -1490,7 +1490,7 @@ function drawMap(rows){
   dnoRegions.forEach(function(r){var xy=r.label,off=dnoLabelOffsets[r.name]||[0,0];html+='<text class="map-label '+(r.name.length>19?'small':'')+'" x="'+(xy[0]+off[0])+'" y="'+(xy[1]+off[1])+'">'+esc(r.name)+'</text>';});
   html+='</svg><div class="map-zoom-controls"><button type="button" data-z="in">+</button><button type="button" data-z="out">−</button><button type="button" data-z="reset">Reset</button></div><div class="map-legend"><b>Flexibility potential</b><div class="map-gradient"></div><div class="map-gradient-labels"><span>Low</span><span>High</span></div></div>';
   $('mapWrap').innerHTML=html;var svg=$('mapWrap').querySelector('.dno-svg');
-  function centerGB(){var rect=$('mapWrap').getBoundingClientRect();mapState.tx=Math.max(0,rect.width*0.16);mapState.ty=0;mapState.scale=1.08;}function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
+  function centerGB(){var rect=$('mapWrap').getBoundingClientRect();mapState.tx=Math.max(0,rect.width*0.16);mapState.ty=0;mapState.scale=1.35;}function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
   if(!mapState.initialized || mapState.lastMode!==geoMode){centerGB();mapState.initialized=true;mapState.lastMode=geoMode;} applyTransform();bindDnoMapInteractions(svg);
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');controls[0].onclick=function(){mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();};controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.50);applyTransform();};controls[2].onclick=function(){centerGB();applyTransform();};
   bindMapGestures(svg,applyTransform);
@@ -1527,7 +1527,7 @@ function drawGspMap(rows){
   html+='</svg><div class="map-legend"><b>GSP flexibility</b><div style="font-size:10px;color:#777;margin-top:5px">GSP feeding areas are shown using NESO geographic boundaries. Shading indicates selected flexibility.</div><div style="display:flex;align-items:center;gap:3px;margin-top:8px"><span style="font-size:9px">0</span><span style="display:inline-block;width:90px;height:8px;background:linear-gradient(90deg,#f0f0ed,hsl(268,55%,38%));border:1px solid #ddd"></span><span style="font-size:9px">'+Math.round(max).toLocaleString()+' MW</span></div></div>';
   $('mapWrap').innerHTML=html;$('mapStatus').textContent='GSP view: NESO GSP geographic feeding areas with indicative DNO-to-GSP flexibility disaggregation.';
   var svg=$('mapWrap').querySelector('.gsp-svg');
-  function centerGB(){var rect=$('mapWrap').getBoundingClientRect();mapState.tx=Math.max(0,rect.width*.16);mapState.ty=0;mapState.scale=1.08;}
+  function centerGB(){var rect=$('mapWrap').getBoundingClientRect();mapState.tx=Math.max(0,rect.width*.16);mapState.ty=0;mapState.scale=1.35;}
   function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
   if(!mapState.initialized || mapState.lastMode!==geoMode){centerGB();mapState.initialized=true;mapState.lastMode=geoMode;} applyTransform();
   Array.prototype.forEach.call(svg.querySelectorAll('.gsp-area,.gsp-point'),function(pt){
