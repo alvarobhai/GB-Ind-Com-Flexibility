@@ -1,21 +1,19 @@
-# GB Industrial & Commercial Flexibility Explorer — V88
+# GB Industrial & Commercial Flexibility Explorer — V90
 
 Static GitHub Pages dashboard package.
 
-## V88 update
-- Recalibrated technical flexibility using the aggressive technical potential case documented in `CLF_Technical_Potential_Aggressive_Calibration_V1.xlsx`, targeting the question: can the equipment technically be shut off or partially turned down on request?
-- Technical potential now totals approximately 7.56 GW across GB C&I.
-- Renamed the economic control from **Economic Potential Threshold** to **Flexibility Procurement Cost**.
-- Default procurement-cost slider position is set to the low-screen starting point.
-- Economic screening now applies a 25% uplift to end-user hurdle costs to estimate delivered/procurement cost: `procurement cost = end-user hurdle cost × 1.25`.
-- Added the agreed explanatory text under the procurement-cost control.
-- The selected £/MWh value is used as the economic screen to determine economic flexibility potential.
-- Retained the V87 GSP QA/rendering behaviour and map controls.
+## V90 update
+- Updated dashboard model data to the current formulaic CLF case.
+- Current technical flexibility totals are approximately **4.06 GW Industrial + 2.69 GW Commercial = 6.74 GW GB C&I**.
+- Industrial and commercial DNO-level results are carried through to the dashboard using the current V6 model outputs.
+- Retained the V89 dashboard interface, controls, DNO/GSP map behaviour and NESO GSP geographic layer.
+- GSP allocation remains based on FES 2025 Building Blocks 2024 electricity demand shares within each DNO.
+- GSP flexibility is an indicative spatial disaggregation of DNO flexibility; it is not an independently modelled GSP flexibility potential.
 
 ## Package
 - `index.html` — dashboard application
-- `data/data.json` — model data
-- `data/gsp_allocation.json` — NESO FES-based DNO-to-GSP allocation
+- `data/data.json` — current formulaic CLF model data at Sector × End-use × DNO level
+- `data/gsp_allocation.json` — FES 2025-based DNO-to-GSP allocation
 
 NESO GSP GIS boundaries are approximate geographic feeding-area boundaries and are used for regional modelling.
 
