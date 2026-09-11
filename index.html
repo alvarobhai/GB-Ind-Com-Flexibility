@@ -942,7 +942,7 @@ function populate(){
   optionBox('sectorBox',[
     {value:'Industrial',label:'Industrial'},
     {value:'Commercial',label:'Commercial'}
-  ],secs,function(v){toggleList('sectorValue',v);selectedDnos=[];populate();render();});
+  ],secs,function(v){toggleList('sectorValue',v);populate();render();});
 
   var segItems=allSegmentKeys().map(function(k){
     var p=k.split('|');return{value:k,label:p[1]};
@@ -950,8 +950,8 @@ function populate(){
   if(!segs.length){segs=segItems.map(function(x){return x.value});setList('segmentValue',segs);}
   var indSeg=segItems.filter(function(x){return x.value.indexOf('Industrial|')===0;});
   var comSeg=segItems.filter(function(x){return x.value.indexOf('Commercial|')===0;});
-  optionBox('segmentIndustrial',indSeg,segs,function(v){toggleList('segmentValue',v);selectedDnos=[];populate();render();});
-  optionBox('segmentCommercial',comSeg,segs,function(v){toggleList('segmentValue',v);selectedDnos=[];populate();render();});
+  optionBox('segmentIndustrial',indSeg,segs,function(v){toggleList('segmentValue',v);populate();render();});
+  optionBox('segmentCommercial',comSeg,segs,function(v){toggleList('segmentValue',v);populate();render();});
 
   var endItems=allEnduseKeys().map(function(k){
     var p=k.split('|');return{value:k,label:p[1]};
@@ -959,8 +959,8 @@ function populate(){
   if(!ends.length){ends=endItems.map(function(x){return x.value});setList('enduseValue',ends);}
   var indEnd=endItems.filter(function(x){return x.value.indexOf('Industrial|')===0;});
   var comEnd=endItems.filter(function(x){return x.value.indexOf('Commercial|')===0;});
-  optionBox('enduseIndustrial',indEnd,ends,function(v){toggleList('enduseValue',v);selectedDnos=[];populate();render();});
-  optionBox('enduseCommercial',comEnd,ends,function(v){toggleList('enduseValue',v);selectedDnos=[];populate();render();});
+  optionBox('enduseIndustrial',indEnd,ends,function(v){toggleList('enduseValue',v);populate();render();});
+  optionBox('enduseCommercial',comEnd,ends,function(v){toggleList('enduseValue',v);populate();render();});
 }
 function chartTooltipHtml(title,lines,subhead){
   var h='<div class="v19-tooltip-title">'+esc(title)+'</div>';
@@ -1490,7 +1490,7 @@ function drawMap(rows){
   dnoRegions.forEach(function(r){var xy=r.label,off=dnoLabelOffsets[r.name]||[0,0];html+='<text class="map-label '+(r.name.length>19?'small':'')+'" x="'+(xy[0]+off[0])+'" y="'+(xy[1]+off[1])+'">'+esc(r.name)+'</text>';});
   html+='</svg><div class="map-zoom-controls"><button type="button" data-z="in">+</button><button type="button" data-z="out">−</button><button type="button" data-z="reset">Reset</button></div><div class="map-legend"><b>Flexibility potential</b><div class="map-gradient"></div><div class="map-gradient-labels"><span>Low</span><span>High</span></div></div>';
   $('mapWrap').innerHTML=html;var svg=$('mapWrap').querySelector('.dno-svg');
-  function centerGB(){var rect=$('mapWrap').getBoundingClientRect();mapState.tx=Math.max(0,rect.width*0.16);mapState.ty=0;mapState.scale=1.35;}function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
+  function centerGB(){var rect=$('mapWrap').getBoundingClientRect();mapState.tx=Math.max(0,rect.width*0.16);mapState.ty=-14;mapState.scale=1.35;}function applyTransform(){svg.style.transform='translate('+mapState.tx+'px,'+mapState.ty+'px) scale('+mapState.scale+')';}
   if(!mapState.initialized || mapState.lastMode!==geoMode){centerGB();mapState.initialized=true;mapState.lastMode=geoMode;} applyTransform();bindDnoMapInteractions(svg);
   var controls=$('mapWrap').querySelectorAll('.map-zoom-controls button');controls[0].onclick=function(){mapState.scale=Math.min(12,mapState.scale*1.50);applyTransform();};controls[1].onclick=function(){mapState.scale=Math.max(.45,mapState.scale/1.50);applyTransform();};controls[2].onclick=function(){centerGB();applyTransform();};
   bindMapGestures(svg,applyTransform);

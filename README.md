@@ -1,4 +1,4 @@
-# GB Industrial & Commercial Flexibility Explorer — V91
+# GB Industrial & Commercial Flexibility Explorer — V92
 
 Static GitHub Pages dashboard package.
 
@@ -18,3 +18,9 @@ NESO GSP GIS boundaries are approximate geographic feeding-area boundaries and a
 
 ## Economic interpretation
 End-user hurdle costs represent the compensation required by the end-user. The dashboard assumes a 25% allowance for aggregator margin and market-access costs on top of these hurdle costs when assessing economic potential.
+
+
+## V92 update
+- Moved the DNO Area and GSP maps upward slightly while retaining the 1.35× default zoom.
+- Sector, segment and end-use selectors no longer reset the DNO Area selection when changed.
+- Each selector retains its own independent selection state; existing filter intersections remain unchanged.
